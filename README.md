@@ -107,11 +107,10 @@ BotBrain is a modular collection of open source software and hardware components
 - **IMU & odometry** - Real-time pose estimation from all supported platforms
 - **Battery monitoring** - Per-robot battery state with runtime estimation
 
-### AI & Perception
-- **YOLOv8/v11 object detection** - 80+ classes, TensorRT-optimized, real-time tracking on BotBrain
-- **Moondream AI** - Multi-modal vision understanding and scene analysis
+### AI & Perception (Coming Soon)
+- **YOLOv8/v11 object detection** - 80+ classes, TensorRT-optimized, real-time tracking on BotBrain (Coming Soon)
 - **ROSA natural language control** - Conversational robot commands via LLM
-- **Detection history** - Searchable log with image and information / description
+- **Detection history** - Searchable log with image and information / description (Coming Soon)
 
 ### Autonomous Navigation
 - **RTABMap SLAM** - Visual mapping with single or dual RealSense D435i cameras
