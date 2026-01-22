@@ -1,7 +1,7 @@
 <!-- LOGO -->
 <p align="center">
   <a href="https://botbot.bot" target="_blank">
-    <img src="docs/images/logo.png" alt="BotBot" width="400">
+    <img src="docs/images/Botbrainlogo.png" alt="BotBot" width="400">
   </a>
 </p>
 
