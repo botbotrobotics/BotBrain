@@ -1,0 +1,4 @@
+#MotorControl.srv
+int32 command
+---
+bool success

@@ -1,0 +1,5 @@
+# Service to set the default map in robot_config.yaml
+string map_name   # Name of the .db file to set as default map
+---
+bool success      # True if the default map was set successfully
+string message    # Status message describing the result

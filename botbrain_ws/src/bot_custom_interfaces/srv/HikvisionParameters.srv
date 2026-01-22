@@ -1,0 +1,8 @@
+# Hikvision Parameters
+
+int32 channel 
+int32 command 
+int32 value
+---
+int32 result
+bool success

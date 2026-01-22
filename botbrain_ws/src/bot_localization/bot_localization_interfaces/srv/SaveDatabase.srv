@@ -1,0 +1,5 @@
+# Service to save current database and switch to localization mode
+# No request parameters needed - saves current session
+---
+bool success          # True if database was saved and mode switched successfully  
+string message        # Status message describing the result

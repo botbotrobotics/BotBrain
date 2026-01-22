@@ -1,0 +1,11 @@
+robot_configuration:
+  robot_name: 
+  robot_model: 
+  description_file_type: 
+  network_interface: 
+  tita_namespace: 
+  openai_api_key: 
+  wifi_interface: 
+  wifi_ssid: 
+  wifi_password: 
+  default_map: 

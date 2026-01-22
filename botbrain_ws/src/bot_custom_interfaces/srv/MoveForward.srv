@@ -1,0 +1,6 @@
+# MoveForward.srv
+float32 distance  # Distance to move forward in meters
+float32 velocity  # Speed in m/s
+---
+bool success
+string message

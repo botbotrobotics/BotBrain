@@ -1,0 +1,76 @@
+{
+  "nodes": [    
+    {
+      "name": "rtab_manager",
+      "display_name": "RtabMap Manager",
+      "classe": "navigation",
+      "order": 1,
+      "description": "Handles SLAM/map building using RTAB-Map",
+      "dependencies": []
+    },
+    {
+      "name": "map_odom_node",
+      "display_name": "Map Odom",
+      "classe": "navigation",
+      "order": 2,
+      "description": "Publishes the transform between map and odom frames",
+      "dependencies": ["rtab_manager"]
+    },
+    {
+      "name": "controller_server",
+      "display_name": "Controller Server (Nav2)",
+      "classe": "navigation",
+      "order": 3,
+      "description": "Nav2 Controller Server",
+      "dependencies": ["rtab_manager"]
+    },
+    {
+      "name": "smoother_server",
+      "display_name": "Smoother Server (Nav2)",
+      "classe": "navigation",
+      "order": 4,
+      "description": "Nav2 Smoother Server",
+      "dependencies": ["controller_server"]
+    },
+    {
+      "name": "planner_server",
+      "display_name": "Planner Server (Nav2)",
+      "classe": "navigation",
+      "order": 5,
+      "description": "Nav2 Planner Server",
+      "dependencies": ["smoother_server"]
+    },
+    {
+      "name": "behavior_server",
+      "display_name": "Behavior Server (Nav2)",
+      "classe": "navigation",
+      "order": 6,
+      "description": "Nav2 Behavior Server",
+      "dependencies": ["planner_server"]
+    },
+    {
+      "name": "bt_navigator",
+      "display_name": "BT Navigator (Nav2)",
+      "classe": "navigation",
+      "order": 7,
+      "description": "Nav2 BT Navigator",
+      "dependencies": ["behavior_server"]
+    },
+    {
+      "name": "waypoint_follower",
+      "display_name": "Waypoint Follower (Nav2)",
+      "classe": "navigation",
+      "order": 8,
+      "description": "Nav2 Waypoint Follower",
+      "dependencies": ["bt_navigator"]
+    },
+    {
+      "name": "nav2_utils",
+      "display_name": "Nav2 Utilities",
+      "classe": "navigation",
+      "order": 9,
+      "description": "Nav2 Utilities",
+      "dependencies": ["waypoint_follower"]
+    }
+  ]
+}

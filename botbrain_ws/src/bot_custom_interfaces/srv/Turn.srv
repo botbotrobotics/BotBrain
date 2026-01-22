@@ -1,0 +1,6 @@
+# TurnRobot.srv
+float32 angle  # Angle to turn in radians
+float32 angular_velocity  # Rotational speed in rad/s
+---
+bool success
+string message

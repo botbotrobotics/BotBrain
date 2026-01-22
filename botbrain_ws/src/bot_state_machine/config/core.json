@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    {
+      "name": "robot_read_node",
+      "display_name": "Robot Reader",
+      "classe": "core",
+      "order": 1,
+      "description": "",
+      "dependencies": []
+    },
+    {
+      "name": "robot_write_node",
+      "display_name": "Robot Writer",
+      "classe": "core",
+      "order": 3,
+      "description": "",
+      "dependencies": []
+    },
+    {
+      "name": "zero_vel_publisher",
+      "display_name": "Zero Velocity Publisher",
+      "classe": "core",
+      "order": 5,
+      "description": "",
+      "dependencies": []
+    }
+  ]
+}

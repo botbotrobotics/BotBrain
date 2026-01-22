@@ -1,0 +1,5 @@
+# Service to set RTAB-Map to localization mode
+# No request parameters needed
+---
+bool success          # True if localization mode was set successfully
+string message        # Status message describing the result

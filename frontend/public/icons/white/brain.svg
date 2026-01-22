@@ -1,0 +1,6 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sparkle/Star pattern representing AI -->
+  <path d="M12 2L13.09 8.26L19 7L15.45 11.82L20 16L13.81 14.12L12 21L10.19 14.12L4 16L8.55 11.82L5 7L10.91 8.26L12 2Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.5" stroke-linejoin="round"/>
+  <circle cx="12" cy="12" r="3" fill="#1F2937"/>
+  <circle cx="12" cy="12" r="1.5" fill="#FFFFFF"/>
+</svg>

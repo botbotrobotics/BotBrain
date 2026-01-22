@@ -1,0 +1,19 @@
+[Unit]
+Description=BotBot bringup service
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+WorkingDirectory=BOTBRAIN_WORKSPACE_PATH
+ExecStartPre=/bin/bash -c 'while ! ip route | grep -q "default via"; do echo "Waiting for a default network route..."; sleep 1; done'
+ExecStart=/bin/bash -c "/usr/bin/docker compose up web_server_prod -d"
+ExecStop=/usr/bin/docker compose stop web_server
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

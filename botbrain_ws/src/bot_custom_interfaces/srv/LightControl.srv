@@ -1,0 +1,8 @@
+# Continuous movement
+
+bool control
+int32 brightness
+
+---
+bool success
+string message

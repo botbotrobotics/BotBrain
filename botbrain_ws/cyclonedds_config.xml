@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS>
+  <Domain>
+    <General>
+      <Interfaces>
+        <NetworkInterface name="lo" priority="100" multicast="true" />
+        <NetworkInterface name="eno1" priority="10" multicast="true" />
+      </Interfaces>
+    </General>
+  </Domain>
+</CycloneDDS>

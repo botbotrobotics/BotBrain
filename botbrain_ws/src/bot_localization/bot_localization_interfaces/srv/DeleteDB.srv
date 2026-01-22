@@ -1,0 +1,5 @@
+# Service to delete a database file from the database directory
+string database_path   # Filename of database file to delete (not full path)
+---
+bool success          # True if database was deleted successfully
+string message        # Status message describing the result

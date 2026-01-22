@@ -1,0 +1,34 @@
+/**/joystick_interface:
+  ros__parameters:
+    device_input: "/dev/input/js0"
+    linear_deadband: 0.02
+    angular_deadband: 0.02
+
+    # Topic names
+    cmd_vel_topic: "cmd_vel_joy"
+    button_state_topic: "button_state"
+    dead_man_switch_topic: "dead_man_switch"
+
+    # Button mappings (pygame button indices)
+    # Default values configured for DualSense (PS5) controller
+    button_mapping:
+      x_button: 0
+      a_button: 1
+      b_button: 2
+      y_button: 3
+      l1_button: 4
+      r1_button: 5
+      l2_button: 6
+      r2_button: 7
+      select_button: 8
+      start_button: 9
+      dead_man_button: 4
+
+    # Axis mappings (pygame axis indices)
+    # Default values configured for DualSense (PS5) controller
+    # Axes typically range from -1.0 to 1.0
+    axis_mapping:
+      linear_x_axis: 1    # Left stick vertical
+      linear_y_axis: 0    # Left stick horizontal
+      angular_y_axis: 5   # Right stick vertical
+      angular_z_axis: 2   # Right stick horizontal

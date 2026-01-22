@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tita">
+
+  <xacro:arg name="prefix" default="" />
+
+  <xacro:include filename="$(find tita_pkg)/xacro/materials.xacro" />
+  <xacro:include filename="$(find tita_pkg)/xacro/description.xacro" />
+  
+  <xacro:description prefix="$(arg prefix)"/>
+
+</robot>

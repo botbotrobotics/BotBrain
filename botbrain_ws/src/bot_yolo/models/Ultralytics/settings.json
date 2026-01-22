@@ -1,0 +1,21 @@
+{
+  "settings_version": "0.0.6",
+  "datasets_dir": "/botbrain_ws/datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "f47cf35f3b5755df07051a46ec9b5f8c0fbf70d22f74124771d3ea3a64a5b0e4",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "hub": true,
+  "mlflow": true,
+  "neptune": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": false
+}

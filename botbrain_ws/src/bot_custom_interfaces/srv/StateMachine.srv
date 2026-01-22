@@ -1,0 +1,5 @@
+string node 
+int32 command 
+---
+int32 result
+bool success

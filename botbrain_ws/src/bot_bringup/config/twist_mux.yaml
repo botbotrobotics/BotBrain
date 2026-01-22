@@ -1,0 +1,31 @@
+#twist_mux:
+/**:
+  ros__parameters:
+    twist_watchdog_timeout: 0.5
+    topics:
+      zero_velocity:
+        topic   : cmd_vel_zero
+        timeout : 0.1
+        priority: 1
+      rosa:
+        topic   : cmd_vel_rosa
+        timeout : 0.2
+        priority: 5
+      navigation:
+        topic   : cmd_vel_nav
+        timeout : 0.2
+        priority: 10
+      nipple:
+        topic   : cmd_vel_nipple
+        timeout : 0.2
+        priority: 99
+      joystick:
+        topic   : cmd_vel_joy
+        timeout : 0.2
+        priority: 100
+
+    locks:
+      dead_man :
+        topic   : dead_man_switch
+        timeout : 0.0
+        priority: 200

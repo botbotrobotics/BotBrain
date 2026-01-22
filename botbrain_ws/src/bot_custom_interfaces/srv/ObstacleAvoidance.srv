@@ -1,0 +1,6 @@
+# Obstacle Avoidance Control
+
+bool control
+---
+bool success
+string message

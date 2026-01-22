@@ -1,0 +1,5 @@
+int32 command 
+string name
+---
+bool success
+string message

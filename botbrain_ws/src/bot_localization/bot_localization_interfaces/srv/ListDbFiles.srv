@@ -1,0 +1,5 @@
+# Service to list all .db files in the hardcoded database directory
+---
+bool success             # True if directory was read successfully
+string message           # Status message describing the result
+string[] db_files        # List of .db file names found in the directory

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="wavesGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <path d="M2 10c.6.6 1.2 1 2 1 1.5 0 2.5-2 4-2s2.5 2 4 2 2.5-2 4-2 2.5 2 4 2c.8 0 1.4-.4 2-1"
+        stroke="url(#wavesGradient)"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <path d="M2 17c.6.6 1.2 1 2 1 1.5 0 2.5-2 4-2s2.5 2 4 2 2.5-2 4-2 2.5 2 4 2c.8 0 1.4-.4 2-1"
+        stroke="url(#wavesGradient)"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <path d="M2 6c.6.6 1.2 1 2 1 1.5 0 2.5-2 4-2s2.5 2 4 2 2.5-2 4-2 2.5 2 4 2c.8 0 1.4-.4 2-1"
+        stroke="url(#wavesGradient)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.5"/>
+</svg>

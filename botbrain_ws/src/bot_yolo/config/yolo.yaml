@@ -1,0 +1,20 @@
+yolo_node:
+  ros__parameters:
+    # Subscriptions
+    camera_topic: "front_camera/color/image_raw"
+
+    # Inference
+    imgsz: 640
+    conf: 0.25
+    device: 0
+
+    # Tracking
+    use_tracking: true
+    tracker_cfg: "botsort.yaml"
+
+    # Drawing
+    draw_labels: true
+    label_every_n: 1
+    line_thickness: 2
+    font_scale: 0.5
+    font_thickness: 1

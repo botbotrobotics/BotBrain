@@ -1,0 +1,6 @@
+# Native remote control response switch
+
+bool flag
+
+---
+bool success

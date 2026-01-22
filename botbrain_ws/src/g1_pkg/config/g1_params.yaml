@@ -1,0 +1,9 @@
+robot_write_node:
+  ros__parameters:
+    robot:
+      keep_move: false
+      speed_mode: 0  # 0: 1.0m/s; 1: 2.0m/s; 2: 2.7m/s; 3: 3.0m/s
+
+
+
+

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inflation Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #333;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+        #preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Map Inflation Visualization Test</h1>
+    
+    <div class="container">
+        <canvas id="map" width="400" height="300"></canvas>
+        <canvas id="preview" width="400" height="300"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button onclick="toggleInflation()">Toggle Inflation</button>
+        <label>
+            Robot Radius: 
+            <input type="range" id="radius" min="5" max="50" value="15" onchange="updateInflation()">
+            <span id="radiusValue">15</span>px
+        </label>
+    </div>
+    
+    <script>
+        const mapCanvas = document.getElementById('map');
+        const previewCanvas = document.getElementById('preview');
+        const mapCtx = mapCanvas.getContext('2d');
+        const previewCtx = previewCanvas.getContext('2d');
+        
+        let showInflation = false;
+        let robotRadius = 15;
+        
+        // Draw test map
+        function drawTestMap() {
+            mapCtx.fillStyle = '#FFFFFF';
+            mapCtx.fillRect(0, 0, 400, 300);
+            
+            mapCtx.fillStyle = '#000000';
+            // Draw some obstacles
+            mapCtx.fillRect(50, 50, 60, 60);
+            mapCtx.fillRect(200, 100, 40, 80);
+            mapCtx.fillRect(300, 50, 50, 30);
+            mapCtx.fillRect(150, 200, 100, 40);
+            
+            // Draw some unknown areas
+            mapCtx.fillStyle = '#808080';
+            mapCtx.fillRect(250, 220, 80, 50);
+        }
+        
+        // Canvas-based inflation visualization
+        function drawInflation() {
+            if (!showInflation) {
+                previewCtx.clearRect(0, 0, 400, 300);
+                return;
+            }
+            
+            const sourceData = mapCtx.getImageData(0, 0, 400, 300);
+            const pixels = sourceData.data;
+            const outputData = previewCtx.createImageData(400, 300);
+            const output = outputData.data;
+            
+            const width = 400;
+            const height = 300;
+            const inflationPixels = robotRadius;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const gray = pixels[idx];
+                    
+                    if (gray > 230) { // Free space
+                        let inflated = false;
+                        
+                        for (let dy = -inflationPixels; dy <= inflationPixels && !inflated; dy++) {
+                            for (let dx = -inflationPixels; dx <= inflationPixels && !inflated; dx++) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist <= inflationPixels) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    
+                                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                        const nidx = (ny * width + nx) * 4;
+                                        if (pixels[nidx] < 25) { // Occupied
+                                            inflated = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (inflated) {
+                            output[idx] = 255;
+                            output[idx + 1] = 0;
+                            output[idx + 2] = 0;
+                            output[idx + 3] = 180;
+                        }
+                    } else if (gray < 25) {
+                        output[idx] = 0;
+                        output[idx + 1] = 0;
+                        output[idx + 2] = 200;
+                        output[idx + 3] = 180;
+                    } else {
+                        output[idx] = 255;
+                        output[idx + 1] = 255;
+                        output[idx + 2] = 0;
+                        output[idx + 3] = 100;
+                    }
+                }
+            }
+            
+            previewCtx.clearRect(0, 0, 400, 300);
+            previewCtx.putImageData(outputData, 0, 0);
+        }
+        
+        function toggleInflation() {
+            showInflation = !showInflation;
+            drawInflation();
+        }
+        
+        function updateInflation() {
+            robotRadius = parseInt(document.getElementById('radius').value);
+            document.getElementById('radiusValue').textContent = robotRadius;
+            if (showInflation) {
+                drawInflation();
+            }
+        }
+        
+        // Initialize
+        drawTestMap();
+    </script>
+</body>
+</html> 

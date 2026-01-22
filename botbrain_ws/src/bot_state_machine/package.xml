@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bot_state_machine</name>
+  <version>0.0.0</version>
+  <description>The .. package</description>
+  <maintainer email="wserrantola@botbot.bot">Wenderson</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>lifecycle_msgs</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp</depend>
+  <depend>nlohmann_json</depend>
+  <depend>bot_custom_interfaces</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+ </package>

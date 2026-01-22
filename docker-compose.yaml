@@ -1,0 +1,161 @@
+services:
+  base:
+    image: botbotrobotics/botbrain:base
+    stdin_open: true
+    tty: true
+    network_mode: host
+    ipc: host
+    privileged: true
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ./botbrain_ws/:/botbrain_ws
+      - /dev:/dev
+      - /run:/run
+    environment:
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+      CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
+
+  dev:
+    extends: base
+    container_name: dev
+    user: root
+    command: ["bash", "-lc", "bash"]
+
+  builder_base:
+    extends: base
+    container_name: builder_base
+    command: ["bash", "-lc", "colcon build --packages-select \
+          go2_pkg \
+          tita_pkg \
+          bot_bringup \
+          bot_description \
+          bot_custom_interfaces \
+          joystick_bot \
+          bot_localization \
+          bot_navigation \
+          bot_localization_interfaces \
+          bot_state_machine \
+          bot_jetson_stats \
+          bot_jetson_stats_interfaces \
+          bot_rosa \
+          g1_pkg"]
+
+  state_machine:
+    extends: base
+    container_name: state_machine
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_state_machine state_machine.launch.py"]
+    restart: always  
+  
+  bringup:
+    extends: base
+    container_name: bringup
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_bringup bringup.launch.py"]
+    restart: always
+
+  localization:
+    extends: base
+    container_name: localization
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_localization localization.launch.py"]
+    restart: always
+
+  navigation:
+    extends: base
+    container_name: navigation
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_navigation navigation.launch.py"]
+    restart: always
+
+  jetson_stats:
+    extends: base
+    container_name: jetson_stats
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_jetson_stats stats.launch.py"]
+    restart: always
+    
+  rosa:
+    extends: base
+    container_name: rosa
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_rosa rosa.launch.py"]
+    restart: always
+
+  yolo_base:
+    image: botbotrobotics/botbrain:yolo
+    stdin_open: true
+    tty: true
+    network_mode: host
+    ipc: host
+    privileged: true
+    runtime: nvidia
+    shm_size: 2gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      YOLO_CONFIG_DIR: /root/.cache/ultralytics
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+      CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
+    volumes:
+      - ./botbrain_ws/:/botbrain_ws
+      - /dev:/dev
+      - /run:/run
+      - ./botbrain_ws/src/bot_yolo/models:/root/.cache/ultralytics
+
+  builder_yolo:
+    extends: yolo_base
+    container_name: builder_yolo
+    command: ["bash", "-lc", "colcon build --packages-select \
+          bot_yolo"]
+
+  yolo:
+    extends: yolo_base
+    container_name: yolo
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_yolo yolo.launch.py"]
+    restart: always
+
+  dev_yolo:
+    extends: yolo_base
+    container_name: dev_yolo
+    user: root
+    command: ["bash"]
+
+  web_server:
+    image: node:22-bullseye
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    env_file:
+      - .env
+
+  web_server_builder:
+    extends: web_server
+    container_name: web_server_builder
+    network_mode: host
+    command: sh -c "npm ci && npm run build:oss"
+
+  web_server_dev:
+    extends: web_server
+    container_name: web_server_dev
+    network_mode: host
+    command: sh -c "npm install && npm run dev:oss"
+    stdin_open: true
+    tty: true
+
+  web_server_prod:
+    extends: web_server
+    container_name: web_server_prod
+    network_mode: host
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+    command: npm run start
+    restart: unless-stopped
+  

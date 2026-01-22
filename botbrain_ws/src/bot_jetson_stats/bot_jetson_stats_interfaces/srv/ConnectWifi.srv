@@ -1,0 +1,14 @@
+string ssid
+string bssid
+string auth_type      # "open" | "psk" | "wpa2-enterprise"
+string psk            # for PSK
+string identity       # for enterprise
+string password       # for enterprise
+string ca_cert_path
+bool   save_profile
+float32 timeout_s
+string interface
+---
+bool   success
+string message
+string ip_address

@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {
+      "name": "joystick_interface",
+      "display_name": "Joystick Interface",
+      "classe": "accessories",
+      "order": 1,
+      "description": "",
+      "dependencies": []
+    },
+    {
+      "name": "controller_commands_node",
+      "display_name": "Controller Commands",
+      "classe": "accessories",
+      "order": 2,
+      "description": "",
+      "dependencies": ["joystick_interface"]
+    },
+    {
+      "name": "jtop_publisher",
+      "display_name": "System Monitor",
+      "classe": "accessories",
+      "order": 3,
+      "description": "",
+      "dependencies": []
+    },
+    {
+      "name": "network_mode_lifecycle_publisher",
+      "display_name": "Network Manager",
+      "classe": "accessories",
+      "order": 4,
+      "description": "",
+      "dependencies": []
+    },
+
+    {
+      "name": "wifi_services",
+      "display_name": "Wi-Fi Manager",
+      "classe": "accessories",
+      "order": 6,
+      "description": "",
+      "dependencies": []
+    }
+  ]
+}

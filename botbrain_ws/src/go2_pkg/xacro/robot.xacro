@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<robot name="go2" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:arg name="prefix" default="" />
+
+    <xacro:include filename="$(find go2_pkg)/xacro/const.xacro"/>
+    <xacro:include filename="$(find go2_pkg)/xacro/materials.xacro"/>
+    <xacro:include filename="$(find go2_pkg)/xacro/leg.xacro"/>
+
+    <link name="$(arg prefix)base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="$(arg prefix)floating_base" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="$(arg prefix)base_link"/>
+        <child link="$(arg prefix)trunk"/>
+    </joint>
+
+    <link name="$(arg prefix)trunk">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://go2_pkg/meshes/trunk.dae" scale="1 1 1"/>
+            </geometry>
+            </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="${trunk_mass}"/>
+            <inertia
+                ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                iyy="${trunk_iyy}" iyz="${trunk_iyz}"
+                izz="${trunk_izz}"/>
+        </inertial>
+    </link>
+
+    <joint name="$(arg prefix)interface_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0.038819 0 0.138615"/>
+        <parent link="$(arg prefix)base_link"/>
+        <child link="$(arg prefix)interface_link"/>
+    </joint>
+
+    <link name="$(arg prefix)interface_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://go2_pkg/meshes/go2_interface.stl" scale="1 1 1"/>
+            </geometry>
+            </visual>
+        <!--<collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+            </geometry>
+        </collision>-->
+        <!--<inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="${trunk_mass}"/>
+            <inertia
+                ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                iyy="${trunk_iyy}" iyz="${trunk_iyz}"
+                izz="${trunk_izz}"/>
+        </inertial>-->
+    </link>
+
+    <joint name="$(arg prefix)imu_joint" type="fixed">
+        <parent link="$(arg prefix)trunk"/>
+        <child link="$(arg prefix)imu_link"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="$(arg prefix)imu_link">
+        <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        </inertial>
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=".001 .001 .001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link
+    name="$(arg prefix)radar">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+  </link>
+  <joint
+    name="$(arg prefix)radar_joint"
+    type="fixed">
+    <origin
+      xyz="0.28945 0 -0.046825"
+      rpy="0 2.8782 0" />
+    <parent
+      link="$(arg prefix)base_link" />
+    <child
+      link="$(arg prefix)radar" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+    <xacro:leg prefix="$(arg prefix)" name="FR" mirror="-1" mirror_dae="False" front_hind="1"  front_hind_dae="True"  />
+    <xacro:leg prefix="$(arg prefix)" name="FL" mirror="1"  mirror_dae="True"   front_hind="1"  front_hind_dae="True"  />
+    <xacro:leg prefix="$(arg prefix)" name="RR" mirror="-1" mirror_dae="False"  front_hind="-1" front_hind_dae="False" />
+    <xacro:leg prefix="$(arg prefix)" name="RL" mirror="1"  mirror_dae="True"   front_hind="-1" front_hind_dae="False" />
+</robot>

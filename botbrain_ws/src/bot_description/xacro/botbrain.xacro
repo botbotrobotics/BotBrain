@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="botbrain" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:arg name="prefix" default="" />
+
+    <link name="$(arg prefix)botbrain_base">
+    </link>
+
+    <joint name="$(arg prefix)botbrain_base_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="$(arg prefix)botbrain_base"/>
+        <child link="$(arg prefix)botbrain_case"/>
+    </joint>
+
+    <link name="$(arg prefix)botbrain_case">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://bot_description/meshes/botbrain.obj" scale="1 1 1"/>
+            </geometry>
+        </visual>
+    </link>
+
+</robot>

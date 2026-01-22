@@ -1,0 +1,6 @@
+# Service to set RTAB-Map to mapping mode, optionally loading a database first
+string database_path    # Path to database file to load before mapping (empty string to skip loading)
+bool clear_db          # Whether to clear existing database in memory before loading
+---
+bool success           # True if mapping mode was set successfully
+string message         # Status message describing the result

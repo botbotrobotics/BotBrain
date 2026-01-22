@@ -1,0 +1,6 @@
+# Set the relative height of the body above the ground when standing and walking.
+float32 height
+
+---
+bool success
+string message

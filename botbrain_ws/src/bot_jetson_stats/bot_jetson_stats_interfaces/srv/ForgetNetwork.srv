@@ -1,0 +1,6 @@
+# ForgetNetwork.srv
+# Remove uma rede Wi-Fi salva do NetworkManager
+string ssid
+---
+bool success
+string message

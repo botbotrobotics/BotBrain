@@ -1,0 +1,5 @@
+string mode
+
+---
+bool success
+string message
