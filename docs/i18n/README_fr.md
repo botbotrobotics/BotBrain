@@ -1,7 +1,7 @@
 <!-- LOGO -->
 <p align="center">
   <a href="https://botbot.bot" target="_blank">
-    <img src="../images/Botbrainlogo.png" alt="BotBot" width="400">
+    <img src="../images/logo.png" alt="BotBot" width="400">
   </a>
 </p>
 
@@ -542,7 +542,7 @@ Rejoignez notre [serveur Discord](https://discord.gg/CrTbJzxXes) pour discuter d
   <img src="../images/botbrainpro.png" alt="BotBrain Pro" width="600">
 </p>
 
-Version Professionnelle / Enterprise de BotBrain avec protection IP67, charges utiles personnalisées comme CamCam (Caméra Thermique + Infrarouge), ZoomZoom (caméra RGB longue portée 30x), modèles IA avancés, intégration IoT (LoRA), connectivité données 3-5g, service et maintenance, intégrations avancées avec charges utiles personnalisées, et bien plus. [En savoir plus ici](https://botbot.bot).
+Version Professionnelle / Enterprise de BotBrain avec protection IP67, charges utiles personnalisées comme CamCam (Caméra Thermique + Infrarouge), ZoomZoom (caméra RGB longue portée 30x), modèles IA avancés, intégration IoT (LoRA), connectivité données 3-5g, service et maintenance, intégrations avancées avec charges utiles personnalisées, et bien plus. [En savoir plus ici](https://botbot.bot) ou [réservez votre essai maintenant](https://www.botbot.bot/testdrive).
 
 ---
 

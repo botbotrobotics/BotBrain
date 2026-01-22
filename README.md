@@ -530,7 +530,7 @@ Join our [Discord server](https://discord.gg/CrTbJzxXes) to discuss ideas, get h
   <img src="docs/images/botbrainpro.png" alt="BotBrain Pro" width="600">
 </p>
 
-Professional / Enterprise version of BotBrain with IP67 protection, custom payloads like CamCam (Thermal + infrared Camera), ZoomZoom (long range 30x RGB camera), advanced AI models, IoT integration (LoRA), 3-5g data connectivity, service and maintianance, advanced integrations with custom payloads, and much more. [Learn more here](https://botbot.bot).
+Professional / Enterprise version of BotBrain with IP67 protection, custom payloads like CamCam (Thermal + infrared Camera), ZoomZoom (long range 30x RGB camera), advanced AI models, IoT integration (LoRA), 3-5g data connectivity, service and maintianance, advanced integrations with custom payloads, and much more. [Learn more here](https://botbot.bot) or [book your test drive now](https://www.botbot.bot/testdrive).
 
 ---
 

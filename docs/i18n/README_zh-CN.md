@@ -1,7 +1,7 @@
 <!-- LOGO -->
 <p align="center">
   <a href="https://botbot.bot" target="_blank">
-    <img src="../images/Botbrainlogo.png" alt="BotBot" width="400">
+    <img src="../images/logo.png" alt="BotBot" width="400">
   </a>
 </p>
 
@@ -542,7 +542,7 @@ rs-enumerate-devices | grep "Serial Number"
   <img src="../images/botbrainpro.png" alt="BotBrain Pro" width="600">
 </p>
 
-BotBrain 的专业/企业版本，具有 IP67 防护、自定义载荷如 CamCam（热成像 + 红外摄像头）、ZoomZoom（30 倍长焦 RGB 摄像头）、高级 AI 模型、IoT 集成（LoRA）、3-5G 数据连接、服务和维护、自定义载荷的高级集成等更多功能。[在此了解更多](https://botbot.bot)。
+BotBrain 的专业/企业版本，具有 IP67 防护、自定义载荷如 CamCam（热成像 + 红外摄像头）、ZoomZoom（30 倍长焦 RGB 摄像头）、高级 AI 模型、IoT 集成（LoRA）、3-5G 数据连接、服务和维护、自定义载荷的高级集成等更多功能。[在此了解更多](https://botbot.bot)或[立即预约试驾](https://www.botbot.bot/testdrive)。
 
 ---
 
