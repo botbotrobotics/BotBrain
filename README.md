@@ -471,12 +471,6 @@ Join our [Discord community](https://discord.gg/CrTbJzxXes) for real-time suppor
 
 ---
 
-## Third-Party Libraries
-
-See [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) for a complete list of frontend and ROS packages used.
-
----
-
 ## Contributing
 
 We welcome contributions! Whether you're fixing bugs, adding features, improving documentation, or adding support for new robots, your help is appreciated. If you can make BotBrain better or faster, bring it.
@@ -543,6 +537,12 @@ Robots can hurt people and themselves when operated incorrectly or during develo
 - **Keep clear of the robot** during initial testing
 
 > **Disclaimer:** BotBot is not responsible for any failures, accidents, or damages resulting from the use of this software or hardware. The user assumes full responsibility for the safe operation, testing, and deployment of robots using BotBrain.
+
+---
+
+## Third-Party Libraries
+
+See [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) for a complete list of frontend and ROS packages used.
 
 ---
 
