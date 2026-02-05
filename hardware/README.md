@@ -285,6 +285,8 @@ Mounting interface for the Unitree Go2 quadruped robot.
 
 Print the Go2 interface mount using the [print settings](#print-settings).
 
+> The interface for the Unitree Go2 can also be found on [Makerworld](https://makerworld.com/en/models/2349666-go2_interface-botbrain-open-source-bboss#profileId-2569625)
+
 ---
 
 ##### Step 2: Prepare the Interface
