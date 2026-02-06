@@ -39,6 +39,15 @@ BotBrain is a modular collection of open source software and hardware components
 - Officially supported boards: Jetson Nano, Jetson Orin Nano (support for AGX and Thor coming soon)
 - Everything is modular - you don't need to run every module (some heavy AI modules require Orin AGX)
 
+<p align="center">
+  <a href="https://youtu.be/L7nLiKkLVP4">📹 Watch BotBrain intro video 📹</a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/VBv4Y7lat8Y">📹 Watch BotBrain complete 1 hour of autonomous patrols in our office</a>
+</p>
+
+
 <h2 align="center">✨ Features at a Glance</h2>
 
 <table>
@@ -88,7 +97,7 @@ BotBrain is a modular collection of open source software and hardware components
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/VBv4Y7lat8Y">📹 Watch BotBrain complete 1 hour of autonomous patrols in our office</a>
+  <a href="https://youtu.be/xZ5c619bTEQ">📹 Watch BotBrain hardware assembly guide</a>
 </p>
 
 
@@ -196,6 +205,10 @@ A collection of ROS2 Humble packages that handle:
 - **Navigation** (`bot_navigation`) - Nav2 integration for autonomous movement
 - **Perception** (`bot_yolo`) - YOLOv8/v11 object detection
 - **Robot Drivers** - Platform-specific packages for Unitree Go2/G1, DirectDrive Tita, and custom robots
+
+<p align="center">
+  <a href="https://discord.gg/9Jkq5tBk6f">Join our discord server for discussion on BotBrain and Robotics</a>
+</p>
 
 ---
 
