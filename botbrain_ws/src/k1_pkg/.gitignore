@@ -1,0 +1,5 @@
+
+# Large map files
+maps/*.db
+maps/*.pgm
+maps/*.yaml

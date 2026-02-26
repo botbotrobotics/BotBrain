@@ -1,0 +1,9 @@
+build/
+install/
+log/
+
+/directory-sys/
+
+.idea
+CMakeLists.bak.txt
+.DS_S*

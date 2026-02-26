@@ -45,7 +45,9 @@ services:
           bot_jetson_stats \
           bot_jetson_stats_interfaces \
           bot_rosa \
-          g1_pkg"]
+          g1_pkg \
+          k1_pkg
+          booster_interface"]
 
   state_machine:
     extends: base

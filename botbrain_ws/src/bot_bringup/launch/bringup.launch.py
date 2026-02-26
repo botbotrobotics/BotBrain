@@ -88,9 +88,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time_arg,
-        description_launch,
+        #description_launch,
         robot_interface_launch,
         twist_mux_launch,
-        joystick_launch,
+        #joystick_launch,
         rosbridge_launch,
     ])
