@@ -20,7 +20,7 @@ services:
       - /run:/run
     environment:
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-      CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
+      #CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
 
   dev:
     extends: base
