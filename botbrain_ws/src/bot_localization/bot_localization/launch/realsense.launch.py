@@ -26,7 +26,7 @@ def make_camera_params(serial: str | None, camera_name: str, tf_prefix: str, cam
         "enable_gyro": False,
         "enable_accel": False,
         "enable_motion": False,
-        "initial_reset": True,
+        "initial_reset": False,
         "accelerate_gpu_with_glsl": True,
         "depth_module.depth_profile": "640x480x6",
         "rgb_camera.color_profile": "640x480x6",
