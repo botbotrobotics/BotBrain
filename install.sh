@@ -159,9 +159,11 @@ fi
 
 # Robot model selection page
 ROBOT_MODEL=$(dialog --title "Robot Model Selection" \
-                     --menu "\nSelect your robot model:" 15 70 5 \
+                     --menu "\nSelect your robot model:" 16 70 8 \
                      "go2" "Unitree Go2" \
+                     "go2-internal" "Unitree Go2 Docking Station" \
                      "go2w" "Unitree Go2W" \
+                     "go2w-internal" "Unitree Go2W Docking Station" \
                      "g1" "Unitree G1" \
                      "g1-internal" "Unitree G1 Internal Jetson" \
                      "tita" "Tita" \
@@ -208,13 +210,20 @@ if [ "$ROBOT_MODEL" = "tita" ]; then
     echo "Tita namespace: $TITA_NAMESPACE"
 fi
 
-# If G1 Internal is selected, prompt for web port
 WEB_PORT="80"
-if [ "$ROBOT_MODEL" = "g1-internal" ]; then
-    # Set WEB_PORT to 3000
-    WEB_PORT="3000"
 
-    # Set ROBOT_MODEL to g1, so can find g1_pkg
+if [ "$ROBOT_MODEL" = "go2-internal" ]; then
+    WEB_PORT="3000"
+    ROBOT_MODEL="go2"
+fi
+
+if [ "$ROBOT_MODEL" = "go2w-internal" ]; then
+    WEB_PORT="3000"
+    ROBOT_MODEL="go2w"
+fi
+
+if [ "$ROBOT_MODEL" = "g1-internal" ]; then
+    WEB_PORT="3000"
     ROBOT_MODEL="g1"
 fi
 

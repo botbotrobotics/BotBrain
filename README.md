@@ -286,7 +286,9 @@ The web dashboard requires Supabase for authentication and data storage. You'll 
 
 ### 3. Software Setup
 
-> **[G1 WiFi Setup Guide](docs/g1-wifi-setup.md)** - If you are using G1 robot, please refeer to this docs before.
+> **[Go2 Local Setup Guide](docs/go2_local_setup_guide.md)** - If you are using the Go2 EDU Docking Station, please refer to this guide before proceeding.
+
+> **[G1-internal WiFi Setup Guide](docs/g1-wifi-setup.md)** - If you are using the G1 robot internal Jetson, please refer to this guide before proceeding.
 
 #### External Dependencies
 
