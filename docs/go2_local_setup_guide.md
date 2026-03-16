@@ -35,17 +35,38 @@ Mount the RealSense camera according to the image below:
 
 The docking station's Jetson that comes with Go2W and Go2Edu versions does not come with a WiFi card. Installing and utilizing BotBrain requires an internet connection, so a solution is provided in this guide.
 
-### Recommended: WiFi Dongle
+### WiFi Dongle Compatibility
 
-Purchase a **ALFA AWUS036NHA** (Atheros AR9271 chipset). The driver for this chipset is natively supported on the docking station, making it plug-and-play — no additional configuration required.
+Not all WiFi dongles work out of the box on the docking station. The table below summarizes tested options:
 
-### Alternative Options
+| Dongle | Status | Notes |
+|--------|--------|-------|
+| ALFA AWUS036NHA (Atheros AR9271) | ❌ Does not work | Generates current overload |
+| Nano TP-Link AC600 Archer T2U Dual Band | ✅ Works | Driver must be installed manually (see below) |
 
-> **Note:** The following alternatives are recommended for experienced developers only.
+### Recommended: Wi-Fi USB Nano TP-Link AC600 Archer T2U Dual Band
 
-- **Ethernet cable** — Connect the Jetson directly via cable. This works out of the box but may require additional network management configuration on the Jetson to route traffic correctly.
+Purchase a **Wi-Fi USB Nano TP-Link AC600 Archer T2U Dual Band**. The driver for this dongle is not natively available on the docking station and must be downloaded and installed once before the dongle can be used.
 
-- **Different WiFi dongle** — Other dongles may work, but their drivers may not be natively available on the docking station. In that case, a first internet connection via cable will be necessary to download and install the corresponding driver.
+**First-time setup — driver installation via Ethernet:**
+
+Since the dongle's driver is not pre-installed, you will need a temporary internet connection to download it. Connect the Jetson directly to your router or laptop via an Ethernet cable for this one-time step.
+
+> **Note:** Routing internet traffic through the Ethernet interface may require additional network configuration on the Jetson (e.g. setting a default gateway, configuring a static IP on the `eth` interface, or enabling IP forwarding on the host machine if sharing a laptop's connection). Once the driver is installed and internet is configured through WiFi, the Ethernet cable can be removed and the WiFi dongle used for all subsequent connections.
+
+Once connected via Ethernet, install the driver:
+
+```bash
+sudo apt update
+sudo apt install dkms
+git clone -b v5.6.4.2 https://github.com/aircrack-ng/rtl8812au.git
+cd rtl8812au
+sudo ./dkms-install.sh
+```
+
+### Using a Different Dongle
+
+Feel free to use a different WiFi dongle if you prefer. Keep in mind that drivers may not be pre-installed, so the same Ethernet-first approach described above will likely apply. If you test a dongle and confirm whether it works or not, we'd love for you to contribute your findings to the compatibility table above — open a PR or file an issue on the [BotBrain repository](https://github.com/botbotrobotics/BotBrain).
 
 ---
 
