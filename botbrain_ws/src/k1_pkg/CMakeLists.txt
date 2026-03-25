@@ -43,6 +43,7 @@ install(PROGRAMS
   scripts/k1_read.py
   scripts/k1_read_sdk.py
   scripts/k1_write.py
+  scripts/k1_write_sdk.py
   scripts/k1_controller_commands.py
   scripts/k1_video_stream.py
   DESTINATION lib/${PROJECT_NAME}
