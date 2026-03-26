@@ -27,7 +27,8 @@ class RobotWriteNode(LifecycleNode):
         self._mode_map = {
             'damping': 0,   # kDamping
             'prepare': 1,   # kPrepare (stand)
-            'walking': 2,   # kWalking
+            'walking': 2,   # kWalking (humanlike gait)
+            'soccer': 4,    # kSoccer (soccer gait)
         }
 
         self.get_logger().info("RobotWriteNode created, in 'unconfigured' state.")
@@ -111,9 +112,11 @@ class RobotWriteNode(LifecycleNode):
         rpc_request = RpcService.Request()
         rpc_request.msg = req_msg
         future = self.rpc_client.call_async(rpc_request)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
+        event = threading.Event()
+        future.add_done_callback(lambda f: event.set())
+        event.wait(timeout=2.0)
 
-        if future.result() is not None:
+        if future.done() and future.result() is not None:
             response.success = True
             response.message = f"Mode changed to '{request.mode}'"
         else:
