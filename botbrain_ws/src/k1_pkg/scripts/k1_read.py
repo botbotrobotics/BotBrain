@@ -2,9 +2,10 @@
 import math
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
-from booster_interface.msg import Odometer, LowState, ImuState
+from booster_interface.msg import Odometer, LowState, ImuState, BatteryState as BoosterBatteryState
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Imu, PointCloud2, BatteryState, JointState
+from sensor_msgs.msg import Imu, PointCloud2, BatteryState, Image, CameraInfo
+from rclpy.qos import qos_profile_sensor_data, QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -20,20 +21,20 @@ class RobotRead(LifecycleNode):
         self.prefix = '' 
 
         # Initialize all ROS communicators to None.
-        self.sport_mode_subscriber = None
-        self.low_state_state_subscriber = None
         self.imu_subscriber = None
-        self.pose_subscriber = None
-        self.lidar_subcriber = None
-        
+        self.stereo_rgb_subscriber = None
+        self.stereo_depth_subscriber = None
+        self.stereo_info_subscriber = None
+        self.battery_subscriber = None
+
         self.tf_broadcaster = None
 
         self.odom_pub = None
         self.imu_pub = None
-        self.lidar_pub = None
         self.battery_pub = None
-        self.imu_temp_pub = None
-        self.joint_state_pub = None
+        self.stereo_rgb_pub = None
+        self.stereo_depth_pub = None
+        self.stereo_info_pub = None
 
         self.get_logger().info("Lifecycle node created, in 'unconfigured' state.")
 
@@ -45,24 +46,31 @@ class RobotRead(LifecycleNode):
         self.prefix = self.get_parameter('prefix').value
         self.get_logger().info(f"Using prefix: '{self.prefix}'")
         
+        stereo_qos = QoSProfile(
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.VOLATILE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+
         # Create subscribers
         self.odom_subscriber = self.create_subscription(Odometer, '/odometer_state', self.odom_subscriber_callback, 10)
         self.imu_subscriber = self.create_subscription(LowState, '/low_state', self.imu_subscriber_callback, 10)
-
-        # self.low_state_state_subscriber = self.create_subscription(LowState, '/lf/lowstate', self.low_state_subscriber_callback, 10)
-        # self.pose_subscriber = self.create_subscription(PoseStamped, '/utlidar/robot_pose', self.publish_pose_stamped, 10)
-        # self.lidar_subcriber = self.create_subscription(PointCloud2, '/utlidar/cloud', self.publish_lidar, 10)
+        self.stereo_rgb_subscriber = self.create_subscription(Image, '/StereoNetNode/rectified_image', self.stereo_rgb_callback, stereo_qos)
+        self.stereo_depth_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_depth', self.stereo_depth_callback, stereo_qos)
+        self.stereo_info_subscriber = self.create_subscription(CameraInfo, '/StereoNetNode/stereonet_depth/camera_info', self.stereo_info_callback, stereo_qos)
+        self.battery_subscriber = self.create_subscription(BoosterBatteryState, '/battery_state', self.battery_callback, 1)
         
         # Create TF broadcaster
         self.tf_broadcaster = TransformBroadcaster(self)
 
         # Create publishers
-        self.odom_pub = self.create_publisher(Odometry, 'odom', 10)
-        self.imu_pub = self.create_publisher(Imu, 'imu/data', 10)
-        self.lidar_pub = self.create_publisher(PointCloud2, 'pointcloud', 10)
-        self.battery_pub = self.create_publisher(BatteryState, 'battery', 1)
-        self.imu_temp_pub = self.create_publisher(Float32, 'imu_temp', 10)
-        self.joint_state_pub = self.create_publisher(JointState, 'joint_states', 10)
+        self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
+        self.imu_pub = self.create_publisher(Imu, '/imu/data', 10)
+        self.battery_pub = self.create_publisher(BatteryState, '/battery', 1)
+        self.stereo_rgb_pub = self.create_publisher(Image, '/rgb/image', qos_profile_sensor_data)
+        self.stereo_depth_pub = self.create_publisher(Image, '/depth/image', qos_profile_sensor_data)
+        self.stereo_info_pub = self.create_publisher(CameraInfo, '/rgb/camera_info', qos_profile_sensor_data)
 
         self.get_logger().info("Node configured successfully.")
         return TransitionCallbackReturn.SUCCESS
@@ -88,18 +96,19 @@ class RobotRead(LifecycleNode):
         # Destroy all ROS entities
         self.destroy_subscription(self.odom_subscriber)
         self.destroy_subscription(self.imu_subscriber)
-        self.destroy_subscription(self.low_state_state_subscriber)
-        self.destroy_subscription(self.pose_subscriber)
-        self.destroy_subscription(self.lidar_subcriber)
+        self.destroy_subscription(self.stereo_rgb_subscriber)
+        self.destroy_subscription(self.stereo_depth_subscriber)
+        self.destroy_subscription(self.stereo_info_subscriber)
+        self.destroy_subscription(self.battery_subscriber)
 
         self.tf_broadcaster = None
 
         self.destroy_publisher(self.odom_pub)
         self.destroy_publisher(self.imu_pub)
-        self.destroy_publisher(self.lidar_pub)
         self.destroy_publisher(self.battery_pub)
-        self.destroy_publisher(self.imu_temp_pub)
-        self.destroy_publisher(self.joint_state_pub)
+        self.destroy_publisher(self.stereo_rgb_pub)
+        self.destroy_publisher(self.stereo_depth_pub)
+        self.destroy_publisher(self.stereo_info_pub)
         
         self.get_logger().info("Node cleaned up successfully.")
         return TransitionCallbackReturn.SUCCESS
@@ -177,113 +186,30 @@ class RobotRead(LifecycleNode):
         imu.linear_acceleration.z = float(imu_state.acc[2])
         self.imu_pub.publish(imu)
 
-        # --- Joint States ---
-        motors = msg.motor_state_serial
-        if len(motors) >= 12:
-            joint_state = JointState()
-            joint_state.header.stamp = stamp
-            joint_state.name = [
-                f'{self.prefix}FR_hip_joint',   f'{self.prefix}FR_thigh_joint', f'{self.prefix}FR_calf_joint',
-                f'{self.prefix}FL_hip_joint',   f'{self.prefix}FL_thigh_joint', f'{self.prefix}FL_calf_joint',
-                f'{self.prefix}RR_hip_joint',   f'{self.prefix}RR_thigh_joint', f'{self.prefix}RR_calf_joint',
-                f'{self.prefix}RL_hip_joint',   f'{self.prefix}RL_thigh_joint', f'{self.prefix}RL_calf_joint',
-            ]
-            joint_state.position = [float(motors[i].q)  for i in range(12)]
-            joint_state.velocity = [float(motors[i].dq) for i in range(12)]
-            self.joint_state_pub.publish(joint_state)
+    def stereo_rgb_callback(self, msg: Image):
+        self.stereo_rgb_pub.publish(msg)
 
-    def publish_pose_stamped(self, msg):
+    def stereo_depth_callback(self, msg: Image):
+        self.stereo_depth_pub.publish(msg)
 
-        transform = TransformStamped()
-        transform.header.stamp = self.get_clock().now().to_msg()
-        transform.header.frame_id = f'{self.prefix}odom'
-        transform.child_frame_id = f'{self.prefix}base_link'
-        transform.transform.translation.x = msg.pose.position.x
-        transform.transform.translation.y = msg.pose.position.y
-        transform.transform.translation.z = msg.pose.position.z
-        transform.transform.rotation = msg.pose.orientation
-        self.tf_broadcaster.sendTransform(transform)
+    def stereo_info_callback(self, msg: CameraInfo):
+        self.stereo_info_pub.publish(msg)
 
-        odom = Odometry()
-        odom.header.stamp = transform.header.stamp
-        odom.header.frame_id = f'{self.prefix}odom'
-        odom.child_frame_id = f'{self.prefix}base_link'
-        odom.pose.pose = msg.pose
-        self.odom_pub.publish(odom)
-
-    def sport_subscriber_callback(self, msg):
-
-        imu = Imu()
-        imu.header.stamp = self.get_clock().now().to_msg() 
-        imu.header.frame_id = f'{self.prefix}imu'
-
-        imu.orientation.x = np.float64(msg.imu_state.quaternion[0])
-        imu.orientation.y = np.float64(msg.imu_state.quaternion[1])
-        imu.orientation.z = np.float64(msg.imu_state.quaternion[2])
-        imu.orientation.w = np.float64(msg.imu_state.quaternion[3])
-        imu.angular_velocity.x = np.float64(msg.imu_state.gyroscope[0])
-        imu.angular_velocity.y = np.float64(msg.imu_state.gyroscope[1])
-        imu.angular_velocity.z = np.float64(msg.imu_state.gyroscope[2])
-        imu.linear_acceleration.x = np.float64(msg.imu_state.accelerometer[0])
-        imu.linear_acceleration.y = np.float64(msg.imu_state.accelerometer[1])
-        imu.linear_acceleration.z = np.float64(msg.imu_state.accelerometer[2])
-        self.imu_pub.publish(imu)
-
-        imu_temp = Float32()
-        imu_temp.data = np.float64(msg.imu_state.temperature)
-        self.imu_temp_pub.publish(imu_temp)
-
-    def publish_lidar(self, msg):
-
-        lidar = msg
-        lidar.header.stamp = self.get_clock().now().to_msg() 
-        lidar.header.frame_id = f'{self.prefix}radar'
-        self.lidar_pub.publish(lidar)
-
-    def low_state_subscriber_callback(self, msg):
-
+    def battery_callback(self, msg: BoosterBatteryState):
         battery = BatteryState()
         battery.header.stamp = self.get_clock().now().to_msg()
         battery.header.frame_id = f'{self.prefix}base'
-        battery.voltage = msg.power_v
-        battery.current = float(msg.bms_state.current)
-        battery.percentage = float(msg.bms_state.soc) / 100.0
+        battery.voltage = msg.voltage
+        battery.current = msg.current
+        battery.percentage = msg.soc / 100.0
         self.battery_pub.publish(battery)
-
-        joint_state_msg = JointState()
-        joint_state_msg.header.stamp = self.get_clock().now().to_msg()
-        joint_state_msg.name = [f'{self.prefix}FL_hip_joint', 
-                                f'{self.prefix}FL_thigh_joint', 
-                                f'{self.prefix}FL_calf_joint',
-                               f'{self.prefix}FR_hip_joint', 
-                               f'{self.prefix}FR_thigh_joint', 
-                               f'{self.prefix}FR_calf_joint',
-                               f'{self.prefix}RL_hip_joint', 
-                               f'{self.prefix}RL_thigh_joint', 
-                               f'{self.prefix}RL_calf_joint',
-                               f'{self.prefix}RR_hip_joint', 
-                               f'{self.prefix}RR_thigh_joint', 
-                               f'{self.prefix}RR_calf_joint']
-        joint_state_msg.position = [
-            np.float64(msg.motor_state[3].q), 
-            np.float64(msg.motor_state[4].q), 
-            np.float64(msg.motor_state[5].q),
-            np.float64(msg.motor_state[0].q), 
-            np.float64(msg.motor_state[1].q), 
-            np.float64(msg.motor_state[2].q),
-            np.float64(msg.motor_state[9].q), 
-            np.float64(msg.motor_state[10].q), 
-            np.float64(msg.motor_state[11].q),
-            np.float64(msg.motor_state[6].q), 
-            np.float64(msg.motor_state[7].q), 
-            np.float64(msg.motor_state[8].q),
-        ]
-        self.joint_state_pub.publish(joint_state_msg)
 
 
 def main(args=None):
     rclpy.init(args=args)
     node = RobotRead()
+    node.trigger_configure()
+    node.trigger_activate()
     rclpy.spin(node)
     rclpy.shutdown()
 
