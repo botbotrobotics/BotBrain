@@ -2,7 +2,7 @@
 import math
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
-from booster_interface.msg import Odometer, LowState, ImuState, BatteryState as BoosterBatteryState
+from booster_interface.msg import Odometer, LowState, ImuState
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, PointCloud2, BatteryState, Image, CameraInfo
 from rclpy.qos import qos_profile_sensor_data, QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy

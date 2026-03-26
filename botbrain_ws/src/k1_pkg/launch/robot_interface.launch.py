@@ -24,14 +24,6 @@ def generate_launch_description():
     network_interface = config['network_interface']
     prefix = robot_name + '/' if robot_name != '' else ''
 
-    controller_commands_node = LifecycleNode(
-        package = 'k1_pkg',
-        executable = 'k1_controller_commands.py',
-        name='controller_commands_node',
-        namespace=robot_name,
-        output='screen'
-    )
-
     k1_read_node = LifecycleNode(
         package = 'k1_pkg',
         executable = 'k1_read.py',
@@ -46,15 +38,6 @@ def generate_launch_description():
         executable = 'k1_write.py',
         parameters=[{'prefix': (prefix)}],
         name='robot_write_node',
-        namespace=robot_name,
-        output='screen'
-    )
-
-    k1_video_stream_node = LifecycleNode(
-        package = 'k1_pkg',
-        executable = 'k1_video_stream.py',
-        parameters=[{'prefix': (prefix), 'network_interface': network_interface}],
-        name='robot_video_stream',
         namespace=robot_name,
         output='screen'
     )
@@ -99,61 +82,15 @@ def generate_launch_description():
         )
     )
 
-    configure_handler_for_commands = RegisterEventHandler(
-        OnProcessStart(
-            target_action=controller_commands_node,
-            on_start=[EmitEvent(event=ChangeState(
-                lifecycle_node_matcher=matches_action(controller_commands_node),
-                transition_id=Transition.TRANSITION_CONFIGURE,
-            ))]
-        )
-    )
-    activate_handler_for_commands = RegisterEventHandler(
-        OnStateTransition(
-            target_lifecycle_node=controller_commands_node,
-            goal_state='inactive',
-            entities=[EmitEvent(event=ChangeState(
-                lifecycle_node_matcher=matches_action(controller_commands_node),
-                transition_id=Transition.TRANSITION_ACTIVATE,
-            ))]
-        )
-    )
-
-    configure_handler_for_video_stream = RegisterEventHandler(
-        OnProcessStart(
-            target_action=k1_video_stream_node,
-            on_start=[EmitEvent(event=ChangeState(
-                lifecycle_node_matcher=matches_action(k1_video_stream_node),
-                transition_id=Transition.TRANSITION_CONFIGURE,
-            ))]
-        )
-    )
-    activate_handler_for_video_stream = RegisterEventHandler(
-        OnStateTransition(
-            target_lifecycle_node=k1_video_stream_node,
-            goal_state='inactive',
-            entities=[EmitEvent(event=ChangeState(
-                lifecycle_node_matcher=matches_action(k1_video_stream_node),
-                transition_id=Transition.TRANSITION_ACTIVATE,
-            ))]
-        )
-    )
-
     return LaunchDescription(
         [
-            k1_read_node ,
+            k1_read_node,
             k1_write_node,
-            controller_commands_node,
-            k1_video_stream_node,
-            
+
             # Handlers
             # configure_handler_for_write,
             # activate_handler_for_write,
             # configure_handler_for_read,
-            # activate_handler_for_read,
-            # configure_handler_for_commands,
-            # activate_handler_for_commands,
-            # configure_handler_for_video_stream,
-            # activate_handler_for_video_stream,
+            # activate_handler_for_read
         ]
     )
