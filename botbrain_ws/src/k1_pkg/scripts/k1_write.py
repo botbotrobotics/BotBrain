@@ -39,7 +39,7 @@ class RobotWriteNode(LifecycleNode):
         self.callback_group = ReentrantCallbackGroup()
 
         self.cmd_vel_subscription = self.create_subscription(
-            Twist, 'cmd_vel', self.cmd_vel_subscription_callback, 1,
+            Twist, 'cmd_vel_out', self.cmd_vel_subscription_callback, 1,
             callback_group=self.callback_group)
 
         self.rpc_client = self.create_client(
