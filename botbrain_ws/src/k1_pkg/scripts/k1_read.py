@@ -208,8 +208,6 @@ class RobotRead(LifecycleNode):
 def main(args=None):
     rclpy.init(args=args)
     node = RobotRead()
-    node.trigger_configure()
-    node.trigger_activate()
     rclpy.spin(node)
     rclpy.shutdown()
 

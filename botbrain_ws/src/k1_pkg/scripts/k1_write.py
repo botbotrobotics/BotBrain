@@ -130,9 +130,6 @@ def main(args=None):
     node = RobotWriteNode()
     executor = MultiThreadedExecutor()
     executor.add_node(node)
-    node.trigger_configure()
-    node.trigger_activate()
-
 
     try:
         executor.spin()
