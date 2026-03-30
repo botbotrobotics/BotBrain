@@ -51,6 +51,14 @@ def generate_launch_description():
             launch_arguments={'database_path': database_path}.items(),
         )
         nodes.append(lidar)
+    elif robot_model == "k1":
+        integrated_camera = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(launch_dir, "rtabmap_integrated_camera.launch.py")
+            ),
+            launch_arguments={'database_path': database_path}.items(),
+        )
+        nodes.append(integrated_camera)
     else:
         if num_cameras == 0:
             pass

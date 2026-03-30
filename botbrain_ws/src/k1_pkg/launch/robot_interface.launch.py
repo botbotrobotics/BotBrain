@@ -3,6 +3,7 @@
 import os
 from launch import LaunchDescription
 from launch_ros.actions import LifecycleNode
+from launch_ros.actions import Node
 import yaml
 from launch.actions import RegisterEventHandler, EmitEvent
 from launch_ros.event_handlers import OnStateTransition
@@ -82,10 +83,19 @@ def generate_launch_description():
         )
     )
 
+    # Bridge odom→base_link (from k1_read) to Trunk (URDF root)
+    base_link_to_trunk = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_trunk',
+        arguments=['0', '0', '0', '0', '0', '0', f'{prefix}base_link', 'Trunk']
+    )
+
     return LaunchDescription(
         [
             k1_read_node,
             k1_write_node,
+            base_link_to_trunk,
 
             # Handlers
             # configure_handler_for_write,
