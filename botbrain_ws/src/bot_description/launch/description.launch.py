@@ -17,7 +17,7 @@ def generate_launch_description():
         config = yaml.safe_load(f)['robot_configuration']
     
     robot_name = config['robot_name']
-    robot_model = config['robot_model']
+    has_own_robot_state_publisher = config.get('has_own_robot_state_publisher', False)
 
     botbrain_description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -39,7 +39,7 @@ def generate_launch_description():
     )
     
     launch_actions = []
-    if robot_model != 'k1':
+    if not has_own_robot_state_publisher:
         robot_description_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(

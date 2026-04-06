@@ -36,7 +36,7 @@ def generate_launch_description():
         source_file=params_file,
         replacements={'<back_obstacle_layer>': back_layer_token})
 
-    use_sim_time = True
+    use_sim_time = False
     autostart = True
     use_respawn = False
     log_level = "info"

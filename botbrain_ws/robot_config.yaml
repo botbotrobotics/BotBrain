@@ -2,6 +2,7 @@ robot_configuration:
   robot_name: ""
   robot_model: ""
   description_file_type: ""
+  has_own_robot_state_publisher: false
   network_interface: ""
   tita_namespace: ""
   openai_api_key: ""
