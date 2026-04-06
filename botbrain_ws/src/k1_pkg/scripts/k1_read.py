@@ -2,7 +2,7 @@
 import math
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
-from booster_interface.msg import Odometer, LowState, ImuState
+from booster_interface.msg import Odometer, LowState, ImuState, BatteryState as BoosterBatteryState
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, PointCloud2, BatteryState, Image, CameraInfo
 from rclpy.qos import qos_profile_sensor_data, QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
@@ -10,6 +10,8 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from tf2_ros import TransformBroadcaster
 import numpy as np
+import cv2
+from cv_bridge import CvBridge
 
 class RobotRead(LifecycleNode):
 
@@ -36,6 +38,7 @@ class RobotRead(LifecycleNode):
         self.stereo_depth_pub = None
         self.stereo_info_pub = None
 
+        self.bridge = CvBridge()
         self.get_logger().info("Lifecycle node created, in 'unconfigured' state.")
 
     def on_configure(self, state: rclpy.lifecycle.State) -> TransitionCallbackReturn:
@@ -187,7 +190,17 @@ class RobotRead(LifecycleNode):
         self.imu_pub.publish(imu)
 
     def stereo_rgb_callback(self, msg: Image):
-        self.stereo_rgb_pub.publish(msg)
+        if msg.encoding.lower() == 'nv12':
+            # NV12 is YUV 4:2:0 semi-planar; height of the NV12 buffer is h*3//2
+            h = msg.height
+            w = msg.width
+            yuv = np.frombuffer(msg.data, dtype=np.uint8).reshape((h * 3 // 2, w))
+            rgb = cv2.cvtColor(yuv, cv2.COLOR_YUV2RGB_NV12)
+            out = self.bridge.cv2_to_imgmsg(rgb, encoding='rgb8')
+            out.header = msg.header
+            self.stereo_rgb_pub.publish(out)
+        else:
+            self.stereo_rgb_pub.publish(msg)
 
     def stereo_depth_callback(self, msg: Image):
         self.stereo_depth_pub.publish(msg)

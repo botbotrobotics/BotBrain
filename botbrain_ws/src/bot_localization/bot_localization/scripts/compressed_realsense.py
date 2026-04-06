@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import yaml
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
 from rclpy.node import Node
@@ -8,17 +10,32 @@ from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge
 import cv2
 
+
+def _load_robot_model():
+    """Read robot_model from robot_config.yaml, located 4 levels above the installed script."""
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        workspace_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(script_dir))))
+        config_file = os.path.join(workspace_dir, 'robot_config.yaml')
+        with open(config_file, 'r') as f:
+            return yaml.safe_load(f)['robot_configuration']['robot_model']
+    except Exception:
+        return 'realsense'
+
+
 class RealsenseCompressedNode(LifecycleNode):
 
     def __init__(self):
         super().__init__('realsense_compressed_node')
+
+        self.robot_model = _load_robot_model()
 
         self.publisher_compressed = None
         self.publisher_compressed_back = None
         self.subscription = None
         self.subscription_back = None
         self.bridge = CvBridge()
-        self.get_logger().info("Lifecycle node created. Awaiting configuration...")
+        self.get_logger().info(f"Lifecycle node created (robot_model='{self.robot_model}'). Awaiting configuration...")
 
     # --- Lifecycle Transition Callbacks ---
 
@@ -32,9 +49,9 @@ class RealsenseCompressedNode(LifecycleNode):
                 history=QoSHistoryPolicy.KEEP_LAST,
                 depth=1
             )
-            # Create publisher for front camera compressed image
+            # Create publisher for front/K1 camera compressed image
             self.publisher_compressed = self.create_publisher(CompressedImage, 'compressed_camera', qos_profile)
-            # Create publisher for back camera compressed image
+            # Back camera publisher (realsense) or depth publisher (K1)
             self.publisher_compressed_back = self.create_publisher(CompressedImage, 'compressed_back_camera', qos_profile)
 
         except Exception as e:
@@ -46,26 +63,49 @@ class RealsenseCompressedNode(LifecycleNode):
 
     def on_activate(self, state):
         self.get_logger().info('In on_activate, activating the node...')
-        # Create subscription to RealSense image topics
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
-        self.subscription = self.create_subscription(
-            Image,
-            'front_camera/color/image_raw',
-            self.image_callback,
-            qos_profile
-        )
-        self.subscription_back = self.create_subscription(
-            Image,
-            '/back_camera/color/image_raw',
-            self.image_callback_back,
-            qos_profile
-        )
-        self.get_logger().info('Node activated and subscribed to front and back camera topics.')
+        if self.robot_model == 'k1':
+            # K1 publishes /rgb/image with BEST_EFFORT (qos_profile_sensor_data)
+            k1_qos = QoSProfile(
+                reliability=QoSReliabilityPolicy.BEST_EFFORT,
+                durability=QoSDurabilityPolicy.VOLATILE,
+                history=QoSHistoryPolicy.KEEP_LAST,
+                depth=1
+            )
+            self.subscription = self.create_subscription(
+                Image,
+                '/rgb/image',
+                self.image_callback,
+                k1_qos
+            )
+            # K1 has no back camera — use depth image instead
+            self.subscription_back = self.create_subscription(
+                Image,
+                '/depth/image',
+                self.depth_callback,
+                k1_qos
+            )
+            self.get_logger().info('Node activated and subscribed to /rgb/image and /depth/image (K1 stereo camera).')
+        else:
+            # Create subscription to RealSense image topics
+            self.subscription = self.create_subscription(
+                Image,
+                'front_camera/color/image_raw',
+                self.image_callback,
+                qos_profile
+            )
+            self.subscription_back = self.create_subscription(
+                Image,
+                '/back_camera/color/image_raw',
+                self.image_callback_back,
+                qos_profile
+            )
+            self.get_logger().info('Node activated and subscribed to front and back camera topics.')
         return super().on_activate(state)
 
     def on_deactivate(self, state):
@@ -82,18 +122,15 @@ class RealsenseCompressedNode(LifecycleNode):
 
     def on_cleanup(self, state):
         self.get_logger().info('In on_cleanup, cleaning up resources...')
-        # Release all resources
         self._cleanup_resources()
         self.get_logger().info('Cleanup successful.')
         return TransitionCallbackReturn.SUCCESS
 
     def on_shutdown(self, state):
         self.get_logger().info('In on_shutdown, shutting down the node...')
-        # Ensure all resources are released on shutdown
         self._cleanup_resources()
         self.get_logger().info('Shutdown complete.')
         return TransitionCallbackReturn.SUCCESS
-
 
     def _cleanup_resources(self):
         """Helper method to destroy publishers and subscriptions."""
@@ -164,6 +201,48 @@ class RealsenseCompressedNode(LifecycleNode):
         except Exception as e:
             self.get_logger().error(f'Error processing back camera image: {e}')
 
+    def depth_callback(self, msg):
+        """Callback to process K1 depth image and publish as compressed colormap (used as back camera slot)."""
+        try:
+            # Convert depth to float32 (handles 32FC1 and 16UC1 encodings)
+            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+            import numpy as np
+            if frame.dtype != np.float32:
+                frame = frame.astype(np.float32)
+
+            self.get_logger().debug('Received and processing K1 depth image frame')
+
+            # Normalize depth to 0-255 (ignore NaN/inf)
+            valid = frame[np.isfinite(frame)]
+            if valid.size == 0:
+                return
+            d_min, d_max = valid.min(), valid.max()
+            if d_max - d_min < 1e-6:
+                return
+            normalized = np.clip((frame - d_min) / (d_max - d_min), 0.0, 1.0)
+            gray8 = (normalized * 255).astype(np.uint8)
+
+            # Apply colormap for better depth visualization
+            colored = cv2.applyColorMap(gray8, cv2.COLORMAP_INFERNO)
+
+            # Resize and compress
+            small_frame = cv2.resize(colored, (640, 360))
+            ret_enc, jpeg = cv2.imencode('.jpg', small_frame, [cv2.IMWRITE_JPEG_QUALITY, 20])
+
+            if ret_enc:
+                # Create compressed image message
+                comp_msg = CompressedImage()
+                comp_msg.header = msg.header  # Keep original timestamp and frame_id
+                comp_msg.format = "jpeg"
+                comp_msg.data = jpeg.tobytes()
+                self.publisher_compressed_back.publish(comp_msg)
+                self.get_logger().debug('Published compressed K1 depth image')
+            else:
+                self.get_logger().warn('Failed to encode K1 depth image to JPEG')
+
+        except Exception as e:
+            self.get_logger().error(f'Error processing K1 depth image: {e}')
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -171,6 +250,7 @@ def main(args=None):
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

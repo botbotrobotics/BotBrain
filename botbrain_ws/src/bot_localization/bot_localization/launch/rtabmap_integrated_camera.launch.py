@@ -21,11 +21,33 @@ def generate_launch_description():
     )
     database_path = LaunchConfiguration('database_path')
 
-    # Stereo camera publishes to absolute topics via <robot>_read.py:
+    # rgbd_sync subscribes to separate rgb/depth/camera_info topics and publishes
+    # a single synchronized RGBDImage topic consumed by rtabmap.
+    rgbd_sync_node = Node(
+        package='rtabmap_sync',
+        executable='rgbd_sync',
+        name='rgbd_sync',
+        namespace=robot_name,
+        output='screen',
+        parameters=[{
+            'approx_sync': True,
+            'approx_sync_max_interval': 0.1,
+            'queue_size': 10,
+            'use_sim_time': False
+        }],
+        remappings=[
+            ('rgb/image', '/rgb/image'),
+            ('depth/image', '/depth/image'),
+            ('rgb/camera_info', '/rgb/camera_info'),
+        ]
+    )
+
+    # Camera publishes to absolute topics via <robot>_read.py:
     #   /rgb/image        (sensor_msgs/Image)
     #   /depth/image      (sensor_msgs/Image)
     #   /rgb/camera_info  (sensor_msgs/CameraInfo)
     #   /odom             (nav_msgs/Odometry)
+    # rtabmap now consumes the synced rgbd_image from rgbd_sync.
     rtabmap_localization_node = Node(
         package='rtabmap_slam',
         executable='rtabmap',
@@ -34,8 +56,9 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {
-                "subscribe_depth": True,
-                "subscribe_rgb": True,
+                "subscribe_rgbd": True,
+                "subscribe_depth": False,
+                "subscribe_rgb": False,
                 "frame_id": f'{prefix}base_link',
                 "map_frame_id": f'{prefix}map',
                 "odom_frame_id": f'{prefix}odom',
@@ -66,15 +89,13 @@ def generate_launch_description():
             },
         ],
         remappings=[
-            # Publishes to absolute topics — remap with leading /
-            ("rgb/image", "/rgb/image"),
-            ("depth/image", "/depth/image"),
-            ("rgb/camera_info", "/rgb/camera_info"),
+            ("rgbd_image", "/rgbd_image"),
             ("odom", "/odom"),
         ]
     )
 
     return LaunchDescription([
         database_path_arg,
+        rgbd_sync_node,
         rtabmap_localization_node,
     ])

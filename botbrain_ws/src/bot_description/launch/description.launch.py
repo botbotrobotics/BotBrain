@@ -17,16 +17,7 @@ def generate_launch_description():
         config = yaml.safe_load(f)['robot_configuration']
     
     robot_name = config['robot_name']
-
-    robot_description_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('bot_description'),
-                'launch',
-                'robot_description.launch.py'
-            )
-        )
-    )
+    robot_model = config['robot_model']
 
     botbrain_description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -47,8 +38,20 @@ def generate_launch_description():
         output='screen'
     )
     
-    return LaunchDescription([
-        robot_description_launch,
+    launch_actions = []
+    if robot_model != 'k1':
+        robot_description_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('bot_description'),
+                    'launch',
+                    'robot_description.launch.py'
+                )
+            )
+        )
+        launch_actions.append(robot_description_launch)
+
+    return LaunchDescription(launch_actions + [
         botbrain_description_launch,
         botbrain_static_tf_node,
     ])

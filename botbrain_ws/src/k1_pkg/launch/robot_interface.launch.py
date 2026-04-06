@@ -88,7 +88,15 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_link_to_trunk',
-        arguments=['0', '0', '0', '0', '0', '0', f'{prefix}base_link', 'Trunk']
+        arguments=['0', '0', '0', '0', '0', '0', f'{prefix}base_link', 'trunk_link']
+    )
+
+    # Depth camera frame offset from head pitch link (85 mm up)
+    head_pitch_to_camera_depth = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='head_pitch_to_camera_depth_frame',
+        arguments=['0', '0', '0.085', '0', '0', '0', 'head_pitch_link', 'camera_link']
     )
 
     return LaunchDescription(
@@ -96,6 +104,7 @@ def generate_launch_description():
             k1_read_node,
             k1_write_node,
             base_link_to_trunk,
+            head_pitch_to_camera_depth,
 
             # Handlers
             # configure_handler_for_write,
