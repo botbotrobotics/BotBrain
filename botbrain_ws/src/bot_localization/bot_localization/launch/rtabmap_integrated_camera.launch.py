@@ -33,7 +33,9 @@ def generate_launch_description():
             'approx_sync': True,
             'approx_sync_max_interval': 0.1,
             'queue_size': 10,
-            'use_sim_time': False
+            'use_sim_time': False,
+            'qos_image': 2,        # BEST_EFFORT (matches k1_read.py stereo_qos)
+            'qos_camera_info': 2,  # BEST_EFFORT
         }],
         remappings=[
             ('rgb/image', '/rgb/image'),
@@ -81,6 +83,7 @@ def generate_launch_description():
                 'Mem/IncrementalMemory': 'False',
                 'Mem/InitWMWithAllNodes': 'True',
                 'Mem/DepthAsMask': 'False',
+                # 'Grid/NormalsSegmentation': 'false',  # avoid PCL segfault on degenerate depth
                 'Vis/MaxFeatures': '500',
                 'Vis/MinInliers': '10',
             },

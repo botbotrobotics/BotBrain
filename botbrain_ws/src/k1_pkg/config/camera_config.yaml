@@ -1,9 +1,9 @@
 camera_configuration:
   front: 
-    type: "d435i"
-    serial_number: "123"
-    parent_frame: "botbrain_base"
-    child_frame: "front_camera_link"
+    type: ""
+    serial_number: ""
+    parent_frame: ""
+    child_frame: ""
     tf:
       x: 0.08
       y: 0.0175
@@ -12,10 +12,10 @@ camera_configuration:
       pitch: 0
       yaw: 0
   back: 
-    type: "d435i"
-    serial_number: "123"
-    parent_frame: "botbrain_base"
-    child_frame: "back_camera_link"
+    type: ""
+    serial_number: ""
+    parent_frame: ""
+    child_frame: ""
     tf:
       x: -0.08
       y: -0.0175

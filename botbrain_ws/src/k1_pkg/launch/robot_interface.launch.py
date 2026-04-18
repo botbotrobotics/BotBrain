@@ -83,6 +83,25 @@ def generate_launch_description():
         )
     )
 
+    # Convert depth image to LaserScan for Nav2 costmaps and collision monitor
+    depth_to_scan_node = Node(
+        package='depthimage_to_laserscan',
+        executable='depthimage_to_laserscan_node',
+        namespace=robot_name,
+        name='depthimage_to_laserscan_front',
+        remappings=[
+            ('depth', '/depth/image'),
+            ('depth_camera_info', '/rgb/camera_info'),
+            ('scan', 'front_camera/scan'),
+        ],
+        parameters=[{
+            'range_max': 3.5,
+            'range_min': 0.3,
+            'scan_height': 3,
+            'output_frame': 'camera_link',
+        }]
+    )
+
     # Bridge odom→base_link (from k1_read) to Trunk (URDF root)
     base_link_to_trunk = Node(
         package='tf2_ros',
@@ -103,6 +122,7 @@ def generate_launch_description():
         [
             k1_read_node,
             k1_write_node,
+            depth_to_scan_node,
             base_link_to_trunk,
             head_pitch_to_camera_depth,
 

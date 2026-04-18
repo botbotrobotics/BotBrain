@@ -59,6 +59,6 @@ def generate_launch_description():
     return LaunchDescription([
         realsense_launch,
         rtabmap_launch,
-        rtabmap_manager_launch,
-        map_odom_launch,
+        rtabmap_manager_launch
+        # map_odom_launch,
     ])

@@ -19,14 +19,16 @@ services:
       - /dev:/dev
       - /run:/run
     environment:
-      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-      CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
+      FASTRTPS_DEFAULT_PROFILES_FILE: "/botbrain_ws/fastdds_profile.xml"
+      RMW_IMPLEMENTATION: ""
+      # CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
 
   dev:
     extends: base
     container_name: dev
     user: root
     command: ["bash", "-lc", "bash"]
+    cpuset: "4"
 
   builder_base:
     extends: base
@@ -46,7 +48,8 @@ services:
           bot_jetson_stats_interfaces \
           bot_rosa \
           g1_pkg \
-          go2w_pkg"]
+          go2w_pkg \
+          k1_pkg"]
 
   state_machine:
     extends: base
@@ -65,6 +68,13 @@ services:
     container_name: localization
     command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_localization localization.launch.py"]
     restart: always
+
+  map_odom:
+    extends: base
+    container_name: map_odom
+    command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_localization map_odom.launch.py"]
+    restart: always
+    cpuset: "4,5"
 
   navigation:
     extends: base
@@ -160,4 +170,5 @@ services:
       - .env
     command: npm run start
     restart: unless-stopped
+    cpuset: "4,5"
   

@@ -41,7 +41,7 @@ def generate_launch_description():
             target_action=state_machine,
             on_start=[  
                 TimerAction(  
-                    period=20.0, 
+                    period=30.0, 
                     actions=[  
                         EmitEvent(event=ChangeState(  
                             lifecycle_node_matcher=matches_action(state_machine),  

@@ -1,0 +1,14 @@
+# constants
+int8 PRESS_DOWN=0
+int8 PRESS_UP=1
+int8 SINGLE_CLICK=0
+int8 DOUBLE_CLICK=1
+int8 TRIPLE_CLICK=0
+int8 LONG_PRESS_START=1
+int8 LONG_PRESS_HOLD=0
+int8 LONG_PRESS_END=1
+
+
+# fields
+int8 event
+int32 button

@@ -8,6 +8,7 @@ from booster_interface.srv import RpcService
 from booster_interface.msg import BoosterApiReqMsg
 from bot_custom_interfaces.srv import Mode
 from geometry_msgs.msg import Twist
+from std_srvs.srv import Trigger
 import json
 import threading
 import time
@@ -22,13 +23,15 @@ class RobotWriteNode(LifecycleNode):
         self.cmd_vel_subscription = None
         self.rpc_client = None
         self.set_mode_srv = None
+        self.exit_wbc_gait_srv = None
 
         # Maps mode name -> RobotMode int (from robot_shared.hpp)
         self._mode_map = {
-            'damping': 0,   # kDamping
-            'prepare': 1,   # kPrepare (stand)
-            'walking': 2,   # kWalking (humanlike gait)
-            'soccer': 4,    # kSoccer (soccer gait)
+            'damping': 0,    # kDamping
+            'prepare': 1,    # kPrepare (stand)
+            'walking': 2,    # kWalking (humanlike gait)
+            'soccer': 4,     # kSoccer (soccer gait)
+            'old_gait': 5,   # kExitWBCGait
         }
 
         self.get_logger().info("RobotWriteNode created, in 'unconfigured' state.")
@@ -39,7 +42,7 @@ class RobotWriteNode(LifecycleNode):
         self.callback_group = ReentrantCallbackGroup()
 
         self.cmd_vel_subscription = self.create_subscription(
-            Twist, 'cmd_vel_out', self.cmd_vel_subscription_callback, 1,
+            Twist, '/cmd_vel_out', self.cmd_vel_subscription_callback, 1,
             callback_group=self.callback_group)
 
         self.rpc_client = self.create_client(
@@ -47,6 +50,9 @@ class RobotWriteNode(LifecycleNode):
 
         self.set_mode_srv = self.create_service(
             Mode, 'change_mode', self.handle_change_mode, callback_group=self.callback_group)
+
+        self.exit_wbc_gait_srv = self.create_service(
+            Trigger, 'exit_wbc_gait', self.handle_exit_wbc_gait, callback_group=self.callback_group)
 
         self.get_logger().info("Node configured successfully.")
         return TransitionCallbackReturn.SUCCESS
@@ -68,6 +74,7 @@ class RobotWriteNode(LifecycleNode):
         self.destroy_subscription(self.cmd_vel_subscription)
         self.destroy_client(self.rpc_client)
         self.destroy_service(self.set_mode_srv)
+        self.destroy_service(self.exit_wbc_gait_srv)
         self.get_logger().info("Node resources cleaned up.")
         return TransitionCallbackReturn.SUCCESS
 
@@ -105,9 +112,14 @@ class RobotWriteNode(LifecycleNode):
             response.message = f"Unknown mode '{request.mode}'. Valid: {list(self._mode_map.keys())}"
             return response
 
-        req_msg = BoosterApiReqMsg()
-        req_msg.api_id = 2000  # kChangeMode
-        req_msg.body = json.dumps({"mode": mode_int})
+        if mode_int == 5:  # kExitWBCGait
+            req_msg = BoosterApiReqMsg()
+            req_msg.api_id = 2036  # kExitWBCGait
+            req_msg.body = ""
+        else:
+            req_msg = BoosterApiReqMsg()
+            req_msg.api_id = 2000  # kChangeMode
+            req_msg.body = json.dumps({"mode": mode_int})
 
         rpc_request = RpcService.Request()
         rpc_request.msg = req_msg
@@ -119,6 +131,27 @@ class RobotWriteNode(LifecycleNode):
         if future.done() and future.result() is not None:
             response.success = True
             response.message = f"Mode changed to '{request.mode}'"
+        else:
+            response.success = False
+            response.message = "RPC call timed out or failed"
+        return response
+
+
+    def handle_exit_wbc_gait(self, request, response):
+        req_msg = BoosterApiReqMsg()
+        req_msg.api_id = 2036  # kExitWBCGait
+        req_msg.body = ""
+
+        rpc_request = RpcService.Request()
+        rpc_request.msg = req_msg
+        future = self.rpc_client.call_async(rpc_request)
+        event = threading.Event()
+        future.add_done_callback(lambda f: event.set())
+        event.wait(timeout=2.0)
+
+        if future.done() and future.result() is not None:
+            response.success = True
+            response.message = "Exited WBC gait"
         else:
             response.success = False
             response.message = "RPC call timed out or failed"

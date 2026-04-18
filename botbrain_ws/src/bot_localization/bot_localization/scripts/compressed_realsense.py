@@ -86,7 +86,7 @@ class RealsenseCompressedNode(LifecycleNode):
             # K1 has no back camera — use depth image instead
             self.subscription_back = self.create_subscription(
                 Image,
-                '/depth/image',
+                '/depth/visual',
                 self.depth_callback,
                 k1_qos
             )
@@ -204,35 +204,35 @@ class RealsenseCompressedNode(LifecycleNode):
     def depth_callback(self, msg):
         """Callback to process K1 depth image and publish as compressed colormap (used as back camera slot)."""
         try:
-            # Convert depth to float32 (handles 32FC1 and 16UC1 encodings)
-            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-            import numpy as np
-            if frame.dtype != np.float32:
-                frame = frame.astype(np.float32)
-
             self.get_logger().debug('Received and processing K1 depth image frame')
 
-            # Normalize depth to 0-255 (ignore NaN/inf)
-            valid = frame[np.isfinite(frame)]
-            if valid.size == 0:
-                return
-            d_min, d_max = valid.min(), valid.max()
-            if d_max - d_min < 1e-6:
-                return
-            normalized = np.clip((frame - d_min) / (d_max - d_min), 0.0, 1.0)
-            gray8 = (normalized * 255).astype(np.uint8)
-
-            # Apply colormap for better depth visualization
-            colored = cv2.applyColorMap(gray8, cv2.COLORMAP_INFERNO)
-
-            # Resize and compress
-            small_frame = cv2.resize(colored, (640, 360))
-            ret_enc, jpeg = cv2.imencode('.jpg', small_frame, [cv2.IMWRITE_JPEG_QUALITY, 20])
+            if msg.encoding in ('bgr8', 'rgb8', 'bgra8', 'rgba8'):
+                # stereonet_visual: top half = raw, bottom half = depth colormap — crop bottom only
+                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                frame = frame[frame.shape[0] // 2:, :]
+                small_frame = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
+                ret_enc, jpeg = cv2.imencode('.jpg', small_frame, [cv2.IMWRITE_JPEG_QUALITY, 20])
+            else:
+                # Raw depth (32FC1 / 16UC1): normalize and apply colormap
+                import numpy as np
+                frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+                if frame.dtype != np.float32:
+                    frame = frame.astype(np.float32)
+                valid = frame[np.isfinite(frame)]
+                if valid.size == 0:
+                    return
+                d_min, d_max = valid.min(), valid.max()
+                if d_max - d_min < 1e-6:
+                    return
+                normalized = np.clip((frame - d_min) / (d_max - d_min), 0.0, 1.0)
+                gray8 = (normalized * 255).astype(np.uint8)
+                colored = cv2.applyColorMap(gray8, cv2.COLORMAP_INFERNO)
+                small_frame = cv2.resize(colored, (640, 360), interpolation=cv2.INTER_AREA)
+                ret_enc, jpeg = cv2.imencode('.jpg', small_frame, [cv2.IMWRITE_JPEG_QUALITY, 20])
 
             if ret_enc:
-                # Create compressed image message
                 comp_msg = CompressedImage()
-                comp_msg.header = msg.header  # Keep original timestamp and frame_id
+                comp_msg.header = msg.header
                 comp_msg.format = "jpeg"
                 comp_msg.data = jpeg.tobytes()
                 self.publisher_compressed_back.publish(comp_msg)

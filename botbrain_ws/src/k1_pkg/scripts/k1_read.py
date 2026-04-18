@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 import math
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
-from booster_interface.msg import Odometer, LowState, ImuState, BatteryState as BoosterBatteryState
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
+from booster_interface.msg import Odometer, LowState, BatteryState as BoosterBatteryState
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Imu, PointCloud2, BatteryState, Image, CameraInfo
-from rclpy.qos import qos_profile_sensor_data, QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
-from std_msgs.msg import Float32
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from sensor_msgs.msg import Imu, BatteryState, Image, CameraInfo
+from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
-import numpy as np
-import cv2
-from cv_bridge import CvBridge
+# cv2, numpy, cv_bridge are imported lazily in on_configure() to avoid
+# blocking the node from reaching 'unconfigured' before the state machine connects.
 
 class RobotRead(LifecycleNode):
 
@@ -27,6 +26,7 @@ class RobotRead(LifecycleNode):
         self.stereo_rgb_subscriber = None
         self.stereo_depth_subscriber = None
         self.stereo_info_subscriber = None
+        self.stereo_visual_subscriber = None
         self.battery_subscriber = None
 
         self.tf_broadcaster = None
@@ -37,23 +37,37 @@ class RobotRead(LifecycleNode):
         self.stereo_rgb_pub = None
         self.stereo_depth_pub = None
         self.stereo_info_pub = None
+        self.stereo_visual_pub = None
 
-        self.bridge = CvBridge()
+        self.bridge = None
+        self._last_rgb_time = 0.0
+        self._rgb_min_interval = 1.0 / 10.0  # max 10 fps for CPU-heavy NV12 decode
+        self._last_depth_time = 0.0
+        self._depth_min_interval = 1.0 / 10.0  # max 10 fps, sufficient for Nav2 costmaps
         self.get_logger().info("Lifecycle node created, in 'unconfigured' state.")
 
     def on_configure(self, state: rclpy.lifecycle.State) -> TransitionCallbackReturn:
 
         self.get_logger().info("on_configure() is called.")
 
+        # cv2/numpy/cv_bridge are heavy C-extensions — deferred until configure so
+        # the node advertises its lifecycle services before spending time on imports.
+        import numpy as np
+        import cv2
+        from cv_bridge import CvBridge
+        self._np = np
+        self._cv2 = cv2
+        self.bridge = CvBridge()
+
         # Get the parameter value now that the node is being configured.
         self.prefix = self.get_parameter('prefix').value
         self.get_logger().info(f"Using prefix: '{self.prefix}'")
         
         stereo_qos = QoSProfile(
-            reliability=ReliabilityPolicy.RELIABLE,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
             durability=DurabilityPolicy.VOLATILE,
             history=HistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=1
         )
 
         # Create subscribers
@@ -62,6 +76,7 @@ class RobotRead(LifecycleNode):
         self.stereo_rgb_subscriber = self.create_subscription(Image, '/StereoNetNode/rectified_image', self.stereo_rgb_callback, stereo_qos)
         self.stereo_depth_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_depth', self.stereo_depth_callback, stereo_qos)
         self.stereo_info_subscriber = self.create_subscription(CameraInfo, '/StereoNetNode/stereonet_depth/camera_info', self.stereo_info_callback, stereo_qos)
+        self.stereo_visual_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_visual', self.stereo_visual_callback, stereo_qos)
         self.battery_subscriber = self.create_subscription(BoosterBatteryState, '/battery_state', self.battery_callback, 1)
         
         # Create TF broadcaster
@@ -71,9 +86,10 @@ class RobotRead(LifecycleNode):
         self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
         self.imu_pub = self.create_publisher(Imu, '/imu/data', 10)
         self.battery_pub = self.create_publisher(BatteryState, '/battery', 1)
-        self.stereo_rgb_pub = self.create_publisher(Image, '/rgb/image', qos_profile_sensor_data)
-        self.stereo_depth_pub = self.create_publisher(Image, '/depth/image', qos_profile_sensor_data)
-        self.stereo_info_pub = self.create_publisher(CameraInfo, '/rgb/camera_info', qos_profile_sensor_data)
+        self.stereo_rgb_pub = self.create_publisher(Image, '/rgb/image', stereo_qos)
+        self.stereo_depth_pub = self.create_publisher(Image, '/depth/image', stereo_qos)
+        self.stereo_info_pub = self.create_publisher(CameraInfo, '/rgb/camera_info', stereo_qos)
+        self.stereo_visual_pub = self.create_publisher(Image, '/depth/visual', stereo_qos)
 
         self.get_logger().info("Node configured successfully.")
         return TransitionCallbackReturn.SUCCESS
@@ -102,6 +118,7 @@ class RobotRead(LifecycleNode):
         self.destroy_subscription(self.stereo_rgb_subscriber)
         self.destroy_subscription(self.stereo_depth_subscriber)
         self.destroy_subscription(self.stereo_info_subscriber)
+        self.destroy_subscription(self.stereo_visual_subscriber)
         self.destroy_subscription(self.battery_subscriber)
 
         self.tf_broadcaster = None
@@ -112,6 +129,7 @@ class RobotRead(LifecycleNode):
         self.destroy_publisher(self.stereo_rgb_pub)
         self.destroy_publisher(self.stereo_depth_pub)
         self.destroy_publisher(self.stereo_info_pub)
+        self.destroy_publisher(self.stereo_visual_pub)
         
         self.get_logger().info("Node cleaned up successfully.")
         return TransitionCallbackReturn.SUCCESS
@@ -190,12 +208,17 @@ class RobotRead(LifecycleNode):
         self.imu_pub.publish(imu)
 
     def stereo_rgb_callback(self, msg: Image):
+        now = self.get_clock().now().nanoseconds * 1e-9
+        if now - self._last_rgb_time < self._rgb_min_interval:
+            return  # drop frame to reduce CPU load
+        self._last_rgb_time = now
+
         if msg.encoding.lower() == 'nv12':
             # NV12 is YUV 4:2:0 semi-planar; height of the NV12 buffer is h*3//2
             h = msg.height
             w = msg.width
-            yuv = np.frombuffer(msg.data, dtype=np.uint8).reshape((h * 3 // 2, w))
-            rgb = cv2.cvtColor(yuv, cv2.COLOR_YUV2RGB_NV12)
+            yuv = self._np.frombuffer(msg.data, dtype=self._np.uint8).reshape((h * 3 // 2, w))
+            rgb = self._cv2.cvtColor(yuv, self._cv2.COLOR_YUV2RGB_NV12)
             out = self.bridge.cv2_to_imgmsg(rgb, encoding='rgb8')
             out.header = msg.header
             self.stereo_rgb_pub.publish(out)
@@ -203,10 +226,19 @@ class RobotRead(LifecycleNode):
             self.stereo_rgb_pub.publish(msg)
 
     def stereo_depth_callback(self, msg: Image):
+        now = self.get_clock().now().nanoseconds * 1e-9
+        if now - self._last_depth_time < self._depth_min_interval:
+            return
+        self._last_depth_time = now
+        if msg.encoding == 'mono16':
+            msg.encoding = '16UC1'
         self.stereo_depth_pub.publish(msg)
 
     def stereo_info_callback(self, msg: CameraInfo):
         self.stereo_info_pub.publish(msg)
+
+    def stereo_visual_callback(self, msg: Image):
+        self.stereo_visual_pub.publish(msg)
 
     def battery_callback(self, msg: BoosterBatteryState):
         battery = BatteryState()
