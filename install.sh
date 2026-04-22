@@ -159,12 +159,13 @@ fi
 
 # Robot model selection page
 ROBOT_MODEL=$(dialog --title "Robot Model Selection" \
-                     --menu "\nSelect your robot model:" 15 70 5 \
+                     --menu "\nSelect your robot model:" 16 70 6 \
                      "go2" "Unitree Go2" \
                      "go2w" "Unitree Go2W" \
                      "g1" "Unitree G1" \
                      "g1-internal" "Unitree G1 Internal Jetson" \
                      "tita" "Tita" \
+                     "k1" "Booster K1" \
                      "other" "Custom Robot" \
                      3>&1 1>&2 2>&3)
 
@@ -219,30 +220,15 @@ if [ "$ROBOT_MODEL" = "g1-internal" ]; then
 fi
 
 # Description file type selection page
-DESCRIPTION_TYPE=$(dialog --title "Description File Type" \
-                          --menu "\nSelect the robot description file format:" 15 70 2 \
-                          "xacro" "Xacro (XML Macros for URDF)" \
-                          "urdf" "URDF (Unified Robot Description Format)" \
-                          3>&1 1>&2 2>&3)
-
-# Check if user cancelled
-if [ $? -ne 0 ]; then
-    clear
-    echo "Installation cancelled by user."
-    exit 1
-fi
-
-echo "Selected description file type: $DESCRIPTION_TYPE"
-
-# Robot name configuration page
-dialog --title "Robot Name Configuration" \
-       --yesno "\nWould you like to set a custom name for your robot?\n\nThis name will be used as the namespace for:\n- ROS2 Topics\n- Services\n- Actions\n- Nodes\n- And other robot-specific identifiers\n\nIf you skip this step, no custom namespace will be set." 15 70
-
-if [ $? -eq 0 ]; then
-    # User selected Yes
-    ROBOT_NAME=$(dialog --title "Robot Name" \
-                        --inputbox "\nEnter a name for your robot:\n\n(Use lowercase letters, numbers, and underscores only)" 12 70 \
-                        3>&1 1>&2 2>&3)
+if [ "$ROBOT_MODEL" = "k1" ]; then
+    DESCRIPTION_TYPE="urdf"
+    echo "K1: description file type set to urdf (auto)"
+else
+    DESCRIPTION_TYPE=$(dialog --title "Description File Type" \
+                              --menu "\nSelect the robot description file format:" 15 70 2 \
+                              "xacro" "Xacro (XML Macros for URDF)" \
+                              "urdf" "URDF (Unified Robot Description Format)" \
+                              3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
         clear
@@ -250,55 +236,50 @@ if [ $? -eq 0 ]; then
         exit 1
     fi
 
-    echo "Robot name: $ROBOT_NAME"
-else
-    # User selected No
+    echo "Selected description file type: $DESCRIPTION_TYPE"
+fi
+
+# Robot name configuration page
+if [ "$ROBOT_MODEL" = "k1" ]; then
     ROBOT_NAME=""
-    echo "No robot name set."
+    echo "K1: no custom namespace (auto)"
+else
+    dialog --title "Robot Name Configuration" \
+           --yesno "\nWould you like to set a custom name for your robot?\n\nThis name will be used as the namespace for:\n- ROS2 Topics\n- Services\n- Actions\n- Nodes\n- And other robot-specific identifiers\n\nIf you skip this step, no custom namespace will be set." 15 70
+
+    if [ $? -eq 0 ]; then
+        ROBOT_NAME=$(dialog --title "Robot Name" \
+                            --inputbox "\nEnter a name for your robot:\n\n(Use lowercase letters, numbers, and underscores only)" 12 70 \
+                            3>&1 1>&2 2>&3)
+
+        if [ $? -ne 0 ]; then
+            clear
+            echo "Installation cancelled by user."
+            exit 1
+        fi
+
+        echo "Robot name: $ROBOT_NAME"
+    else
+        ROBOT_NAME=""
+        echo "No robot name set."
+    fi
 fi
 
 # Network interface selection page
-# Get list of available network interfaces (works on both Linux and macOS)
-if [ "$(uname)" = "Darwin" ]; then
-    # macOS: ifconfig -l lists all interfaces in one line
-    INTERFACES=$(ifconfig -l | tr ' ' '\n' | grep -v "lo0" | awk '{printf "%s \"%s\" ", $1, $1}')
+if [ "$ROBOT_MODEL" = "k1" ]; then
+    NETWORK_INTERFACE="usb_eth0"
+    echo "K1: network interface set to usb_eth0 (auto)"
 else
-    # Linux: parse ifconfig output
-    INTERFACES=$(ifconfig -a | grep -E "^[a-z]" | awk '{print $1}' | sed 's/://g' | grep -v "lo" | awk '{printf "%s \"%s\" ", $1, $1}')
-fi
-
-if [ -z "$INTERFACES" ]; then
-    # If no interfaces found, allow manual entry
-    NETWORK_INTERFACE=$(dialog --title "Network Interface Configuration" \
-                               --inputbox "\nNo network interfaces detected.\n\nPlease enter the network interface name manually:" 12 70 \
-                               3>&1 1>&2 2>&3)
-
-    if [ $? -ne 0 ]; then
-        clear
-        echo "Installation cancelled by user."
-        exit 1
-    fi
-else
-    # Add "custom" option to the menu
-    INTERFACES="$INTERFACES custom \"Enter custom interface name\""
-
-    # Create the menu dynamically with available interfaces
-    eval "NETWORK_INTERFACE=\$(dialog --title \"Network Interface Selection\" \
-                                      --menu \"\nSelect the network interface for ROS2 communication:\n\nThis interface will be used for DDS communication.\" 18 70 8 \
-                                      $INTERFACES \
-                                      3>&1 1>&2 2>&3)"
-
-    # Check if user cancelled
-    if [ $? -ne 0 ]; then
-        clear
-        echo "Installation cancelled by user."
-        exit 1
+    # Get list of available network interfaces (works on both Linux and macOS)
+    if [ "$(uname)" = "Darwin" ]; then
+        INTERFACES=$(ifconfig -l | tr ' ' '\n' | grep -v "lo0" | awk '{printf "%s \"%s\" ", $1, $1}')
+    else
+        INTERFACES=$(ifconfig -a | grep -E "^[a-z]" | awk '{print $1}' | sed 's/://g' | grep -v "lo" | awk '{printf "%s \"%s\" ", $1, $1}')
     fi
 
-    # If user selected custom, prompt for manual entry
-    if [ "$NETWORK_INTERFACE" = "custom" ]; then
-        NETWORK_INTERFACE=$(dialog --title "Custom Network Interface" \
-                                   --inputbox "\nEnter the network interface name:" 10 70 \
+    if [ -z "$INTERFACES" ]; then
+        NETWORK_INTERFACE=$(dialog --title "Network Interface Configuration" \
+                                   --inputbox "\nNo network interfaces detected.\n\nPlease enter the network interface name manually:" 12 70 \
                                    3>&1 1>&2 2>&3)
 
         if [ $? -ne 0 ]; then
@@ -306,10 +287,35 @@ else
             echo "Installation cancelled by user."
             exit 1
         fi
-    fi
-fi
+    else
+        INTERFACES="$INTERFACES custom \"Enter custom interface name\""
 
-echo "Selected network interface: $NETWORK_INTERFACE"
+        eval "NETWORK_INTERFACE=\$(dialog --title \"Network Interface Selection\" \
+                                          --menu \"\nSelect the network interface for ROS2 communication:\n\nThis interface will be used for DDS communication.\" 18 70 8 \
+                                          $INTERFACES \
+                                          3>&1 1>&2 2>&3)"
+
+        if [ $? -ne 0 ]; then
+            clear
+            echo "Installation cancelled by user."
+            exit 1
+        fi
+
+        if [ "$NETWORK_INTERFACE" = "custom" ]; then
+            NETWORK_INTERFACE=$(dialog --title "Custom Network Interface" \
+                                       --inputbox "\nEnter the network interface name:" 10 70 \
+                                       3>&1 1>&2 2>&3)
+
+            if [ $? -ne 0 ]; then
+                clear
+                echo "Installation cancelled by user."
+                exit 1
+            fi
+        fi
+    fi
+
+    echo "Selected network interface: $NETWORK_INTERFACE"
+fi
 
 # Wi-Fi interface selection page
 # Get list of available network interfaces (works on both Linux and macOS)
@@ -391,26 +397,29 @@ echo "Wi-Fi SSID: $WIFI_SSID"
 echo "Wi-Fi Password: [hidden]"
 
 # OpenAI API Key configuration page
-dialog --title "OpenAI API Key Configuration" \
-       --yesno "\nWould you like to configure an OpenAI API key?\n\nThis is optional and can be used for GPT-powered features in your robot.\n\nYou can skip this step and configure it later in robot_config.yaml if needed." 12 70
-
-if [ $? -eq 0 ]; then
-    # User selected Yes
-    OPENAI_API_KEY=$(dialog --title "OpenAI API Key" \
-                            --inputbox "\nEnter your OpenAI API key:\n\n(You can find this at https://platform.openai.com/api-keys)" 12 70 \
-                            3>&1 1>&2 2>&3)
-
-    if [ $? -ne 0 ]; then
-        clear
-        echo "Installation cancelled by user."
-        exit 1
-    fi
-
-    echo "OpenAI API key configured"
-else
-    # User selected No
+if [ "$ROBOT_MODEL" = "k1" ]; then
     OPENAI_API_KEY=""
-    echo "OpenAI API key skipped"
+    echo "K1: OpenAI API key skipped (auto)"
+else
+    dialog --title "OpenAI API Key Configuration" \
+           --yesno "\nWould you like to configure an OpenAI API key?\n\nThis is optional and can be used for GPT-powered features in your robot.\n\nYou can skip this step and configure it later in robot_config.yaml if needed." 12 70
+
+    if [ $? -eq 0 ]; then
+        OPENAI_API_KEY=$(dialog --title "OpenAI API Key" \
+                                --inputbox "\nEnter your OpenAI API key:\n\n(You can find this at https://platform.openai.com/api-keys)" 12 70 \
+                                3>&1 1>&2 2>&3)
+
+        if [ $? -ne 0 ]; then
+            clear
+            echo "Installation cancelled by user."
+            exit 1
+        fi
+
+        echo "OpenAI API key configured"
+    else
+        OPENAI_API_KEY=""
+        echo "OpenAI API key skipped"
+    fi
 fi
 
 # Supabase configuration page
@@ -466,29 +475,21 @@ EOF
     echo "Created .env file with placeholder credentials at $ENV_FILE"
 fi
 
-# Front camera selection page
-FRONT_CAMERA=$(dialog --title "Front Camera Selection" \
-                      --menu "\nSelect the front camera model:" 16 70 4 \
-                      "d435i" "Intel RealSense D435i" \
-                      "d455" "Intel RealSense D455" \
-                      "d555" "Intel RealSense D555" \
-                      "none" "No front camera" \
-                      3>&1 1>&2 2>&3)
-
-# Check if user cancelled
-if [ $? -ne 0 ]; then
-    clear
-    echo "Installation cancelled by user."
-    exit 1
-fi
-
-echo "Selected front camera: $FRONT_CAMERA"
-
-# If front camera is not "none", ask for serial number
-FRONT_SERIAL=""
-if [ "$FRONT_CAMERA" != "none" ]; then
-    FRONT_SERIAL=$(dialog --title "Front Camera Serial Number" \
-                          --inputbox "\nEnter the serial number for the front camera:\n\n(You can find this on the camera label or using 'rs-enumerate-devices')" 12 70 \
+# Front and rear camera selection
+if [ "$ROBOT_MODEL" = "k1" ]; then
+    FRONT_CAMERA="none"
+    FRONT_SERIAL=""
+    REAR_CAMERA="none"
+    REAR_SERIAL=""
+    echo "K1: camera configuration skipped (robot uses its own cameras)"
+else
+    # Front camera selection page
+    FRONT_CAMERA=$(dialog --title "Front Camera Selection" \
+                          --menu "\nSelect the front camera model:" 16 70 4 \
+                          "d435i" "Intel RealSense D435i" \
+                          "d455" "Intel RealSense D455" \
+                          "d555" "Intel RealSense D555" \
+                          "none" "No front camera" \
                           3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
@@ -497,32 +498,31 @@ if [ "$FRONT_CAMERA" != "none" ]; then
         exit 1
     fi
 
-    echo "Front camera serial number: $FRONT_SERIAL"
-fi
+    echo "Selected front camera: $FRONT_CAMERA"
 
-# Rear camera selection page
-REAR_CAMERA=$(dialog --title "Rear Camera Selection" \
-                     --menu "\nSelect the rear camera model:" 16 70 4 \
-                     "d435i" "Intel RealSense D435i" \
-                     "d455" "Intel RealSense D455" \
-                     "d555" "Intel RealSense D555" \
-                     "none" "No rear camera" \
-                     3>&1 1>&2 2>&3)
+    # If front camera is not "none", ask for serial number
+    FRONT_SERIAL=""
+    if [ "$FRONT_CAMERA" != "none" ]; then
+        FRONT_SERIAL=$(dialog --title "Front Camera Serial Number" \
+                              --inputbox "\nEnter the serial number for the front camera:\n\n(You can find this on the camera label or using 'rs-enumerate-devices')" 12 70 \
+                              3>&1 1>&2 2>&3)
 
-# Check if user cancelled
-if [ $? -ne 0 ]; then
-    clear
-    echo "Installation cancelled by user."
-    exit 1
-fi
+        if [ $? -ne 0 ]; then
+            clear
+            echo "Installation cancelled by user."
+            exit 1
+        fi
 
-echo "Selected rear camera: $REAR_CAMERA"
+        echo "Front camera serial number: $FRONT_SERIAL"
+    fi
 
-# If rear camera is not "none", ask for serial number
-REAR_SERIAL=""
-if [ "$REAR_CAMERA" != "none" ]; then
-    REAR_SERIAL=$(dialog --title "Rear Camera Serial Number" \
-                         --inputbox "\Enter the serial number for the rear camera:\n\n(You can find this on the camera label or using 'rs-enumerate-devices')" 12 70 \
+    # Rear camera selection page
+    REAR_CAMERA=$(dialog --title "Rear Camera Selection" \
+                         --menu "\nSelect the rear camera model:" 16 70 4 \
+                         "d435i" "Intel RealSense D435i" \
+                         "d455" "Intel RealSense D455" \
+                         "d555" "Intel RealSense D555" \
+                         "none" "No rear camera" \
                          3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
@@ -531,32 +531,45 @@ if [ "$REAR_CAMERA" != "none" ]; then
         exit 1
     fi
 
-    echo "Rear camera serial number: $REAR_SERIAL"
-fi
+    echo "Selected rear camera: $REAR_CAMERA"
 
-# Update camera_config.yaml in the selected robot package
-CAMERA_CONFIG_FILE="botbrain_ws/src/${ROBOT_MODEL}_pkg/config/camera_config.yaml"
-
-if [ -f "$CAMERA_CONFIG_FILE" ]; then
-    # Update front camera type if not "none"
-    if [ "$FRONT_CAMERA" != "none" ]; then
-        sed -i.bak "s/\(front:.*\)/\1/" "$CAMERA_CONFIG_FILE"
-        sed -i.bak "/front:/,/type:/ s/type: \".*\"/type: \"$FRONT_CAMERA\"/" "$CAMERA_CONFIG_FILE"
-        sed -i.bak "/front:/,/serial_number:/ s/serial_number: \".*\"/serial_number: \"$FRONT_SERIAL\"/" "$CAMERA_CONFIG_FILE"
-        echo "Updated front camera configuration in $CAMERA_CONFIG_FILE"
-    fi
-
-    # Update rear camera type if not "none"
+    # If rear camera is not "none", ask for serial number
+    REAR_SERIAL=""
     if [ "$REAR_CAMERA" != "none" ]; then
-        sed -i.bak "/back:/,/type:/ s/type: \".*\"/type: \"$REAR_CAMERA\"/" "$CAMERA_CONFIG_FILE"
-        sed -i.bak "/back:/,/serial_number:/ s/serial_number: \".*\"/serial_number: \"$REAR_SERIAL\"/" "$CAMERA_CONFIG_FILE"
-        echo "Updated rear camera configuration in $CAMERA_CONFIG_FILE"
+        REAR_SERIAL=$(dialog --title "Rear Camera Serial Number" \
+                             --inputbox "\Enter the serial number for the rear camera:\n\n(You can find this on the camera label or using 'rs-enumerate-devices')" 12 70 \
+                             3>&1 1>&2 2>&3)
+
+        if [ $? -ne 0 ]; then
+            clear
+            echo "Installation cancelled by user."
+            exit 1
+        fi
+
+        echo "Rear camera serial number: $REAR_SERIAL"
     fi
 
-    # Deletes backup file
-    rm -f "${CAMERA_CONFIG_FILE}.bak"
-else
-    echo "Warning: $CAMERA_CONFIG_FILE not found. Skipping camera configuration."
+    # Update camera_config.yaml in the selected robot package
+    CAMERA_CONFIG_FILE="botbrain_ws/src/${ROBOT_MODEL}_pkg/config/camera_config.yaml"
+
+    if [ -f "$CAMERA_CONFIG_FILE" ]; then
+        if [ "$FRONT_CAMERA" != "none" ]; then
+            sed -i.bak "s/\(front:.*\)/\1/" "$CAMERA_CONFIG_FILE"
+            sed -i.bak "/front:/,/type:/ s/type: \".*\"/type: \"$FRONT_CAMERA\"/" "$CAMERA_CONFIG_FILE"
+            sed -i.bak "/front:/,/serial_number:/ s/serial_number: \".*\"/serial_number: \"$FRONT_SERIAL\"/" "$CAMERA_CONFIG_FILE"
+            echo "Updated front camera configuration in $CAMERA_CONFIG_FILE"
+        fi
+
+        if [ "$REAR_CAMERA" != "none" ]; then
+            sed -i.bak "/back:/,/type:/ s/type: \".*\"/type: \"$REAR_CAMERA\"/" "$CAMERA_CONFIG_FILE"
+            sed -i.bak "/back:/,/serial_number:/ s/serial_number: \".*\"/serial_number: \"$REAR_SERIAL\"/" "$CAMERA_CONFIG_FILE"
+            echo "Updated rear camera configuration in $CAMERA_CONFIG_FILE"
+        fi
+
+        rm -f "${CAMERA_CONFIG_FILE}.bak"
+    else
+        echo "Warning: $CAMERA_CONFIG_FILE not found. Skipping camera configuration."
+    fi
 fi
 
 # Update cyclonedds_config.xml with selected network interface

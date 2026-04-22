@@ -35,23 +35,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/AgentService.srv"
 )
 
-include("${CMAKE_CURRENT_LIST_DIR}/../.workflow/project-defined.cmake")
-
-
 # 安装头文件
 install(DIRECTORY include/
         DESTINATION include/
 )
-
-macro(default_install_none)
-endmacro()
-
-macro(custom_install_env)
-  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-endmacro()
-
-set(CUSTOM_VAR_LIB_BINARY_INSTALL "1")
-closure_import_install_project(default_install_none custom_install_env)
 
 
 # 导出依赖
