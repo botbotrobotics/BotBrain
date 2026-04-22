@@ -10,8 +10,8 @@ RemainAfterExit=yes
 User=root
 WorkingDirectory=BOTBRAIN_WORKSPACE_PATH
 ExecStartPre=/bin/bash -c 'while ! ip route | grep -q "default via"; do echo "Waiting for a default network route..."; sleep 1; done'
-ExecStart=/bin/bash -c "source ./botbrain_ws/robot_select.sh && /usr/bin/docker compose up dev bringup localization map_odom navigation rosa yolo jetson_stats state_machine -d"
-ExecStop=/usr/bin/docker compose stop dev bringup localization map_odom navigation rosa yolo jetson_stats state_machine
+ExecStart=/bin/bash -c "source ./botbrain_ws/robot_select.sh && /usr/bin/docker compose up dev bringup localization map_odom navigation jetson_stats state_machine -d"
+ExecStop=/usr/bin/docker compose stop dev bringup localization map_odom navigation jetson_stats state_machine
 Restart=on-failure
 RestartSec=3
 
