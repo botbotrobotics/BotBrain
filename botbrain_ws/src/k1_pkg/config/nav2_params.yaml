@@ -58,7 +58,7 @@
 
 /**/controller_server:
   ros__parameters:
-    controller_frequency: 10.0
+    controller_frequency: 5.0
     costmap_update_timeout: 0.30
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
@@ -81,7 +81,7 @@
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
       time_steps: 40
-      model_dt: 0.1
+      model_dt: 0.2
       batch_size: 1500
       ax_max: 0.5
       ax_min: -1.0
@@ -360,7 +360,7 @@
     global_costmap_topic: /<prefix>global_costmap/costmap_raw
     local_footprint_topic: /<prefix>local_costmap/published_footprint
     global_footprint_topic: /<prefix>global_costmap/published_footprint
-    cycle_frequency: 10.0
+    cycle_frequency: 5.0
     behavior_plugins:
       ["spin", "backup", "drive_on_heading", "assisted_teleop", "wait"]
     spin:

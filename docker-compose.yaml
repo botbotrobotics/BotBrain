@@ -16,10 +16,12 @@ services:
               capabilities: [gpu]
     volumes:
       - ./botbrain_ws/:/botbrain_ws
+      - /opt/booster:/opt/booster:ro
       - /dev:/dev
       - /run:/run
     environment:
       FASTRTPS_DEFAULT_PROFILES_FILE: "/botbrain_ws/fastdds_profile.xml"
+      RMW_FASTRTPS_PUBLICATION_MODE: "ASYNCHRONOUS"
       RMW_IMPLEMENTATION: ""
       # CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
 

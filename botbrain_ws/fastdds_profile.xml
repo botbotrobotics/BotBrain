@@ -7,8 +7,9 @@
             <interfaceWhiteList>
                 <address>127.0.0.1</address>
                 <address>192.168.127.101</address>
-                <!-- <address>192.168.10.102</address>  -->
+                <address>192.168.10.200</address>
             </interfaceWhiteList>
+                <non_blocking_send>true</non_blocking_send>
         </transport_descriptor>
 
         <transport_descriptor>
@@ -25,13 +26,25 @@
                 <transport_id>shm_transport</transport_id>
             </userTransports>
             <useBuiltinTransports>false</useBuiltinTransports>
+              <builtin>
+                  <discovery_config>
+                      <!-- FIX: evict the notebook participant 10s after cable pull
+                           so its locators are removed from the routing table -->
+                      <leaseDuration>
+                          <sec>10</sec>
+                      </leaseDuration>
+                      <leaseAnnouncement>
+                          <sec>3</sec>
+                      </leaseAnnouncement>
+                  </discovery_config>
+              </builtin>
         </rtps>
     </participant>
 
     <publisher profile_name="default publisher profile" is_default_profile="true">
         <qos>
             <data_sharing>
-                <kind>OFF</kind>
+                <kind>AUTOMATIC</kind>
             </data_sharing>
         </qos>
     </publisher>
@@ -39,7 +52,7 @@
     <subscriber profile_name="default subscription profile" is_default_profile="true">
         <qos>
             <data_sharing>
-                <kind>OFF</kind>
+                <kind>AUTOMATIC</kind>
             </data_sharing>
         </qos>
     </subscriber>
