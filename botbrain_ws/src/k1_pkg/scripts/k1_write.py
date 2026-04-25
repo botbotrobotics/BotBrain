@@ -105,30 +105,35 @@ class RobotWriteNode(LifecycleNode):
         except Exception as e:
             self.get_logger().error(f'Move RPC call raised exception: {e}')
 
+    def _call_rpc(self, req_msg, timeout=2.0):
+        rpc_request = RpcService.Request()
+        rpc_request.msg = req_msg
+        future = self.rpc_client.call_async(rpc_request)
+        event = threading.Event()
+        future.add_done_callback(lambda f: event.set())
+        if not event.wait(timeout=timeout):
+            self.get_logger().warn('RPC call timed out')
+            return None
+        return future.result()
+
     def handle_change_mode(self, request, response):
+        self.get_logger().info(f"[change_mode] Received request: mode='{request.mode}'")
         mode_int = self._mode_map.get(request.mode.lower())
         if mode_int is None:
             response.success = False
             response.message = f"Unknown mode '{request.mode}'. Valid: {list(self._mode_map.keys())}"
             return response
 
+        req_msg = BoosterApiReqMsg()
         if mode_int == 5:  # kExitWBCGait
-            req_msg = BoosterApiReqMsg()
-            req_msg.api_id = 2036  # kExitWBCGait
+            req_msg.api_id = 2036
             req_msg.body = ""
         else:
-            req_msg = BoosterApiReqMsg()
             req_msg.api_id = 2000  # kChangeMode
             req_msg.body = json.dumps({"mode": mode_int})
 
-        rpc_request = RpcService.Request()
-        rpc_request.msg = req_msg
-        future = self.rpc_client.call_async(rpc_request)
-        event = threading.Event()
-        future.add_done_callback(lambda f: event.set())
-        event.wait(timeout=2.0)
-
-        if future.done() and future.result() is not None:
+        result = self._call_rpc(req_msg)
+        if result is not None:
             response.success = True
             response.message = f"Mode changed to '{request.mode}'"
         else:
@@ -136,20 +141,13 @@ class RobotWriteNode(LifecycleNode):
             response.message = "RPC call timed out or failed"
         return response
 
-
     def handle_exit_wbc_gait(self, request, response):
         req_msg = BoosterApiReqMsg()
         req_msg.api_id = 2036  # kExitWBCGait
         req_msg.body = ""
 
-        rpc_request = RpcService.Request()
-        rpc_request.msg = req_msg
-        future = self.rpc_client.call_async(rpc_request)
-        event = threading.Event()
-        future.add_done_callback(lambda f: event.set())
-        event.wait(timeout=2.0)
-
-        if future.done() and future.result() is not None:
+        result = self._call_rpc(req_msg)
+        if result is not None:
             response.success = True
             response.message = "Exited WBC gait"
         else:

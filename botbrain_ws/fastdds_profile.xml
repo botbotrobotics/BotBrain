@@ -7,7 +7,7 @@
             <interfaceWhiteList>
                 <address>127.0.0.1</address>
                 <address>192.168.127.101</address>
-                <address>192.168.10.200</address>
+    			<!-- <address>192.168.10.200</address> -->
             </interfaceWhiteList>
                 <non_blocking_send>true</non_blocking_send>
         </transport_descriptor>

@@ -2,8 +2,7 @@
 
 IP="$1"
 
-PROFILE_SHM="/opt/booster/BoosterRos2/fastdds_profile.xml"
-PROFILE_UDP="/opt/booster/BoosterRos2/fastdds_profile_udp_only.xml"
+PROFILE="/home/booster/Desktop/BotBrain/botbrain_ws/fastdds_profile.xml"
 
 if [ -z "$IP" ]; then
     echo "Usage: $0 <ip-address>"
@@ -11,38 +10,36 @@ if [ -z "$IP" ]; then
     exit 1
 fi
 
-# Validate IP format
 if ! echo "$IP" | grep -qE '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
     echo "Error: '$IP' is not a valid IP address."
     exit 1
 fi
 
-add_to_whitelist() {
-    local file="$1"
+# --- whitelist ---
 
-    if [ ! -f "$file" ]; then
-        echo "  [SKIP] File not found: $file"
-        return 1
-    fi
-
-    if grep -q "<address>${IP}</address>" "$file"; then
-        echo "  [SKIP] $IP already in whitelist: $file"
-        return 0
-    fi
-
-    # Insert new <address> line before </interfaceWhiteList>
+if grep -q "<address>${IP}</address>" "$PROFILE"; then
+    echo "  [SKIP] $IP already in whitelist"
+else
     TAB=$'\t'
-    sudo sed -i "/<\/interfaceWhiteList>/i\\${TAB}${TAB}<address>${IP}<\/address>" "$file"
-    echo "  [OK]   Added $IP to: $file"
+    sed -i "/<\/interfaceWhiteList>/i\\    ${TAB}${TAB}${TAB}<address>${IP}<\/address>" "$PROFILE"
+    echo "  [OK]   Added $IP to whitelist"
+fi
+
+# --- .bashrc ---
+
+add_export() {
+    local line="$1"
+    if grep -qF "$line" ~/.bashrc; then
+        echo "  [SKIP] Already in ~/.bashrc: $line"
+    else
+        echo "$line" >> ~/.bashrc
+        echo "  [OK]   Added to ~/.bashrc: $line"
+    fi
 }
 
-echo "Adding $IP to FastDDS whitelists..."
-add_to_whitelist "$PROFILE_SHM"
-add_to_whitelist "$PROFILE_UDP"
+add_export "export FASTRTPS_DEFAULT_PROFILES_FILE=${PROFILE}"
+add_export "export RMW_FASTRTPS_PUBLICATION_MODE=ASYNCHRONOUS"
+
 echo ""
-echo "Current whitelists:"
-for f in "$PROFILE_SHM" "$PROFILE_UDP"; do
-    echo ""
-    echo "  $f"
-    grep '<address>' "$f" | sed 's/^/    /'
-done
+echo "Current whitelist ($PROFILE):"
+grep '<address>' "$PROFILE" | sed 's/^/    /'

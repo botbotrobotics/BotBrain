@@ -73,10 +73,10 @@ class RobotRead(LifecycleNode):
         # Create subscribers
         self.odom_subscriber = self.create_subscription(Odometer, '/odometer_state', self.odom_subscriber_callback, 10)
         self.imu_subscriber = self.create_subscription(LowState, '/low_state', self.imu_subscriber_callback, 10)
-        self.stereo_rgb_subscriber = self.create_subscription(Image, '/StereoNetNode/rectified_image', self.stereo_rgb_callback, stereo_qos)
-        self.stereo_depth_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_depth', self.stereo_depth_callback, stereo_qos)
-        self.stereo_info_subscriber = self.create_subscription(CameraInfo, '/StereoNetNode/stereonet_depth/camera_info', self.stereo_info_callback, stereo_qos)
-        self.stereo_visual_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_visual', self.stereo_visual_callback, stereo_qos)
+        self.stereo_rgb_subscriber = self.create_subscription(Image, '/boostercamera/head/rgb', self.stereo_rgb_callback, stereo_qos)
+        self.stereo_depth_subscriber = self.create_subscription(Image, '/boostercamera/head/depth', self.stereo_depth_callback, stereo_qos)
+        self.stereo_info_subscriber = self.create_subscription(CameraInfo, '/boostercamera/head/rgb/camera_info', self.stereo_info_callback, stereo_qos)
+        # self.stereo_visual_subscriber = self.create_subscription(Image, '/StereoNetNode/stereonet_visual', self.stereo_visual_callback, stereo_qos)
         self.battery_subscriber = self.create_subscription(BoosterBatteryState, '/battery_state', self.battery_callback, 1)
         
         # Create TF broadcaster

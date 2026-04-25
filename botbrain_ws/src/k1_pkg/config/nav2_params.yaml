@@ -247,7 +247,7 @@
       global_frame: <prefix>map
       robot_base_frame: <prefix>base_link
       resolution: 0.05
-      footprint: "[[0.360, 0.20], [0.360, -0.20], [-0.450, -0.20], [-0.450, 0.20]]"
+      footprint: "[[0.360, 0.20], [0.360, -0.20], [-0.300, -0.20], [-0.300, 0.20]]"
       track_unknown_space: true
       transform_tolerance: 2.0
       plugins: ["static_layer", "obstacle_layer_front", <back_obstacle_layer>"inflation_layer"]
@@ -304,7 +304,7 @@
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.6
+        inflation_radius: 0.4
       always_send_full_costmap: True
       service_introspection_mode: "disabled"
 

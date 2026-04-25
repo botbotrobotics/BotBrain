@@ -17,28 +17,11 @@ def generate_launch_description():
         config = yaml.safe_load(f)['robot_configuration']
     
     robot_name = config['robot_name']
+    robot_model = config['robot_model']
     has_own_robot_state_publisher = config.get('has_own_robot_state_publisher', False)
 
-    botbrain_description_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('bot_description'),
-                'launch',
-                'botbrain_description.launch.py'
-            )
-        )
-    )
-
-    botbrain_static_tf_node = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_tf_botbrain_base',
-        namespace=robot_name,
-        arguments=['0.0', '0.0', '0.0', '0', '0', '0', f'{robot_name}/interface_link', f'{robot_name}/botbrain_base'],
-        output='screen'
-    )
-    
     launch_actions = []
+
     if not has_own_robot_state_publisher:
         robot_description_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -51,7 +34,26 @@ def generate_launch_description():
         )
         launch_actions.append(robot_description_launch)
 
-    return LaunchDescription(launch_actions + [
-        botbrain_description_launch,
-        botbrain_static_tf_node,
-    ])
+    # k1 has no interface_link in its URDF, so skipping the botbrain description
+    # avoids a second disconnected TF tree that breaks rtabmap's odom→base_link lookup.
+    if robot_model != 'k1':
+        botbrain_description_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory('bot_description'),
+                    'launch',
+                    'botbrain_description.launch.py'
+                )
+            )
+        )
+        botbrain_static_tf_node = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_tf_botbrain_base',
+            namespace=robot_name,
+            arguments=['0.0', '0.0', '0.0', '0', '0', '0', f'{robot_name}/interface_link', f'{robot_name}/botbrain_base'],
+            output='screen'
+        )
+        launch_actions += [botbrain_description_launch, botbrain_static_tf_node]
+
+    return LaunchDescription(launch_actions)
