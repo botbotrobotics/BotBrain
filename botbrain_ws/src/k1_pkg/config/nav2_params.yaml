@@ -76,7 +76,7 @@
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.45
       yaw_goal_tolerance: 0.25
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
@@ -90,11 +90,11 @@
       az_max: 1.0
       vx_std: 0.3
       vy_std: 0.2
-      wz_std: 0.5
-      vx_max: 0.50
+      wz_std: 0.3
+      vx_max: 0.35
       vx_min: 0.0
       vy_max: 0.35
-      wz_max: 1.0
+      wz_max: 0.5
       iteration_count: 2
       prune_distance: 1.7
       transform_tolerance: 0.1
@@ -150,7 +150,7 @@
       PathAlignCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 10.0
+        cost_weight: 5.0
         max_path_occupancy_ratio: 0.05
         trajectory_point_step: 4
         threshold_to_consider: 0.5

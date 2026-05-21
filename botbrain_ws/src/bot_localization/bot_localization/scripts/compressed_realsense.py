@@ -202,10 +202,7 @@ class RealsenseCompressedNode(LifecycleNode):
     def depth_callback(self, msg):
         """Callback to process K1 depth image and publish as compressed colormap (used as back camera slot)."""
         try:
-            self.get_logger().info(f'depth_callback fired: encoding={msg.encoding}, size={msg.width}x{msg.height}')
-
             if msg.encoding in ('bgr8', 'rgb8', 'bgra8', 'rgba8'):
-                self.get_logger().info('depth_callback: color path (cropping bottom half)')
                 # stereonet_visual: top half = raw, bottom half = depth colormap — crop bottom only
                 frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
                 frame = frame[frame.shape[0] // 2:, :]
@@ -213,7 +210,6 @@ class RealsenseCompressedNode(LifecycleNode):
                 # Raw depth (32FC1 / 16UC1): normalize to [0,255] and apply colormap
                 frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough').astype(np.float32)
                 d_min, d_max = float(np.nanmin(frame)), float(np.nanmax(frame))
-                self.get_logger().info(f'depth_callback: raw depth path, d_min={d_min:.3f}, d_max={d_max:.3f}')
                 if d_max > d_min:
                     normalized = np.clip((frame - d_min) / (d_max - d_min), 0.0, 1.0)
                 else:
@@ -229,7 +225,6 @@ class RealsenseCompressedNode(LifecycleNode):
                 comp_msg.format = "jpeg"
                 comp_msg.data = jpeg.tobytes()
                 self.publisher_compressed_back.publish(comp_msg)
-                self.get_logger().info(f'depth_callback: published to compressed_back_camera ({len(jpeg)} bytes)')
             else:
                 self.get_logger().warn('depth_callback: cv2.imencode failed, nothing published')
 
