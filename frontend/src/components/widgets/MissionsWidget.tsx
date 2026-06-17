@@ -9,6 +9,7 @@ import useFollowWaypoints from '@/hooks/ros/useFollowWaypoints';
 import { missionsService, MissionWithWaypoints } from '@/services/missions';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { cn } from '@/utils/cn';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Helper to normalize map names for comparison
 function normalizeMapName(name: string): string {
@@ -34,6 +35,7 @@ interface MissionItemProps {
 
 function MissionItem({ mission, isSelected, isRunning, progress, onSelect, disabled }: MissionItemProps) {
   const waypointCount = mission.waypoints?.length || 0;
+  const { t } = useLanguage();
 
   return (
     <button
@@ -59,12 +61,12 @@ function MissionItem({ mission, isSelected, isRunning, progress, onSelect, disab
           <span className="font-medium truncate text-sm">{mission.name}</span>
           {isRunning && (
             <span className="text-xs px-1.5 py-0.5 rounded bg-green-500 text-white flex-shrink-0">
-              Running
+              {t('missions', 'running')}
             </span>
           )}
         </div>
         <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-          {waypointCount} {waypointCount === 1 ? 'wp' : 'wps'}
+          {waypointCount} {waypointCount === 1 ? t('missions', 'waypointShort') : t('missions', 'waypointsShort')}
         </span>
       </div>
 
@@ -108,6 +110,7 @@ export function MissionsWidget({
   title = 'Missions',
   props,
 }: MissionsWidgetProps) {
+  const { t } = useLanguage();
   const { updateWidgetProps } = useDashboard();
   const { connectionStatus } = useRobotConnection();
   const { getCurrentDatabase, isConnected: rosConnected } = useRosMappingServices();
@@ -257,6 +260,7 @@ export function MissionsWidget({
     navConnected &&
     !isNavigating;
   const canStop = isNavigating && activeMissionId;
+  const displayTitle = props?.title || (title === 'Missions' ? t('missions', 'title') : currentTitle);
 
   return (
     <Widget
@@ -264,7 +268,7 @@ export function MissionsWidget({
       title={
         <div className="flex items-center">
           <Route className="mr-2 w-4 h-4" />
-          <span>{currentTitle}</span>
+          <span>{displayTitle}</span>
         </div>
       }
       onRemove={onRemove}
@@ -282,14 +286,14 @@ export function MissionsWidget({
           <div className="bg-gray-100 dark:bg-botbot-darker rounded-md p-3 mb-2 text-sm flex-shrink-0">
             <div>
               <label className="block text-gray-700 dark:text-gray-300 mb-1">
-                Widget Name
+                {t('missions', 'widgetName')}
               </label>
               <input
                 type="text"
                 value={currentTitle}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 className="w-full p-2 border rounded-md dark:bg-botbot-dark dark:border-botbot-darker"
-                placeholder="Enter widget name"
+                placeholder={t('missions', 'widgetNamePlaceholder')}
               />
             </div>
           </div>
@@ -305,7 +309,7 @@ export function MissionsWidget({
               "hover:bg-gray-100 dark:hover:bg-botbot-darker",
               isRefreshing && "animate-spin"
             )}
-            title="Refresh missions"
+            title={t('missions', 'refreshMissions')}
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -315,22 +319,22 @@ export function MissionsWidget({
         <div className="flex-1 overflow-y-auto min-h-0 space-y-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400">
-              Loading...
+              {t('missions', 'loading')}
             </div>
           ) : !isRobotConnected ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>Connect to robot to view missions</span>
+              <span>{t('missions', 'connectToRobotToViewMissions')}</span>
             </div>
           ) : !currentMapName ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>Load a map to see missions</span>
+              <span>{t('missions', 'loadMapToSeeMissions')}</span>
             </div>
           ) : filteredMissions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>No missions for current map</span>
+              <span>{t('missions', 'noMissionsForCurrentMap')}</span>
             </div>
           ) : (
             filteredMissions.map(mission => (
@@ -367,15 +371,15 @@ export function MissionsWidget({
             )}
           >
             {canStop ? (
-              <>
-                <Square className="w-4 h-4" />
-                Stop Mission
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                Start Mission
-              </>
+            <>
+              <Square className="w-4 h-4" />
+              {t('missions', 'stopMission')}
+            </>
+          ) : (
+            <>
+              <Play className="w-4 h-4" />
+              {t('missions', 'startMission')}
+            </>
             )}
           </button>
         </div>

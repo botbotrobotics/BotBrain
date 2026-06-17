@@ -6,6 +6,7 @@ import { X, Search, Loader2, Check, AlertCircle, RefreshCw } from 'lucide-react'
 import { cn } from '@/utils/cn';
 import { useYoloUploaderConfig } from '@/hooks/ros/useYoloUploaderConfig';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface YoloSettingsDialogProps {
   isOpen: boolean;
@@ -125,6 +126,7 @@ const ALL_CLASSES = Object.values(YOLO_CLASSES).flat();
 
 export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDialogProps) {
   const { connection } = useRobotConnection();
+  const { t } = useLanguage();
   const { getParameters, applySettings, isLoading, isFetching, lastError, clearError } = useYoloUploaderConfig();
 
   const [minConfidence, setMinConfidence] = useState(0.5);
@@ -176,7 +178,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
       }
       setHasFetched(true);
     } catch (error) {
-      setFetchError(error instanceof Error ? error.message : 'Failed to fetch settings');
+      setFetchError(error instanceof Error ? error.message : t('aiDetections', 'failedToFetchSettings'));
     }
   }, [connection.online, getParameters]);
 
@@ -286,10 +288,10 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Detection Upload Settings
+              {t('aiDetections', 'settingsTitle')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Configure which detections are saved to the database
+              {t('aiDetections', 'settingsDescription')}
             </p>
           </div>
           <button
@@ -307,7 +309,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Loading current settings...</span>
+                <span>{t('aiDetections', 'loadingCurrentSettings')}</span>
               </div>
             </div>
           )}
@@ -318,7 +320,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               <div className="flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                 <p className="text-sm text-orange-700 dark:text-orange-300">
-                  Could not load current settings: {fetchError}
+                  {t('aiDetections', 'couldNotLoadSettings').replace('{error}', fetchError)}
                 </p>
               </div>
               <button
@@ -326,7 +328,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-md hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                Retry
+                {t('aiDetections', 'retry')}
               </button>
             </div>
           )}
@@ -336,7 +338,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
             <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                Robot is not connected. Connect to load and apply settings.
+                {t('aiDetections', 'robotNotConnectedSettings')}
               </p>
             </div>
           )}
@@ -348,7 +350,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Minimum Confidence
+                    {t('aiDetections', 'minimumConfidence')}
                   </label>
               <span className={cn(
                 "px-2.5 py-1 rounded-full text-sm font-medium text-white",
@@ -374,7 +376,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               </div>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Only detections with confidence above this threshold will be saved
+              {t('aiDetections', 'minimumConfidenceDescription')}
             </p>
           </div>
 
@@ -382,23 +384,25 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Object Filter
+                {t('aiDetections', 'objectFilter')}
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {selectedObjects.size === 0 ? 'All objects' : `${selectedObjects.size} selected`}
+                  {selectedObjects.size === 0
+                    ? t('aiDetections', 'allObjects')
+                    : t('aiDetections', 'selectedCount').replace('{count}', String(selectedObjects.size))}
                 </span>
                 <button
                   onClick={selectAll}
                   className="text-xs px-2 py-1 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors"
                 >
-                  Select All
+                  {t('aiDetections', 'selectAll')}
                 </button>
                 <button
                   onClick={clearAll}
                   className="text-xs px-2 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-botbot-dark rounded transition-colors"
                 >
-                  Clear
+                  {t('aiDetections', 'clear')}
                 </button>
               </div>
             </div>
@@ -408,7 +412,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search objects..."
+                placeholder={t('aiDetections', 'searchObjects')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-botbot-dark focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
@@ -434,7 +438,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
                 ))}
                 {selectedObjects.size > 10 && (
                   <span className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">
-                    +{selectedObjects.size - 10} more
+                    {t('aiDetections', 'moreObjects').replace('{count}', String(selectedObjects.size - 10))}
                   </span>
                 )}
               </div>
@@ -467,15 +471,15 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               ))}
               {Object.keys(filteredCategories).length === 0 && (
                 <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  No objects match your search
+                  {t('aiDetections', 'noObjectsMatch')}
                 </div>
               )}
             </div>
 
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {selectedObjects.size === 0
-                ? 'All detected objects will be saved. Select specific objects to filter.'
-                : 'Only selected objects will be saved to the database'}
+                ? t('aiDetections', 'allObjectsWillBeSaved')
+                : t('aiDetections', 'onlySelectedObjectsSaved')}
             </p>
           </div>
             </>
@@ -496,7 +500,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
           {success && (
             <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
               <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-              <p className="text-sm text-green-700 dark:text-green-300">Settings applied successfully!</p>
+              <p className="text-sm text-green-700 dark:text-green-300">{t('aiDetections', 'settingsApplied')}</p>
             </div>
           )}
 
@@ -506,7 +510,7 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               disabled={isLoading}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-botbot-dark rounded-lg transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t('aiDetections', 'cancel')}
             </button>
             <button
               onClick={handleApply}
@@ -521,10 +525,10 @@ export default function YoloSettingsDialog({ isOpen, onClose }: YoloSettingsDial
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Applying...
+                  {t('aiDetections', 'applying')}
                 </>
               ) : (
-                'Apply Settings'
+                t('aiDetections', 'applySettings')
               )}
             </button>
           </div>

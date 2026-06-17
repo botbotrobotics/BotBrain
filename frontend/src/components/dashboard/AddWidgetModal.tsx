@@ -87,21 +87,21 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     {
       type: 'camera' as WidgetType,
       label: t('myUI', 'widgetCamera'),
-      description: 'Live video feed from robot cameras',
+      description: t('myUI', 'widgetCameraDescription'),
       icon: <Camera className="w-6 h-6" />,
       category: 'visualization',
     },
     {
       type: 'visualization3d' as WidgetType,
       label: t('myUI', 'widget3DVisualization'),
-      description: '3D robot model and environment',
+      description: t('myUI', 'widget3DVisualizationDescription'),
       icon: <Box className="w-6 h-6" />,
       category: 'visualization',
     },
     {
       type: 'map' as WidgetType,
       label: t('myUI', 'widgetMapView'),
-      description: 'Live map and navigation view',
+      description: t('myUI', 'widgetMapViewDescription'),
       icon: <Map className="w-6 h-6" />,
       category: 'visualization',
     },
@@ -109,35 +109,35 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     {
       type: 'joystick' as WidgetType,
       label: t('myUI', 'widgetJoystick'),
-      description: 'Virtual joystick for robot control',
+      description: t('myUI', 'widgetJoystickDescription'),
       icon: <Gamepad className="w-6 h-6" />,
       category: 'control',
     },
     {
       type: 'button' as WidgetType,
       label: t('myUI', 'widgetButton'),
-      description: 'Custom action button',
+      description: t('myUI', 'widgetButtonDescription'),
       icon: <Square className="w-6 h-6" />,
       category: 'control',
     },
     {
       type: 'buttonGroup' as WidgetType,
       label: t('myUI', 'widgetButtonGroup'),
-      description: 'Multiple action buttons',
+      description: t('myUI', 'widgetButtonGroupDescription'),
       icon: <Square className="w-6 h-6" />,
       category: 'control',
     },
     {
       type: 'delivery' as WidgetType,
-      label: 'Delivery',
-      description: 'Delivery management controls',
+      label: t('myUI', 'widgetDelivery'),
+      description: t('myUI', 'widgetDeliveryDescription'),
       icon: <Package className="w-6 h-6" />,
       category: 'control',
     },
     {
       type: 'missions' as WidgetType,
-      label: 'Missions',
-      description: 'Manage and execute robot missions',
+      label: t('myUI', 'widgetMissions'),
+      description: t('myUI', 'widgetMissionsDescription'),
       icon: <Route className="w-6 h-6" />,
       category: 'control',
     },
@@ -145,35 +145,35 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     {
       type: 'audio' as WidgetType,
       label: t('myUI', 'widgetAudioStream'),
-      description: 'Audio streaming controls',
+      description: t('myUI', 'widgetAudioStreamDescription'),
       icon: <Volume2 className="w-6 h-6" />,
       category: 'media',
     },
     {
       type: 'microphone' as WidgetType,
-      label: 'Microphone',
-      description: 'Voice input and recording',
+      label: t('myUI', 'widgetMicrophone'),
+      description: t('myUI', 'widgetMicrophoneDescription'),
       icon: <Mic className="w-6 h-6" />,
       category: 'media',
     },
     {
       type: 'ttsPresets' as WidgetType,
-      label: 'TTS Presets',
-      description: 'Text-to-speech presets',
+      label: t('myUI', 'widgetTTSPresets'),
+      description: t('myUI', 'widgetTTSPresetsDescription'),
       icon: <Volume2 className="w-6 h-6" />,
       category: 'media',
     },
     {
       type: 'soundClips' as WidgetType,
-      label: 'Sound Clips',
-      description: 'Play pre-recorded sounds',
+      label: t('myUI', 'widgetSoundClips'),
+      description: t('myUI', 'widgetSoundClipsDescription'),
       icon: <Volume2 className="w-6 h-6" />,
       category: 'media',
     },
     {
       type: 'recorder' as WidgetType,
-      label: 'Recorder',
-      description: 'Audio/video recording',
+      label: t('myUI', 'widgetRecorder'),
+      description: t('myUI', 'widgetRecorderDescription'),
       icon: <Circle className="w-6 h-6" />,
       category: 'media',
     },
@@ -181,28 +181,28 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     {
       type: 'gauge' as WidgetType,
       label: t('myUI', 'widgetGauge'),
-      description: 'Display numeric values',
+      description: t('myUI', 'widgetGaugeDescription'),
       icon: <Gauge className="w-6 h-6" />,
       category: 'information',
     },
     {
       type: 'sidewaysgauge' as WidgetType,
       label: t('myUI', 'widgetSidewaysGauge'),
-      description: 'Horizontal gauge display',
+      description: t('myUI', 'widgetSidewaysGaugeDescription'),
       icon: <Battery className="w-6 h-6" />,
       category: 'information',
     },
     {
       type: 'info' as WidgetType,
       label: t('myUI', 'widgetInformation'),
-      description: 'Display robot information',
+      description: t('myUI', 'widgetInformationDescription'),
       icon: <Info className="w-6 h-6" />,
       category: 'information',
     },
     {
       type: 'mapsManagement' as WidgetType,
-      label: 'Maps Management',
-      description: 'Manage saved maps',
+      label: t('myUI', 'widgetMapsManagement'),
+      description: t('myUI', 'widgetMapsManagementDescription'),
       icon: <Map className="w-6 h-6" />,
       category: 'information',
     },
@@ -210,21 +210,21 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     {
       type: 'chat' as WidgetType,
       label: t('myUI', 'widgetChat'),
-      description: 'Chat interface',
+      description: t('myUI', 'widgetChatDescription'),
       icon: <MessageSquare className="w-6 h-6" />,
       category: 'ai',
     },
     {
       type: 'aiStream' as WidgetType,
-      label: 'AI Stream',
-      description: 'AI processing stream',
+      label: t('myUI', 'widgetAIStream'),
+      description: t('myUI', 'widgetAIStreamDescription'),
       icon: <Brain className="w-6 h-6" />,
       category: 'ai',
     },
     {
       type: 'recentDetections' as WidgetType,
-      label: 'Recent Detections',
-      description: 'Object detection history',
+      label: t('myUI', 'widgetRecentDetections'),
+      description: t('myUI', 'widgetRecentDetectionsDescription'),
       icon: <Sparkles className="w-6 h-6" />,
       category: 'ai',
     },
@@ -236,12 +236,12 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
     : allWidgetOptions.filter(widget => !proOnlyWidgetTypes.includes(widget.type));
 
   const categories = [
-    { id: 'all', label: 'All Widgets', icon: '🎯' },
-    { id: 'visualization', label: 'Visualization', icon: '👁️' },
-    { id: 'control', label: 'Control', icon: '🎮' },
-    { id: 'media', label: 'Media', icon: '🎵' },
-    { id: 'information', label: 'Information', icon: '📊' },
-    { id: 'ai', label: 'AI & Smart', icon: '🤖' },
+    { id: 'all', label: t('myUI', 'categoryAllWidgets'), icon: '🎯' },
+    { id: 'visualization', label: t('myUI', 'categoryVisualization'), icon: '👁️' },
+    { id: 'control', label: t('myUI', 'categoryControl'), icon: '🎮' },
+    { id: 'media', label: t('myUI', 'categoryMedia'), icon: '🎵' },
+    { id: 'information', label: t('myUI', 'categoryInformation'), icon: '📊' },
+    { id: 'ai', label: t('myUI', 'categoryAiSmart'), icon: '🤖' },
   ];
 
   const filteredWidgets = widgetOptions.filter(widget => {
@@ -284,7 +284,7 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              Add Widget to Dashboard
+              {t('myUI', 'addWidgetToDashboard')}
             </h2>
             <button
               onClick={onClose}
@@ -301,7 +301,7 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search widgets..."
+              placeholder={t('myUI', 'searchWidgets')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-botbot-darker text-gray-800 dark:text-white
                        placeholder-gray-400 dark:placeholder-gray-500
@@ -335,7 +335,7 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
           {filteredWidgets.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 dark:text-gray-400">
-                No widgets found matching your search.
+                {t('myUI', 'noWidgetsFound')}
               </p>
             </div>
           ) : (
@@ -398,14 +398,14 @@ export function AddWidgetModal({ isOpen, onClose, onAddWidget }: AddWidgetModalP
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {filteredWidgets.length} widget{filteredWidgets.length !== 1 ? 's' : ''} available
+              {(filteredWidgets.length === 1 ? t('myUI', 'widgetAvailable') : t('myUI', 'widgetsAvailable')).replace('{count}', String(filteredWidgets.length))}
             </p>
             <button
               onClick={onClose}
               className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800
                        dark:hover:text-white transition-colors"
             >
-              Cancel
+              {t('myUI', 'cancel')}
             </button>
           </div>
           </div>

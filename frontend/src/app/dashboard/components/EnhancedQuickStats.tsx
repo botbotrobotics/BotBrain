@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Database } from '@/types/database.types';
 
 type Robot = Database['public']['Tables']['robots']['Row'];
@@ -112,6 +113,7 @@ function StatCard({
 export default function EnhancedQuickStats() {
   const { connection } = useRobotConnection();
   const { supabase, user } = useSupabase();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
 
   // Basic stats
@@ -123,9 +125,9 @@ export default function EnhancedQuickStats() {
   const [monthlyActions, setMonthlyActions] = useState<number>(0);
 
   // Enhanced stats
-  const [memberDuration, setMemberDuration] = useState<string>('New');
+  const [memberDuration, setMemberDuration] = useState<string>('');
   const [peakHour, setPeakHour] = useState<string>('--');
-  const [mostUsedRobot, setMostUsedRobot] = useState<string>('None');
+  const [mostUsedRobot, setMostUsedRobot] = useState<string>('');
   const [activeDays, setActiveDays] = useState<number>(0);
   const [missionsTotal, setMissionsTotal] = useState<number>(0);
   const [detectionsCount, setDetectionsCount] = useState<number>(0);
@@ -159,13 +161,13 @@ export default function EnhancedQuickStats() {
           const diffYears = Math.floor(diffDays / 365);
 
           if (diffYears > 0) {
-            setMemberDuration(`${diffYears}+ year${diffYears > 1 ? 's' : ''}`);
+            setMemberDuration(`${diffYears}+ ${t('dashboard', diffYears > 1 ? 'years' : 'year')}`);
           } else if (diffMonths > 0) {
-            setMemberDuration(`${diffMonths} month${diffMonths > 1 ? 's' : ''}`);
+            setMemberDuration(`${diffMonths} ${t('dashboard', diffMonths > 1 ? 'months' : 'month')}`);
           } else if (diffDays > 0) {
-            setMemberDuration(`${diffDays} day${diffDays > 1 ? 's' : ''}`);
+            setMemberDuration(`${diffDays} ${t('dashboard', diffDays > 1 ? 'days' : 'day')}`);
           } else {
-            setMemberDuration('New member');
+            setMemberDuration(t('dashboard', 'newMember'));
           }
         }
 
@@ -325,7 +327,7 @@ export default function EnhancedQuickStats() {
     };
 
     fetchAllStats();
-  }, [user, supabase]);
+  }, [user, supabase, t]);
 
   const onlineRobots = connection.online ? 1 : 0;
 
@@ -335,11 +337,11 @@ export default function EnhancedQuickStats() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={<Bot className="h-5 w-5 text-white" />}
-          label="Fleet Size"
+          label={t('dashboard', 'fleetSize')}
           value={robots.length}
-          subValue={`${onlineRobots} online now`}
+          subValue={`${onlineRobots} ${t('dashboard', 'onlineNow')}`}
           trend={robots.length > 0 ? 'up' : 'neutral'}
-          trendValue={onlineRobots > 0 ? 'Active' : 'Offline'}
+          trendValue={onlineRobots > 0 ? t('dashboard', 'active') : t('dashboard', 'offline')}
           gradient="from-violet-500 to-purple-600"
           variant="gradient"
           loading={loading}
@@ -347,11 +349,11 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Activity className="h-5 w-5 text-white" />}
-          label="Total Actions"
+          label={t('dashboard', 'totalActions')}
           value={totalActions > 9999 ? `${(totalActions / 1000).toFixed(1)}k` : totalActions}
-          subValue={`${activeDays} active days`}
+          subValue={`${activeDays} ${t('dashboard', 'activeDays')}`}
           trend={monthlyActions > 500 ? 'up' : 'down'}
-          trendValue={`${monthlyActions} this month`}
+          trendValue={`${monthlyActions} ${t('dashboard', 'thisMonth')}`}
           gradient="from-blue-500 to-cyan-600"
           variant="glass"
           loading={loading}
@@ -359,8 +361,8 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Calendar className="h-5 w-5 text-white" />}
-          label="User Since"
-          value={memberDuration}
+          label={t('dashboard', 'userSince')}
+          value={memberDuration || t('dashboard', 'new')}
           subValue={userProfile ? new Date(userProfile.created_at).toLocaleDateString() : '--'}
           gradient="from-emerald-500 to-teal-600"
           variant="default"
@@ -369,9 +371,9 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Star className="h-5 w-5 text-white" />}
-          label="Favorite Robot"
-          value={mostUsedRobot}
-          subValue={robots.filter(r => r.is_favorite).length > 0 ? 'Most used' : 'No favorite set'}
+          label={t('dashboard', 'favoriteRobot')}
+          value={mostUsedRobot || t('dashboard', 'noFavoriteSet')}
+          subValue={robots.filter(r => r.is_favorite).length > 0 ? t('dashboard', 'mostUsed') : t('dashboard', 'noFavoriteSet')}
           gradient="from-yellow-500 to-orange-600"
           variant="neon"
           loading={loading}
@@ -382,11 +384,11 @@ export default function EnhancedQuickStats() {
       <div className="grid grid-cols-3 gap-4">
         <StatCard
           icon={<Clock className="h-4 w-4 text-white" />}
-          label="Today"
+          label={t('dashboard', 'today')}
           value={todayActions}
-          subValue="actions"
+          subValue={t('dashboard', 'actions')}
           trend={todayActions > 50 ? 'up' : todayActions > 10 ? 'neutral' : 'down'}
-          trendValue={todayActions > 50 ? 'Very active' : todayActions > 10 ? 'Active' : 'Quiet'}
+          trendValue={todayActions > 50 ? t('dashboard', 'veryActive') : todayActions > 10 ? t('dashboard', 'active') : t('dashboard', 'quiet')}
           gradient="from-indigo-500 to-blue-600"
           variant="glass"
           size="small"
@@ -395,11 +397,11 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<TrendingUp className="h-4 w-4 text-white" />}
-          label="This Week"
+          label={t('dashboard', 'thisWeek')}
           value={weeklyActions}
-          subValue="actions"
+          subValue={t('dashboard', 'actions')}
           trend={weeklyActions > 200 ? 'up' : 'neutral'}
-          trendValue={`Avg ${Math.round(weeklyActions / 7)}/day`}
+          trendValue={t('dashboard', 'avgPerDay').replace('{count}', String(Math.round(weeklyActions / 7)))}
           gradient="from-pink-500 to-rose-600"
           variant="glass"
           size="small"
@@ -408,9 +410,9 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Gauge className="h-4 w-4 text-white" />}
-          label="Peak Hour"
+          label={t('dashboard', 'peakHour')}
           value={peakHour}
-          subValue="most active"
+          subValue={t('dashboard', 'mostActive')}
           gradient="from-purple-500 to-violet-600"
           variant="glass"
           size="small"
@@ -422,9 +424,9 @@ export default function EnhancedQuickStats() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={<Target className="h-4 w-4 text-white" />}
-          label="Missions"
+          label={t('dashboard', 'missions')}
           value={missionsTotal}
-          subValue="created"
+          subValue={t('dashboard', 'created')}
           gradient="from-red-500 to-pink-600"
           variant="default"
           size="small"
@@ -433,9 +435,9 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Brain className="h-4 w-4 text-white" />}
-          label="AI Detections"
+          label={t('dashboard', 'aiDetections')}
           value={detectionsCount}
-          subValue={avgConfidence > 0 ? `${(avgConfidence * 100).toFixed(0)}% conf` : 'YOLO active'}
+          subValue={avgConfidence > 0 ? `${(avgConfidence * 100).toFixed(0)}% ${t('dashboard', 'confidenceAbbrev')}` : t('dashboard', 'yoloActive')}
           gradient="from-green-500 to-emerald-600"
           variant="default"
           size="small"
@@ -444,9 +446,9 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<Music className="h-4 w-4 text-white" />}
-          label="Sound Library"
+          label={t('dashboard', 'soundLibrary')}
           value={soundsCount}
-          subValue="audio clips"
+          subValue={t('dashboard', 'audioClips')}
           gradient="from-orange-500 to-red-600"
           variant="default"
           size="small"
@@ -455,9 +457,9 @@ export default function EnhancedQuickStats() {
 
         <StatCard
           icon={<DatabaseIcon className="h-4 w-4 text-white" />}
-          label="Storage"
+          label={t('dashboard', 'storage')}
           value={storageUsed}
-          subValue="used"
+          subValue={t('dashboard', 'used')}
           gradient="from-gray-600 to-gray-800"
           variant="default"
           size="small"

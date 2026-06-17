@@ -72,9 +72,9 @@ export default function LabsPage() {
       badge: 'alpha' as const,
     },
     {
-      name: 'Weather',
+      name: t('labs', 'weather'),
       icon: Cloud,
-      description: 'Simple weather viewer for current conditions',
+      description: t('labs', 'weatherDescription'),
       action: () => router.push('/weather'),
       badge: 'alpha' as const,
     },
@@ -187,4 +187,4 @@ export default function LabsPage() {
       </div>
     </div>
   );
-} 
+}

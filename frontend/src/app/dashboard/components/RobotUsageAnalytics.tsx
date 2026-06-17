@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Bot, TrendingUp, Star, Clock, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { Database } from '@/types/database.types';
 
@@ -17,6 +18,7 @@ interface RobotUsage {
 
 export default function RobotUsageAnalytics() {
   const { supabase, user } = useSupabase();
+  const { t } = useLanguage();
   const [robotUsage, setRobotUsage] = useState<RobotUsage[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalUsage, setTotalUsage] = useState(0);
@@ -144,7 +146,7 @@ export default function RobotUsageAnalytics() {
   }, [user, supabase]);
 
   const formatLastUsed = (timestamp: string | null) => {
-    if (!timestamp) return 'Never';
+    if (!timestamp) return t('dashboard', 'never');
 
     const date = new Date(timestamp);
     const now = new Date();
@@ -153,10 +155,10 @@ export default function RobotUsageAnalytics() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('dashboard', 'justNow');
+    if (diffMins < 60) return t('dashboard', 'minutesAgo').replace('{count}', String(diffMins));
+    if (diffHours < 24) return t('dashboard', 'hoursAgo').replace('{count}', String(diffHours));
+    if (diffDays < 7) return t('dashboard', 'daysAgo').replace('{count}', String(diffDays));
     return date.toLocaleDateString();
   };
 
@@ -188,7 +190,7 @@ export default function RobotUsageAnalytics() {
       <div className="bg-white dark:bg-botbot-dark rounded-2xl p-4 shadow-lg h-full min-h-[280px] flex items-center justify-center">
         <div className="text-center">
           <Bot className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">No robots configured yet</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard', 'noRobotsConfiguredYet')}</p>
         </div>
       </div>
     );
@@ -206,10 +208,10 @@ export default function RobotUsageAnalytics() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Robot Fleet Usage
+              {t('dashboard', 'robotFleetUsage')}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {robotUsage.length} robot{robotUsage.length !== 1 ? 's' : ''}
+              {t('dashboard', robotUsage.length === 1 ? 'robotCountSingular' : 'robotCount').replace('{count}', String(robotUsage.length))}
             </p>
           </div>
         </div>
@@ -218,12 +220,12 @@ export default function RobotUsageAnalytics() {
             <span className="text-xs font-bold text-violet-700 dark:text-violet-300">
               {totalUsage.toLocaleString()}
             </span>
-            <span className="text-xs text-violet-600 dark:text-violet-400">actions</span>
+            <span className="text-xs text-violet-600 dark:text-violet-400">{t('dashboard', 'actions')}</span>
           </div>
           {mostActiveTime && (
             <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <Clock className="h-3 w-3" />
-              <span>Peak: {mostActiveTime}</span>
+              <span>{t('dashboard', 'peak')}: {mostActiveTime}</span>
             </div>
           )}
         </div>
@@ -260,7 +262,7 @@ export default function RobotUsageAnalytics() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className="text-[11px] text-gray-600 dark:text-gray-400">
-                      {usage.usageCount.toLocaleString()} actions
+                      {usage.usageCount.toLocaleString()} {t('dashboard', 'actions')}
                     </p>
                     <span className="text-[11px] text-gray-400">•</span>
                     <p className="text-[11px] text-gray-500 dark:text-gray-500">
@@ -271,7 +273,7 @@ export default function RobotUsageAnalytics() {
                         <span className="text-[11px] text-gray-400">•</span>
                         <div className="flex items-center gap-1">
                           <Zap className="h-2.5 w-2.5 text-green-500" />
-                          <span className="text-[11px] text-green-600 dark:text-green-400">Active</span>
+                          <span className="text-[11px] text-green-600 dark:text-green-400">{t('dashboard', 'active')}</span>
                         </div>
                       </>
                     )}
@@ -313,12 +315,12 @@ export default function RobotUsageAnalytics() {
           {isExpanded ? (
             <>
               <ChevronUp className="h-3 w-3" />
-              <span>Show less</span>
+              <span>{t('dashboard', 'showLess')}</span>
             </>
           ) : (
             <>
               <ChevronDown className="h-3 w-3" />
-              <span>Show {robotUsage.length - 3} more</span>
+              <span>{t('dashboard', 'showMore').replace('{count}', String(robotUsage.length - 3))}</span>
             </>
           )}
         </button>

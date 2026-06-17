@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Send, Eye, HelpCircle, Brain, Search, MapPin, Loader2, X } from 'lucide-react';
 import useMoondreamServices, { MoondreamBoundingBox, MoondreamPoint } from '@/hooks/ros/useMoondreamServices';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MoondreamDetectionsProps {
   expandedView?: boolean;
@@ -13,16 +14,12 @@ interface MoondreamDetectionsProps {
 type MoonDreamMode = 'caption' | 'query-no-reasoning' | 'query-with-reasoning' | 'detect' | 'point';
 
 interface ModeConfigBase {
-  title: string;
-  description: string;
   icon: typeof Eye;
   color: string;
 }
 
 interface ModeConfigWithInput extends ModeConfigBase {
   hasInput: true;
-  inputPlaceholder: string;
-  inputLabel: string;
 }
 
 interface ModeConfigWithoutInput extends ModeConfigBase {
@@ -33,47 +30,29 @@ type ModeConfigType = ModeConfigWithInput | ModeConfigWithoutInput;
 
 const modeConfig: Record<MoonDreamMode, ModeConfigType> = {
   'caption': {
-    title: 'Caption',
-    description: 'Generate a description of the image',
     icon: Eye,
     color: 'from-blue-500 to-cyan-500',
     hasInput: false,
   },
   'query-no-reasoning': {
-    title: 'Query - No Reasoning',
-    description: 'Ask a question about the image',
     icon: HelpCircle,
     color: 'from-purple-500 to-pink-500',
     hasInput: true,
-    inputPlaceholder: 'Ask a question about the image...',
-    inputLabel: 'Question',
   },
   'query-with-reasoning': {
-    title: 'Query - With Reasoning',
-    description: 'Ask a question with detailed reasoning',
     icon: Brain,
     color: 'from-green-500 to-emerald-500',
     hasInput: true,
-    inputPlaceholder: 'Ask a question for detailed analysis...',
-    inputLabel: 'Question',
   },
   'detect': {
-    title: 'Detect',
-    description: 'Detect specific objects in the image',
     icon: Search,
     color: 'from-orange-500 to-red-500',
     hasInput: true,
-    inputPlaceholder: 'Describe what to detect...',
-    inputLabel: 'Description',
   },
   'point': {
-    title: 'Point',
-    description: 'Point to specific locations in the image',
     icon: MapPin,
     color: 'from-indigo-500 to-purple-500',
     hasInput: true,
-    inputPlaceholder: 'Describe what to point to...',
-    inputLabel: 'Description',
   },
 };
 
@@ -82,9 +61,10 @@ export default function MoondreamDetections({
   onBoundingBoxesChange,
   onPointsChange
 }: MoondreamDetectionsProps) {
+  const { t } = useLanguage();
   const [selectedMode, setSelectedMode] = useState<MoonDreamMode>('caption');
   const [inputValue, setInputValue] = useState('');
-  const [response, setResponse] = useState('Ready to interact with MoonDream. Select a mode and submit to begin.');
+  const [response, setResponse] = useState(t('aiDetections', 'moonDreamReady'));
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -100,6 +80,44 @@ export default function MoondreamDetections({
 
   const currentMode = modeConfig[selectedMode];
   const ModeIcon = currentMode.icon;
+
+  const getModeTitle = (mode: MoonDreamMode) => {
+    const titles: Record<MoonDreamMode, string> = {
+      caption: t('aiDetections', 'moonDreamCaption'),
+      'query-no-reasoning': t('aiDetections', 'moonDreamQueryNoReasoning'),
+      'query-with-reasoning': t('aiDetections', 'moonDreamQueryWithReasoning'),
+      detect: t('aiDetections', 'moonDreamDetect'),
+      point: t('aiDetections', 'moonDreamPoint'),
+    };
+    return titles[mode];
+  };
+
+  const getModeDescription = (mode: MoonDreamMode) => {
+    const descriptions: Record<MoonDreamMode, string> = {
+      caption: t('aiDetections', 'moonDreamCaptionDescription'),
+      'query-no-reasoning': t('aiDetections', 'moonDreamQueryNoReasoningDescription'),
+      'query-with-reasoning': t('aiDetections', 'moonDreamQueryWithReasoningDescription'),
+      detect: t('aiDetections', 'moonDreamDetectDescription'),
+      point: t('aiDetections', 'moonDreamPointDescription'),
+    };
+    return descriptions[mode];
+  };
+
+  const getInputLabel = (mode: MoonDreamMode) => (
+    mode === 'query-no-reasoning' || mode === 'query-with-reasoning'
+      ? t('aiDetections', 'moonDreamQuestionLabel')
+      : t('aiDetections', 'moonDreamDescriptionLabel')
+  );
+
+  const getInputPlaceholder = (mode: MoonDreamMode) => {
+    const placeholders: Partial<Record<MoonDreamMode, string>> = {
+      'query-no-reasoning': t('aiDetections', 'moonDreamQuestionPlaceholder'),
+      'query-with-reasoning': t('aiDetections', 'moonDreamReasoningPlaceholder'),
+      detect: t('aiDetections', 'moonDreamDetectPlaceholder'),
+      point: t('aiDetections', 'moonDreamPointPlaceholder'),
+    };
+    return placeholders[mode] || '';
+  };
 
   // Update parent component when bounding boxes or points change
   useEffect(() => {
@@ -127,70 +145,78 @@ export default function MoondreamDetections({
           if (result.success && result.caption) {
             setResponse(result.caption);
           } else {
-            setError(result.error || 'Failed to generate caption');
+            setError(result.error || t('aiDetections', 'moonDreamFailedCaption'));
           }
           break;
 
         case 'query-no-reasoning':
           if (!inputValue.trim()) {
-            setError('Please enter a question');
+            setError(t('aiDetections', 'moonDreamEnterQuestion'));
             return;
           }
           result = await callQuery(inputValue, false);
           if (result.success && result.answer) {
             setResponse(result.answer);
           } else {
-            setError(result.error || 'Failed to answer question');
+            setError(result.error || t('aiDetections', 'moonDreamFailedQuestion'));
           }
           break;
 
         case 'query-with-reasoning':
           if (!inputValue.trim()) {
-            setError('Please enter a question');
+            setError(t('aiDetections', 'moonDreamEnterQuestion'));
             return;
           }
           result = await callQuery(inputValue, true);
           if (result.success) {
             if (result.reasoning) {
-              setResponse(`${result.reasoning.text}\n\nAnswer: ${result.answer}`);
+              setResponse(`${result.reasoning.text}\n\n${t('aiDetections', 'moonDreamAnswerLabel')}: ${result.answer}`);
             } else if (result.answer) {
               setResponse(result.answer);
             }
           } else {
-            setError(result.error || 'Failed to answer question with reasoning');
+            setError(result.error || t('aiDetections', 'moonDreamFailedReasoning'));
           }
           break;
 
         case 'detect':
           if (!inputValue.trim()) {
-            setError('Please enter a description');
+            setError(t('aiDetections', 'moonDreamEnterDescription'));
             return;
           }
           result = await callDetect(inputValue);
           if (result.success && result.objects) {
             const count = result.objects.length;
-            setResponse(`Found ${count} object${count !== 1 ? 's' : ''} matching "${inputValue}". ${count > 0 ? 'Purple bounding boxes shown on the live stream.' : ''}`);
+            setResponse(t('aiDetections', 'moonDreamDetectResult')
+              .replace('{count}', String(count))
+              .replace('{objectLabel}', count === 1 ? t('aiDetections', 'moonDreamObjectSingular') : t('aiDetections', 'moonDreamObjectPlural'))
+              .replace('{input}', inputValue)
+              .replace('{overlayMessage}', count > 0 ? t('aiDetections', 'moonDreamBoundingBoxesShown') : ''));
           } else {
-            setError(result.error || 'Failed to detect objects');
+            setError(result.error || t('aiDetections', 'moonDreamFailedDetect'));
           }
           break;
 
         case 'point':
           if (!inputValue.trim()) {
-            setError('Please enter a description');
+            setError(t('aiDetections', 'moonDreamEnterDescription'));
             return;
           }
           result = await callPoint(inputValue);
           if (result.success && result.points) {
             const count = result.points.length;
-            setResponse(`Identified ${count} point${count !== 1 ? 's' : ''} for "${inputValue}". ${count > 0 ? 'Red markers shown on the live stream.' : ''}`);
+            setResponse(t('aiDetections', 'moonDreamPointResult')
+              .replace('{count}', String(count))
+              .replace('{pointLabel}', count === 1 ? t('aiDetections', 'moonDreamPointSingular') : t('aiDetections', 'moonDreamPointPlural'))
+              .replace('{input}', inputValue)
+              .replace('{overlayMessage}', count > 0 ? t('aiDetections', 'moonDreamRedMarkersShown') : ''));
           } else {
-            setError(result.error || 'Failed to identify points');
+            setError(result.error || t('aiDetections', 'moonDreamFailedPoint'));
           }
           break;
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(t('aiDetections', 'moonDreamUnexpectedError'));
       console.error('MoonDream error:', err);
     }
   };
@@ -211,7 +237,7 @@ export default function MoondreamDetections({
                 onClick={() => {
                   setSelectedMode(mode);
                   setInputValue(''); // Clear input when switching modes
-                  setResponse('Ready to interact with MoonDream. Select a mode and submit to begin.');
+                  setResponse(t('aiDetections', 'moonDreamReady'));
                   setError(null);
                   clearOverlays(); // Clear any existing overlays
                 }}
@@ -246,7 +272,7 @@ export default function MoondreamDetections({
                       : 'text-gray-700 dark:text-gray-300'
                     }
                   `}>
-                    {config.title}
+                    {getModeTitle(mode)}
                   </span>
                 </div>
               </button>
@@ -275,10 +301,10 @@ export default function MoondreamDetections({
 
             <div className="flex-1">
               <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1">
-                {currentMode.title}
+                {getModeTitle(selectedMode)}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {currentMode.description}
+                {getModeDescription(selectedMode)}
               </p>
             </div>
           </div>
@@ -289,7 +315,7 @@ export default function MoondreamDetections({
       {currentMode.hasInput && (
         <div className="flex-shrink-0">
           <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
-            {(currentMode as ModeConfigWithInput).inputLabel}
+            {getInputLabel(selectedMode)}
           </label>
           <div className="flex gap-3">
             <input
@@ -297,7 +323,7 @@ export default function MoondreamDetections({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && inputValue.trim() && handleSubmit()}
-              placeholder={(currentMode as ModeConfigWithInput).inputPlaceholder}
+              placeholder={getInputPlaceholder(selectedMode)}
               className={`
                 flex-1 px-5 py-3 rounded-lg text-base
                 border border-gray-300 dark:border-gray-600
@@ -327,7 +353,7 @@ export default function MoondreamDetections({
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              <span>{loading ? 'Processing...' : 'Send'}</span>
+              <span>{loading ? t('aiDetections', 'moonDreamProcessing') : t('aiDetections', 'moonDreamSend')}</span>
             </button>
 
             {/* Clear button for Detect and Point modes */}
@@ -335,7 +361,7 @@ export default function MoondreamDetections({
               <button
                 onClick={() => {
                   clearOverlays();
-                  setResponse('Overlays cleared from the live stream.');
+                  setResponse(t('aiDetections', 'moonDreamOverlaysCleared'));
                 }}
                 className={`
                   px-4 py-3 rounded-lg font-medium
@@ -345,10 +371,10 @@ export default function MoondreamDetections({
                   hover:from-red-600 hover:to-orange-600
                   shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
                 `}
-                title="Clear all bounding boxes and points from the live stream"
+                title={t('aiDetections', 'moonDreamClearOverlaysTitle')}
               >
                 <X className="w-4 h-4" />
-                <span>Clear</span>
+                <span>{t('aiDetections', 'moonDreamClear')}</span>
               </button>
             )}
           </div>
@@ -376,7 +402,7 @@ export default function MoondreamDetections({
             ) : (
               <ModeIcon className="w-6 h-6" />
             )}
-            <span>{loading ? 'Generating...' : 'Generate Caption'}</span>
+            <span>{loading ? t('aiDetections', 'moonDreamGenerating') : t('aiDetections', 'moonDreamGenerateCaption')}</span>
           </button>
         </div>
       )}
@@ -389,7 +415,7 @@ export default function MoondreamDetections({
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentMode.color} animate-pulse`} />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                MoonDream Response
+                {t('aiDetections', 'moonDreamResponse')}
               </span>
             </div>
 
@@ -397,19 +423,19 @@ export default function MoondreamDetections({
             {(boundingBoxes.length > 0 || points.length > 0) && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-gray-500 dark:text-gray-400">
-                  {boundingBoxes.length > 0 && `${boundingBoxes.length} box${boundingBoxes.length !== 1 ? 'es' : ''}`}
+                  {boundingBoxes.length > 0 && `${boundingBoxes.length} ${boundingBoxes.length === 1 ? t('aiDetections', 'moonDreamBoxSingular') : t('aiDetections', 'moonDreamBoxPlural')}`}
                   {boundingBoxes.length > 0 && points.length > 0 && ', '}
-                  {points.length > 0 && `${points.length} point${points.length !== 1 ? 's' : ''}`}
+                  {points.length > 0 && `${points.length} ${points.length === 1 ? t('aiDetections', 'moonDreamPointSingular') : t('aiDetections', 'moonDreamPointPlural')}`}
                 </span>
                 <button
                   onClick={() => {
                     clearOverlays();
-                    setResponse('All overlays have been cleared from the live stream.');
+                    setResponse(t('aiDetections', 'moonDreamAllOverlaysCleared'));
                   }}
                   className="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-medium transition-colors duration-200"
-                  title="Clear all overlays"
+                  title={t('aiDetections', 'moonDreamClearAllOverlaysTitle')}
                 >
-                  Clear All
+                  {t('aiDetections', 'moonDreamClearAll')}
                 </button>
               </div>
             )}
@@ -455,11 +481,11 @@ export default function MoondreamDetections({
           {/* Response metadata */}
           <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span className="italic">
-              Mode: {currentMode.title}
+              {t('aiDetections', 'moonDreamMode')}: {getModeTitle(selectedMode)}
             </span>
             {inputValue && currentMode.hasInput && (
               <span className="truncate max-w-[200px]">
-                Input: "{inputValue}"
+                {t('aiDetections', 'moonDreamInput')}: "{inputValue}"
               </span>
             )}
           </div>

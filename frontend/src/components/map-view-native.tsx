@@ -618,7 +618,7 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
           <button
             onClick={handleStopNavigation}
             className="bg-red-500 dark:bg-red-600 text-white w-8 h-8 rounded-lg border border-red-600 dark:border-red-700 shadow-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors flex items-center justify-center"
-            title="Stop navigation"
+            title={t('maps', 'stopNavigation')}
           >
             <Square className="w-4 h-4" />
           </button>
@@ -630,7 +630,7 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
                 ? 'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 dark:border-emerald-700' 
                 : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
-            title={isGoalMode ? "Cancel goal setting" : "Set navigation goal"}
+            title={isGoalMode ? t('maps', 'cancelGoalSetting') : t('maps', 'setNavigationGoal')}
             disabled={!nav2Connected || isNavigating}
           >
             <Navigation className="w-4 h-4" />
@@ -639,21 +639,21 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
         <button
           onClick={handleZoomIn}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom in"
+          title={t('maps', 'zoomIn')}
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={handleZoomOut}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom out"
+          title={t('maps', 'zoomOut')}
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
           onClick={handleReset}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Reset view"
+          title={t('maps', 'resetView')}
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -664,7 +664,7 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
               ? 'bg-green-500 dark:bg-green-600 text-white border-green-600 dark:border-green-700 hover:bg-green-600 dark:hover:bg-green-700' 
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
-          title={showNavPlan ? "Hide navigation plan" : "Show navigation plan"}
+          title={showNavPlan ? t('maps', 'hideNavigationPlan') : t('maps', 'showNavigationPlan')}
         >
           <Route className="w-4 h-4" />
         </button>
@@ -699,7 +699,7 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin mb-2"></div>
-            <p className="text-sm text-white">Loading map...</p>
+            <p className="text-sm text-white">{t('maps', 'loadingMap')}</p>
           </div>
         </div>
       )}
@@ -719,17 +719,17 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
         <div className="absolute bottom-3 left-3 bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 rounded-lg p-2 text-xs">
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-violet-500" />
-            <span className="text-gray-700 dark:text-gray-300">Robot Position</span>
+            <span className="text-gray-700 dark:text-gray-300">{t('maps', 'robotPosition')}</span>
           </div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-3 h-3 bg-gray-700 dark:bg-gray-300"></div>
-            <span className="text-gray-700 dark:text-gray-300">Walls</span>
+            <span className="text-gray-700 dark:text-gray-300">{t('maps', 'walls')}</span>
           </div>
           {goalPosition && (
             <div className="flex items-center gap-2">
               <Navigation className="w-3 h-3 text-emerald-500" />
               <span className="text-gray-700 dark:text-gray-300">
-                {isNavigating ? 'Navigating...' : 'Nav Goal'}
+                {isNavigating ? t('maps', 'navigating') : t('maps', 'navGoal')}
               </span>
             </div>
           )}
@@ -741,7 +741,7 @@ export default function MapViewNative({ className = '' }: MapViewNativeProps) {
         <div className="absolute top-3 left-3 bg-emerald-500 dark:bg-emerald-600 text-white rounded-lg px-3 py-2 text-sm shadow-lg">
           <div className="flex items-center gap-2">
             <Navigation className="w-4 h-4" />
-            <span>Click on map to set navigation goal</span>
+            <span>{t('maps', 'clickOnMapToSetNavigationGoal')}</span>
           </div>
         </div>
       )}

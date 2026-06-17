@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { User, Calendar, Clock, Activity, TrendingUp, Shield, Sparkles } from 'lucide-react';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Database } from '@/types/database.types';
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 
 export default function WelcomeSection() {
   const { user, supabase } = useSupabase();
+  const { language, t } = useLanguage();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [lastSeen, setLastSeen] = useState<string>('');
@@ -45,10 +47,10 @@ export default function WelcomeSection() {
           const diffMs = now.getTime() - lastActivity.getTime();
           const diffMins = Math.floor(diffMs / 60000);
 
-          if (diffMins < 1) setLastSeen('Just now');
-          else if (diffMins < 60) setLastSeen(`${diffMins}m ago`);
-          else if (diffMins < 1440) setLastSeen(`${Math.floor(diffMins / 60)}h ago`);
-          else setLastSeen(`${Math.floor(diffMins / 1440)}d ago`);
+          if (diffMins < 1) setLastSeen(t('dashboard', 'justNow'));
+          else if (diffMins < 60) setLastSeen(t('dashboard', 'minutesAgo').replace('{count}', String(diffMins)));
+          else if (diffMins < 1440) setLastSeen(t('dashboard', 'hoursAgo').replace('{count}', String(Math.floor(diffMins / 60))));
+          else setLastSeen(t('dashboard', 'daysAgo').replace('{count}', String(Math.floor(diffMins / 1440))));
         }
 
         // Fetch weekly activity count
@@ -129,16 +131,16 @@ export default function WelcomeSection() {
           const diffYears = Math.floor(diffDays / 365);
 
           if (diffYears > 0) {
-            setMemberSince(`${diffYears} ${diffYears === 1 ? 'year' : 'years'}`);
+            setMemberSince(`${diffYears} ${t('dashboard', diffYears === 1 ? 'year' : 'years')}`);
           } else if (diffMonths > 0) {
-            setMemberSince(`${diffMonths} ${diffMonths === 1 ? 'month' : 'months'}`);
+            setMemberSince(`${diffMonths} ${t('dashboard', diffMonths === 1 ? 'month' : 'months')}`);
           } else if (diffDays > 7) {
             const weeks = Math.floor(diffDays / 7);
-            setMemberSince(`${weeks} ${weeks === 1 ? 'week' : 'weeks'}`);
+            setMemberSince(`${weeks} ${t('dashboard', weeks === 1 ? 'week' : 'weeks')}`);
           } else if (diffDays > 0) {
-            setMemberSince(`${diffDays} ${diffDays === 1 ? 'day' : 'days'}`);
+            setMemberSince(`${diffDays} ${t('dashboard', diffDays === 1 ? 'day' : 'days')}`);
           } else {
-            setMemberSince('Today');
+            setMemberSince(t('dashboard', 'today'));
           }
         }
       } catch (error) {
@@ -147,7 +149,7 @@ export default function WelcomeSection() {
     };
 
     fetchUserProfile();
-  }, [user, supabase]);
+  }, [user, supabase, t]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -159,13 +161,14 @@ export default function WelcomeSection() {
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('dashboard', 'goodMorning');
+    if (hour < 17) return t('dashboard', 'goodAfternoon');
+    return t('dashboard', 'goodEvening');
   };
 
   const formatDate = () => {
-    return currentTime.toLocaleDateString('en-US', {
+    const locale = language === 'zh-CN' ? 'zh-CN' : language === 'pt' ? 'pt-BR' : 'en-US';
+    return currentTime.toLocaleDateString(locale, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -202,7 +205,7 @@ export default function WelcomeSection() {
                   {userProfile?.avatar_url ? (
                     <img
                       src={userProfile.avatar_url}
-                      alt="User Avatar"
+                      alt={t('dashboard', 'userAvatar')}
                       className="h-14 w-14 rounded-xl object-cover"
                     />
                   ) : (
@@ -220,29 +223,33 @@ export default function WelcomeSection() {
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
-                {getGreeting()}, {userProfile?.name || user?.email?.split('@')[0] || 'User'}!
+                {getGreeting()}, {userProfile?.name || user?.email?.split('@')[0] || t('dashboard', 'user')}!
               </h1>
-              <p className="mt-2 text-white/90">Welcome back to BotBrain</p>
+              <p className="mt-2 text-white/90">{t('dashboard', 'welcomeBackToBotBrain')}</p>
 
               {/* User stats in a row */}
               <div className="flex flex-wrap items-center gap-4 mt-4">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                   <Activity className="h-3.5 w-3.5 text-green-300" />
-                  <span className="text-xs font-medium">Active {lastSeen || 'Now'}</span>
+                  <span className="text-xs font-medium">{t('dashboard', 'active')} {lastSeen || t('dashboard', 'now')}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                   <TrendingUp className="h-3.5 w-3.5 text-blue-300" />
-                  <span className="text-xs font-medium">{weeklyActivity} actions this week</span>
+                  <span className="text-xs font-medium">{t('dashboard', 'actionsThisWeek').replace('{count}', String(weeklyActivity))}</span>
                 </div>
                 {streak > 0 && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                     <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
-                    <span className="text-xs font-medium">{streak} day{streak !== 1 ? 's' : ''} streak</span>
+                    <span className="text-xs font-medium">
+                      {t('dashboard', streak === 1 ? 'dayStreak' : 'daysStreak').replace('{count}', String(streak))}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                   <Shield className="h-3.5 w-3.5 text-purple-300" />
-                  <span className="text-xs font-medium">User for {memberSince || '0 days'}</span>
+                  <span className="text-xs font-medium">
+                    {t('dashboard', 'userFor').replace('{duration}', memberSince || `0 ${t('dashboard', 'days')}`)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -255,7 +262,7 @@ export default function WelcomeSection() {
               <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all">
                 <Clock className="h-5 w-5 text-white/90" />
                 <div>
-                  <p className="text-xs text-white/70">Current Time</p>
+                  <p className="text-xs text-white/70">{t('dashboard', 'currentTime')}</p>
                   <p className="font-mono font-bold text-lg">{formatTime()}</p>
                 </div>
               </div>
@@ -265,7 +272,7 @@ export default function WelcomeSection() {
               <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all">
                 <Calendar className="h-5 w-5 text-white/90" />
                 <div>
-                  <p className="text-xs text-white/70">Today's Date</p>
+                  <p className="text-xs text-white/70">{t('dashboard', 'todaysDate')}</p>
                   <p className="font-medium">{formatDate()}</p>
                 </div>
               </div>

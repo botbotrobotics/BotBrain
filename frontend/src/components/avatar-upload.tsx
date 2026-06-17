@@ -29,27 +29,27 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
     if (!file) return;
 
     if (!supabase) {
-      alert('Database connection not available');
+      alert(t('profile', 'databaseUnavailable'));
       return;
     }
 
     // Check authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
-      alert('You must be logged in to upload an avatar');
+      alert(t('profile', 'avatarLoginRequired'));
       return;
     }
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, WebP, or GIF)');
+      alert(t('profile', 'invalidAvatarFile'));
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      alert(t('profile', 'avatarFileSizeLimit'));
       return;
     }
 
@@ -110,7 +110,7 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
       });
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      const errorMessage = error?.message || error?.error_description || 'Error uploading avatar. Please try again.';
+      const errorMessage = error?.message || error?.error_description || t('profile', 'avatarUploadError');
       alert(errorMessage);
     } finally {
       setUploading(false);
@@ -120,7 +120,7 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
   const handleDelete = async () => {
     if (!avatarUrl || !supabase) return;
 
-    const confirmDelete = window.confirm('Are you sure you want to delete your avatar?');
+    const confirmDelete = window.confirm(t('profile', 'deleteAvatarConfirm'));
     if (!confirmDelete) return;
 
     setUploading(true);
@@ -151,7 +151,7 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
       });
     } catch (error) {
       console.error('Error deleting avatar:', error);
-      alert('Error deleting avatar. Please try again.');
+      alert(t('profile', 'deleteAvatarError'));
     } finally {
       setUploading(false);
     }
@@ -165,7 +165,7 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
           {previewUrl ? (
             <img 
               src={previewUrl} 
-              alt="Avatar" 
+              alt={t('profile', 'avatarAlt')}
               className="max-w-full max-h-full object-contain"
             />
           ) : (
@@ -192,7 +192,7 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
           <button
             onClick={handleDelete}
             className="absolute -top-2 -right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition-colors"
-            title="Delete"
+            title={t('profile', 'deleteAvatar')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -218,16 +218,16 @@ export default function AvatarUpload({ avatarUrl, userId, onAvatarUpdate }: Avat
         {uploading ? (
           <>
             <Loader2 className="w-4 h-4 inline-block mr-2 animate-spin" />
-            Uploading...
+            {t('profile', 'uploadingAvatar')}
           </>
         ) : (
-          previewUrl ? 'Change Avatar' : 'Upload Avatar'
+          previewUrl ? t('profile', 'changeAvatar') : t('profile', 'uploadAvatar')
         )}
       </button>
 
       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-        Click on the avatar or button to upload. Max 5MB. JPEG, PNG, WebP, or GIF.
+        {t('profile', 'avatarUploadHelp')}
       </p>
     </div>
   );
-} 
+}

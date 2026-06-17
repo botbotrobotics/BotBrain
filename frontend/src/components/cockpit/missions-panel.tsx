@@ -9,6 +9,7 @@ import useFollowWaypoints from '@/hooks/ros/useFollowWaypoints';
 import { missionsService, MissionWithWaypoints } from '@/services/missions';
 import { cn } from '@/utils/cn';
 import { useActiveMission } from '@/contexts/ActiveMissionContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Helper to normalize map names for comparison
 function normalizeMapName(name: string): string {
@@ -34,6 +35,7 @@ interface MissionItemProps {
 
 function MissionItem({ mission, isSelected, isRunning, progress, onSelect, disabled }: MissionItemProps) {
   const waypointCount = mission.waypoints?.length || 0;
+  const { t } = useLanguage();
 
   return (
     <button
@@ -59,12 +61,12 @@ function MissionItem({ mission, isSelected, isRunning, progress, onSelect, disab
           <span className="font-medium truncate text-sm">{mission.name}</span>
           {isRunning && (
             <span className="text-xs px-1.5 py-0.5 rounded bg-green-500 text-white flex-shrink-0">
-              Running
+              {t('missions', 'running')}
             </span>
           )}
         </div>
         <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-          {waypointCount} {waypointCount === 1 ? 'waypoint' : 'waypoints'}
+          {waypointCount} {waypointCount === 1 ? t('missions', 'waypoint') : t('missions', 'waypoints')}
         </span>
       </div>
 
@@ -86,6 +88,7 @@ function MissionItem({ mission, isSelected, isRunning, progress, onSelect, disab
 }
 
 export default function MissionsPanel() {
+  const { t } = useLanguage();
   const { connectionStatus } = useRobotConnection();
   const { getCurrentDatabase, isConnected: rosConnected } = useRosMappingServices();
   const {
@@ -250,7 +253,7 @@ export default function MissionsPanel() {
       title={
         <div className="flex items-center">
           <Route className="mr-2 w-5 h-5" />
-          <span>Missions</span>
+          <span>{t('missions', 'title')}</span>
         </div>
       }
       className="h-full !flex !flex-col"
@@ -264,7 +267,7 @@ export default function MissionsPanel() {
             "hover:bg-gray-100 dark:hover:bg-botbot-darker",
             isRefreshing && "animate-spin"
           )}
-          title="Refresh missions"
+          title={t('missions', 'refreshMissions')}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -274,22 +277,22 @@ export default function MissionsPanel() {
       <div className="flex-1 overflow-y-auto min-h-0 space-y-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400">
-              Loading...
+              {t('missions', 'loading')}
             </div>
           ) : !isRobotConnected ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>Connect to robot to view missions</span>
+              <span>{t('missions', 'connectToRobotToViewMissions')}</span>
             </div>
           ) : !currentMapName ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>Load a map to see missions</span>
+              <span>{t('missions', 'loadMapToSeeMissions')}</span>
             </div>
           ) : filteredMissions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-4 text-sm text-gray-500 dark:text-gray-400 text-center px-2">
               <Route className="w-6 h-6 mb-1 opacity-50" />
-              <span>No missions for current map</span>
+              <span>{t('missions', 'noMissionsForCurrentMap')}</span>
             </div>
           ) : (
             filteredMissions.map(mission => (
@@ -328,12 +331,12 @@ export default function MissionsPanel() {
           {canStop ? (
             <>
               <Square className="w-4 h-4" />
-              Stop Mission
+              {t('missions', 'stopMission')}
             </>
           ) : (
             <>
               <Play className="w-4 h-4" />
-              Start Mission
+              {t('missions', 'startMission')}
             </>
           )}
         </button>

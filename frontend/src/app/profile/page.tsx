@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import ChangePasswordPopup from '@/components/change-password-popup';
 import ColorPicker from '@/components/color-picker';
 import { auditLogger } from '@/utils/audit-logger';
-import { SpeedMode, SPEED_MODE_MULTIPLIERS, SPEED_MODE_LABELS, SPEED_MODE_DESCRIPTIONS, DEFAULT_SPEED_MODE } from '@/types/speed-mode';
+import { SpeedMode, SPEED_MODE_MULTIPLIERS, DEFAULT_SPEED_MODE } from '@/types/speed-mode';
 
 // Dynamically import AvatarUpload with SSR disabled to avoid window.confirm issues
 const AvatarUpload = dynamic(
@@ -43,8 +43,20 @@ export default function ProfilePage() {
 
   useEffect(() => {
     // Set page title
-    document.title = 'Profile - BotBot';
-  }, []);
+    document.title = `${t('profile', 'title')} - BotBot`;
+  }, [t]);
+
+  const speedModeLabels: Record<SpeedMode, string> = {
+    beginner: t('profile', 'speedModeBeginner'),
+    normal: t('profile', 'speedModeNormal'),
+    insane: t('profile', 'speedModeInsane'),
+  };
+
+  const speedModeDescriptions: Record<SpeedMode, string> = {
+    beginner: t('profile', 'speedModeBeginnerDescription'),
+    normal: t('profile', 'speedModeNormalDescription'),
+    insane: t('profile', 'speedModeInsaneDescription'),
+  };
   
   // Track original values to detect changes
   const [originalName, setOriginalName] = useState('');
@@ -310,10 +322,10 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                {t('profile', 'title') || 'Profile Settings'}
+                {t('profile', 'title')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Manage your account settings and preferences
+                {t('profile', 'pageDescription')}
               </p>
             </div>
 
@@ -331,17 +343,17 @@ export default function ProfilePage() {
               {saveStatus === 'saving' ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  {t('common', 'saving') || 'Saving...'}
+                  {t('common', 'saving')}
                 </>
               ) : saveStatus === 'saved' ? (
                 <>
                   <Check className="w-4 h-4 mr-2" />
-                  {t('common', 'saved') || 'Saved'}
+                  {t('common', 'saved')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  {t('common', 'save') || 'Save Changes'}
+                  {t('profile', 'saveChanges')}
                 </>
               )}
             </button>
@@ -355,7 +367,7 @@ export default function ProfilePage() {
             {/* Avatar and Name Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                Personal Information
+                {t('profile', 'personalInformation')}
               </h2>
 
               {/* Avatar Upload Section */}
@@ -372,7 +384,7 @@ export default function ProfilePage() {
               {/* Name Field */}
               <div className="space-y-2">
                 <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('profile', 'name') || 'Display Name'}
+                  {t('profile', 'name')}
                 </label>
                 <input
                   type="text"
@@ -383,10 +395,10 @@ export default function ProfilePage() {
                              focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-botbot-accent
                              bg-white dark:bg-botbot-dark text-gray-800 dark:text-gray-100
                              transition-colors duration-200"
-                  placeholder={t('profile', 'namePlaceholder') || 'Enter your name'}
+                  placeholder={t('profile', 'namePlaceholder')}
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('profile', 'nameDescription') || 'Your display name in the application'}
+                  {t('profile', 'nameDescription')}
                 </p>
               </div>
             </div>
@@ -394,14 +406,14 @@ export default function ProfilePage() {
             {/* Account Information Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                Account Information
+                {t('profile', 'accountInformation')}
               </h2>
 
               <div className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
                   <label htmlFor="user-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t('profile', 'email') || 'Email Address'}
+                    {t('profile', 'email')}
                   </label>
                   <input
                     type="email"
@@ -413,14 +425,14 @@ export default function ProfilePage() {
                                cursor-not-allowed"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t('profile', 'emailDescription') || 'Your email address cannot be changed'}
+                    {t('profile', 'emailDescription')}
                   </p>
                 </div>
 
                 {/* User ID Field */}
                 <div className="space-y-2">
                   <label htmlFor="user-id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t('profile', 'userId') || 'User ID'}
+                    {t('profile', 'userId')}
                   </label>
                   <input
                     type="text"
@@ -432,7 +444,7 @@ export default function ProfilePage() {
                                cursor-not-allowed font-mono text-sm"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t('profile', 'userIdDescription') || 'Your unique user identifier'}
+                    {t('profile', 'userIdDescription')}
                   </p>
                 </div>
               </div>
@@ -441,7 +453,7 @@ export default function ProfilePage() {
             {/* Security Actions Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                Security
+                {t('profile', 'security')}
               </h2>
 
               <div className="space-y-3">
@@ -454,7 +466,7 @@ export default function ProfilePage() {
                              transition-all duration-200 border border-gray-200 dark:border-botbot-darker"
                 >
                   <Key className="w-4 h-4 mr-2" />
-                  {t('profile', 'changePassword') || 'Change Password'}
+                  {t('profile', 'changePassword')}
                 </button>
 
                 {/* Sign Out Button */}
@@ -467,7 +479,7 @@ export default function ProfilePage() {
                              transition-all duration-200"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  {t('userProfile', 'logout') || 'Sign Out'}
+                  {t('userProfile', 'logout')}
                 </button>
               </div>
             </div>
@@ -478,7 +490,7 @@ export default function ProfilePage() {
             {/* Appearance Settings Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                Appearance
+                {t('profile', 'appearance')}
               </h2>
 
               <div className="space-y-6">
@@ -493,15 +505,15 @@ export default function ProfilePage() {
                 {/* Hide Branding Toggle */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Branding Options
+                    {t('profile', 'brandingOptions')}
                   </label>
                   <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-botbot-dark/50 rounded-lg">
                     <div className="flex-1 mr-4">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Hide BotBot Logo
+                        {t('profile', 'hideBotBotLogo')}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Remove the BotBot logo from the navigation bar
+                        {t('profile', 'hideBotBotLogoDescription')}
                       </p>
                     </div>
                     <button
@@ -525,22 +537,22 @@ export default function ProfilePage() {
             {/* System Settings Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                System Settings
+                {t('profile', 'systemSettings')}
               </h2>
 
               <div className="space-y-6">
                 {/* Audit Logging Toggle */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Privacy & Logging
+                    {t('profile', 'privacyAndLogging')}
                   </label>
                   <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-botbot-dark/50 rounded-lg">
                     <div className="flex-1 mr-4">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Audit Logging
+                        {t('profile', 'auditLogging')}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Log all user actions for security and analytics purposes
+                        {t('profile', 'auditLoggingDescription')}
                       </p>
                     </div>
                     <button
@@ -562,12 +574,12 @@ export default function ProfilePage() {
                 {/* Connection Timeout Setting */}
                 <div className="space-y-2">
                   <label htmlFor="connection-timeout" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Robot Connection
+                    {t('profile', 'robotConnection')}
                   </label>
                   <div className="p-4 bg-gray-50 dark:bg-botbot-dark/50 rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Connection Timeout
+                        {t('profile', 'connectionTimeout')}
                       </p>
                       <div className="flex items-center space-x-2">
                         <input
@@ -588,11 +600,11 @@ export default function ProfilePage() {
                                      bg-white dark:bg-botbot-dark text-gray-800 dark:text-gray-100
                                      text-sm text-center"
                         />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">seconds</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('profile', 'seconds')}</span>
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Time to wait for robot connection before timing out (1-120 seconds, default: 20)
+                      {t('profile', 'connectionTimeoutDescription')}
                     </p>
                   </div>
                 </div>
@@ -602,12 +614,12 @@ export default function ProfilePage() {
             {/* Speed & Control Card */}
             <div className="bg-white dark:bg-botbot-darker rounded-xl shadow-sm border border-gray-200 dark:border-botbot-dark p-6">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">
-                Speed & Control
+                {t('profile', 'speedAndControl')}
               </h2>
 
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Speed Mode
+                  {t('profile', 'speedMode')}
                 </label>
 
                 {/* Segmented Control */}
@@ -623,20 +635,20 @@ export default function ProfilePage() {
                           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                         }`}
                     >
-                      {SPEED_MODE_LABELS[mode]}
+                      {speedModeLabels[mode]}
                     </button>
                   ))}
                 </div>
 
                 {/* Description for selected mode */}
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {SPEED_MODE_DESCRIPTIONS[speedMode]}
+                  {speedModeDescriptions[speedMode]}
                 </p>
 
                 {/* Visual indicator */}
                 <div className="p-4 bg-gray-50 dark:bg-botbot-dark/50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Speed Level</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{t('profile', 'speedLevel')}</span>
                     <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                       {Math.round(SPEED_MODE_MULTIPLIERS[speedMode] * 100)}%
                     </span>
@@ -694,15 +706,17 @@ export default function ProfilePage() {
 
               {/* Title */}
               <h2 className="text-lg font-semibold text-center text-gray-900 dark:text-white mb-2">
-                Enable Insane Mode?
+                {t('profile', 'enableInsaneModeTitle')}
               </h2>
 
               {/* Message */}
               <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-2">
-                This will set robot speed to <span className="font-semibold text-red-600 dark:text-red-400">100%</span> of maximum velocity.
+                {t('profile', 'enableInsaneModeDescriptionPrefix')}{' '}
+                <span className="font-semibold text-red-600 dark:text-red-400">100%</span>{' '}
+                {t('profile', 'enableInsaneModeDescriptionSuffix')}
               </p>
               <p className="text-xs text-center text-gray-500 dark:text-gray-400 mb-6">
-                Only recommended for experienced operators in controlled environments.
+                {t('profile', 'insaneModeRecommendation')}
               </p>
 
               {/* Buttons */}
@@ -714,7 +728,7 @@ export default function ProfilePage() {
                              hover:bg-gray-100 dark:hover:bg-botbot-darker
                              transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600"
                 >
-                  Cancel
+                  {t('common', 'cancel')}
                 </button>
                 <button
                   onClick={confirmInsaneMode}
@@ -723,7 +737,7 @@ export default function ProfilePage() {
                              text-white font-medium
                              transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
-                  Enable Insane
+                  {t('profile', 'enableInsane')}
                 </button>
               </div>
             </motion.div>
@@ -732,4 +746,4 @@ export default function ProfilePage() {
       </AnimatePresence>
     </div>
   );
-} 
+}

@@ -68,7 +68,7 @@ export default function MapView({ className = '' }: MapViewProps) {
           const availableMapTopics = commonMapTopics.filter(topic => result.topics.includes(topic));
           if (availableMapTopics.length === 0) {
             console.warn('No standard map topics found. You may need to run a map server or navigation stack.');
-            setMapError('No map topics available. Please ensure map_server or navigation is running.');
+            setMapError(t('maps', 'noMapTopicsAvailable'));
           } else {
             console.log('Found map topics:', availableMapTopics);
           }
@@ -143,7 +143,7 @@ export default function MapView({ className = '' }: MapViewProps) {
         initializeMap();
       } catch (error) {
         console.error('Error loading map scripts:', error);
-        setMapError('Failed to load map libraries');
+        setMapError(t('maps', 'failedToLoadMapLibraries'));
       }
     };
 
@@ -216,7 +216,7 @@ export default function MapView({ className = '' }: MapViewProps) {
           console.log('OccupancyGridClient created successfully for topic:', mapTopic);
         } catch (error) {
           console.error('Error creating OccupancyGridClient:', error);
-          setMapError('Failed to create map client');
+          setMapError(t('maps', 'failedToCreateMapClient'));
           return;
         }
 
@@ -469,7 +469,7 @@ export default function MapView({ className = '' }: MapViewProps) {
         };
       } catch (error) {
         console.error('Error initializing map:', error);
-        setMapError(error instanceof Error ? error.message : 'Failed to initialize map viewer');
+        setMapError(error instanceof Error ? error.message : t('maps', 'failedToInitializeMapViewer'));
         
         // Try a fallback approach with manual canvas rendering
         if (tryFallbackMapRenderingRef.current) {
@@ -691,7 +691,7 @@ export default function MapView({ className = '' }: MapViewProps) {
           resetBtn.style.color = 'white';
           resetBtn.style.cursor = 'pointer';
           resetBtn.style.borderRadius = '4px';
-          resetBtn.title = 'Reset view';
+          resetBtn.title = t('maps', 'resetView');
           
           zoomInBtn.onclick = (e) => {
             e.preventDefault();
@@ -898,7 +898,7 @@ export default function MapView({ className = '' }: MapViewProps) {
       setIsMapLoaded(false);
       setMapError(null);
     };
-  }, [connection.ros, connection.online, showCostmap]);
+  }, [connection.ros, connection.online, showCostmap, t]);
 
   if (!connection.online) {
     return (
@@ -918,9 +918,9 @@ export default function MapView({ className = '' }: MapViewProps) {
         <button
           onClick={() => setShowCostmap(!showCostmap)}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-xs rounded-lg px-3 py-1.5 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          title={showCostmap ? "Show base map" : "Show costmap"}
+          title={showCostmap ? t('maps', 'showBaseMap') : t('maps', 'showCostmap')}
         >
-          {showCostmap ? 'Costmap' : 'Base Map'}
+          {showCostmap ? t('maps', 'costmap') : t('maps', 'baseMap')}
         </button>
       </div>
 
@@ -936,7 +936,7 @@ export default function MapView({ className = '' }: MapViewProps) {
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin mb-2"></div>
-            <p className="text-sm text-white mb-2">Loading map...</p>
+            <p className="text-sm text-white mb-2">{t('maps', 'loadingMap')}</p>
             <button
               onClick={() => {
                 console.log('Manual fallback trigger');
@@ -946,7 +946,7 @@ export default function MapView({ className = '' }: MapViewProps) {
               }}
               className="text-xs text-gray-300 underline hover:text-white"
             >
-              Use fallback renderer
+              {t('maps', 'useFallbackRenderer')}
             </button>
           </div>
         </div>
@@ -967,12 +967,12 @@ export default function MapView({ className = '' }: MapViewProps) {
         <div className="absolute bottom-3 left-3 bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 rounded-lg p-2 text-xs">
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-orange-500" />
-            <span className="text-gray-700 dark:text-gray-300">Robot Position</span>
+            <span className="text-gray-700 dark:text-gray-300">{t('maps', 'robotPosition')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-gray-700 dark:bg-gray-300"></div>
             <span className="text-gray-700 dark:text-gray-300">
-              {showCostmap ? 'Obstacles' : 'Walls'}
+              {showCostmap ? t('maps', 'obstacles') : t('maps', 'walls')}
             </span>
           </div>
         </div>

@@ -36,6 +36,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WeatherData {
   properties: {
@@ -212,6 +213,7 @@ const UVIndexIndicator: React.FC<{ index: number }> = ({ index }) => {
 };
 
 const WeatherDashboard: React.FC = () => {
+  const { t } = useLanguage();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -302,7 +304,7 @@ const WeatherDashboard: React.FC = () => {
               }
             );
             const data = await response.json();
-            loc.placeName = data.address?.city || data.address?.town || data.address?.village || 'Unknown Location';
+            loc.placeName = data.address?.city || data.address?.town || data.address?.village || t('weather', 'unknownLocation');
           } catch (err) {
             loc.placeName = `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`;
           }
@@ -310,15 +312,15 @@ const WeatherDashboard: React.FC = () => {
           setLocation(loc);
         },
         (err) => {
-          setError('Unable to get location. Please enable location services.');
+          setError(t('weather', 'locationUnavailable'));
           setLoading(false);
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser.');
+      setError(t('weather', 'geolocationUnsupported'));
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Fetch weather data
   const fetchWeatherData = useCallback(async () => {
@@ -351,13 +353,13 @@ const WeatherDashboard: React.FC = () => {
 
       setError(null);
     } catch (err) {
-      setError('Failed to fetch weather data. Please try again.');
+      setError(t('weather', 'failedToFetch'));
       console.error('Weather fetch error:', err);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [location]);
+  }, [location, t]);
 
   useEffect(() => {
     if (location) {
@@ -1006,10 +1008,7 @@ const WeatherDashboard: React.FC = () => {
       >
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
           <Info className="w-4 h-4 mr-2 flex-shrink-0" />
-          <span>
-            Weather data provided by MET Norway API. Location determined using browser's Geolocation API.
-            Only your coordinates are shared with weather services to fetch local conditions. Data updates every 5 minutes.
-          </span>
+          <span>{t('weather', 'attribution')}</span>
         </div>
       </motion.div>
     </div>

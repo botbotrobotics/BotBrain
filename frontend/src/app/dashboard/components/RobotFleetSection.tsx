@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Bot, Wifi, WifiOff, Star, Plus, ArrowRight, Loader2 } from 'lucide-react';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Database } from '@/types/database.types';
 import Button from '@/components/ui/button';
 
@@ -15,9 +16,10 @@ interface RobotCardProps {
   isConnected: boolean;
   isConnecting: boolean;
   onConnect: () => void;
+  t: ReturnType<typeof useLanguage>['t'];
 }
 
-function RobotCard({ robot, isConnected, isConnecting, onConnect }: RobotCardProps) {
+function RobotCard({ robot, isConnected, isConnecting, onConnect, t }: RobotCardProps) {
   const statusGradient = isConnected
     ? 'from-green-400 to-emerald-500'
     : 'from-gray-400 to-gray-500';
@@ -70,7 +72,7 @@ function RobotCard({ robot, isConnected, isConnecting, onConnect }: RobotCardPro
               {robot.name}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {robot.type || 'Robot'} • ID: {robot.id.slice(0, 8)}
+              {robot.type || t('dashboard', 'robot')} • ID: {robot.id.slice(0, 8)}
             </p>
           </div>
         </div>
@@ -88,20 +90,20 @@ function RobotCard({ robot, isConnected, isConnecting, onConnect }: RobotCardPro
                   <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75" />
                   <div className="relative w-2 h-2 bg-green-500 rounded-full" />
                 </div>
-                <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 uppercase">Live</span>
+                <span className="text-[10px] font-semibold text-green-600 dark:text-green-400 uppercase">{t('dashboard', 'live')}</span>
               </>
             ) : (
               <>
                 <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase">Offline</span>
+                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase">{t('dashboard', 'offline')}</span>
               </>
             )}
           </div>
 
           {isConnected && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">Active</span>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">{t('dashboard', 'active')}</span>
             </div>
           )}
         </div>
@@ -117,19 +119,19 @@ function RobotCard({ robot, isConnected, isConnecting, onConnect }: RobotCardPro
               {isConnecting ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  <span>Connecting...</span>
+                  <span>{t('dashboard', 'connecting')}</span>
                 </>
               ) : (
                 <>
                   <Wifi className="h-3.5 w-3.5 group-hover:animate-pulse" />
-                  <span>Connect</span>
+                  <span>{t('dashboard', 'connect')}</span>
                 </>
               )}
             </button>
           ) : (
             <div className="flex items-center justify-center gap-1 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-xl">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold text-green-700 dark:text-green-400">Connected</span>
+              <span className="text-xs font-semibold text-green-700 dark:text-green-400">{t('dashboard', 'connected')}</span>
             </div>
           )}
         </div>
@@ -142,6 +144,7 @@ export default function RobotFleetSection() {
   const router = useRouter();
   const { connection, connectionStatus, connectToRobotWithInfo } = useRobotConnection();
   const { supabase, user } = useSupabase();
+  const { t } = useLanguage();
   const [robots, setRobots] = useState<Robot[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectingRobotId, setConnectingRobotId] = useState<string | null>(null);
@@ -188,7 +191,7 @@ export default function RobotFleetSection() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Your Robots</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('dashboard', 'yourRobots')}</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -214,7 +217,7 @@ export default function RobotFleetSection() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Your Robots</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('dashboard', 'yourRobots')}</h2>
         </div>
         <div className="bg-white dark:bg-botbot-dark rounded-xl p-8 shadow-sm border border-gray-100 dark:border-botbot-darker text-center">
           <div className="max-w-md mx-auto">
@@ -222,13 +225,13 @@ export default function RobotFleetSection() {
               <Bot className="h-8 w-8 text-violet-600 dark:text-violet-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-              No Robots Yet
+              {t('dashboard', 'noRobotsYet')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Get started by adding your first robot
+              {t('dashboard', 'getStartedAddFirstRobot')}
             </p>
             <Button
-              label="Add Your First Robot"
+              label={t('dashboard', 'addYourFirstRobot')}
               colorPalette="default"
               onClick={() => router.push('/fleet')}
               customClasses="inline-flex items-center gap-2"
@@ -243,14 +246,14 @@ export default function RobotFleetSection() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Your Robot Fleet</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Manage and monitor your connected robots</p>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('dashboard', 'yourRobotFleet')}</h2>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('dashboard', 'yourRobotFleetDescription')}</p>
         </div>
         <button
           onClick={() => router.push('/fleet')}
           className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-xl transition-all duration-300 group"
         >
-          <span>Manage Fleet</span>
+          <span>{t('dashboard', 'manageFleet')}</span>
           <ArrowRight className="h-3.5 w-3.5 transform group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
@@ -263,6 +266,7 @@ export default function RobotFleetSection() {
             isConnected={connection.connectedRobot?.id === robot.id && connection.online}
             isConnecting={connectingRobotId === robot.id && connectionStatus === 'connecting'}
             onConnect={() => handleConnect(robot)}
+            t={t}
           />
         ))}
 
@@ -282,10 +286,10 @@ export default function RobotFleetSection() {
               </div>
             </div>
             <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-violet-700 dark:group-hover:text-violet-400 transition-colors">
-              Add Robot
+              {t('dashboard', 'addRobot')}
             </h3>
             <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1 group-hover:text-violet-600/70 dark:group-hover:text-violet-400/70 transition-colors">
-              Connect new device
+              {t('dashboard', 'connectNewDevice')}
             </p>
           </div>
         </div>

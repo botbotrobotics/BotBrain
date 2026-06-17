@@ -10,6 +10,7 @@ import { JoysticksWrapper } from '@/components/ui/JoysticksWrapper';
 import useRobotActions from '@/hooks/ros/useRobotActions';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MapLocation {
   id: string;
@@ -37,6 +38,7 @@ export default function MapsPage() {
   
   const { dispatch } = useNotifications();
   const { joystickEnabled, setJoystickEnabled } = useHeader();
+  const { t } = useLanguage();
   const robotActions = useRobotActions();
   
   const {
@@ -106,8 +108,8 @@ export default function MapsPage() {
         id: index.toString(),
         name: map.name,
         path: map.path,
-        lastUpdated: map.lastModified || 'Unknown',
-        size: map.size || 'Unknown',
+        lastUpdated: map.lastModified || t('maps', 'unknown'),
+        size: map.size || t('maps', 'unknown'),
       }));
       setLocations(mapsWithIds);
 
@@ -174,8 +176,8 @@ export default function MapsPage() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Map Loaded',
-          message: `Successfully loaded and activated map: ${mapName}`,
+          title: t('maps', 'mapLoadedTitle'),
+          message: t('maps', 'mapLoadedMessage').replace('{mapName}', mapName),
         },
       });
     } catch (error) {
@@ -184,8 +186,8 @@ export default function MapsPage() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to Load Map',
-          message: `Could not load map: ${mapName}`,
+          title: t('maps', 'failedToLoadMapTitle'),
+          message: t('maps', 'failedToLoadMapMessage').replace('{mapName}', mapName),
         },
       });
     } finally {
@@ -213,8 +215,8 @@ export default function MapsPage() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to Delete Map',
-          message: `Could not delete map: ${mapName}`,
+          title: t('maps', 'failedToDeleteMapTitle'),
+          message: t('maps', 'failedToDeleteMapMessage').replace('{mapName}', mapName),
         },
       });
     } finally {
@@ -228,10 +230,10 @@ export default function MapsPage() {
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex-shrink-0">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-          Maps Management
+          {t('maps', 'pageTitle')}
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          View and manage robot navigation maps
+          {t('maps', 'pageDescription')}
         </p>
       </div>
 
@@ -252,7 +254,7 @@ export default function MapsPage() {
               <button
                 onClick={() => setLeftPanelCollapsed(true)}
                 className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-100 dark:bg-botbot-darkest hover:bg-gray-200 dark:hover:bg-botbot-darker rounded-full p-2 shadow-lg transition-all duration-200"
-                title="Hide panel"
+                title={t('maps', 'hidePanel')}
               >
                 <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />
               </button>
@@ -261,7 +263,7 @@ export default function MapsPage() {
               <div className="flex flex-col h-full space-y-4">
                 {/* Camera Feed */}
                 <div className="flex-shrink-0">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Live Camera</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('maps', 'liveCamera')}</h3>
                   <div className="bg-gray-50 dark:bg-botbot-darkest/50 rounded-lg overflow-hidden aspect-video">
                     <RosCameraImg 
                       cameraType="camera"
@@ -283,32 +285,32 @@ export default function MapsPage() {
                   >
                     <Gamepad2 className="w-4 h-4" />
                     <span className="text-sm font-medium">
-                      {showJoysticks ? 'Hide' : 'Show'} Joysticks
+                      {showJoysticks ? t('maps', 'hideJoysticks') : t('maps', 'showJoysticks')}
                     </span>
                   </button>
                 </div>
 
                 {/* Robot Control Buttons */}
                 <div className="flex-1 flex flex-col space-y-2">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Robot Controls</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('maps', 'robotControls')}</h3>
                   
                   {/* Stand Up/Down */}
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => robotActions.getUp.action()}
                       className="flex items-center justify-center gap-1 px-2 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200 text-sm font-medium"
-                      title="Stand Up"
+                      title={t('actionButtons', 'getUp')}
                     >
                       <ArrowUp className="w-4 h-4" />
-                      <span className="hidden xl:inline">Get Up</span>
+                      <span className="hidden xl:inline">{t('actionButtons', 'getUp')}</span>
                     </button>
                     <button
                       onClick={() => robotActions.getDown.action()}
                       className="flex items-center justify-center gap-1 px-2 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 text-sm font-medium"
-                      title="Stand Down"
+                      title={t('actionButtons', 'getDown')}
                     >
                       <ArrowDown className="w-4 h-4" />
-                      <span className="hidden xl:inline">Get Down</span>
+                      <span className="hidden xl:inline">{t('actionButtons', 'getDown')}</span>
                     </button>
                   </div>
 
@@ -317,18 +319,18 @@ export default function MapsPage() {
                     <button
                       onClick={() => robotActions.jointLock.action()}
                       className="flex items-center justify-center gap-1 px-2 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 text-sm font-medium"
-                      title="Lock Joints"
+                      title={t('actionButtons', 'lock')}
                     >
                       <Lock className="w-4 h-4" />
-                      <span className="hidden xl:inline">Lock</span>
+                      <span className="hidden xl:inline">{t('actionButtons', 'lock')}</span>
                     </button>
                     <button
                       onClick={() => robotActions.balanceStand.action()}
                       className="flex items-center justify-center gap-1 px-2 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 text-sm font-medium"
-                      title="Unlock Joints"
+                      title={t('actionButtons', 'unlock')}
                     >
                       <Unlock className="w-4 h-4" />
-                      <span className="hidden xl:inline">Unlock</span>
+                      <span className="hidden xl:inline">{t('actionButtons', 'unlock')}</span>
                     </button>
                   </div>
 
@@ -343,7 +345,7 @@ export default function MapsPage() {
                 <button
                   onClick={() => setLeftPanelCollapsed(false)}
                   className="absolute -left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-100 dark:bg-botbot-darkest hover:bg-gray-200 dark:hover:bg-botbot-darker rounded-full p-2 shadow-lg transition-all duration-200"
-                  title="Show control panel"
+                  title={t('maps', 'showControlPanel')}
                 >
                   <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                 </button>
@@ -351,12 +353,12 @@ export default function MapsPage() {
               <div className="flex items-center justify-between mb-3 flex-shrink-0">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
-                  Map Viewer
+                  {t('maps', 'mapViewer')}
                 </h2>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   {selectedLocation 
                     ? locations.find(l => l.id === selectedLocation)?.name 
-                    : 'Current Map'}
+                    : t('maps', 'currentMap')}
                 </div>
               </div>
               <div className="flex-1 min-h-0 bg-gray-50 dark:bg-botbot-darkest/50 rounded-lg overflow-hidden">
@@ -374,8 +376,8 @@ export default function MapsPage() {
                           type: 'ADD_NOTIFICATION',
                           payload: {
                             type: 'info',
-                            title: 'Set Home Position',
-                            message: 'Click on the map to set home position, then drag to set orientation',
+                            title: t('maps', 'setHomePositionTitle'),
+                            message: t('maps', 'setHomePositionMessage'),
                           },
                         });
                       } else {
@@ -396,7 +398,7 @@ export default function MapsPage() {
               {/* Mapping Control */}
               <div className="mb-4 flex-shrink-0">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Mapping Control
+                  {t('maps', 'mappingControl')}
                 </h3>
                 <div className="space-y-3">
                   {/* Map Name Input - Shows when Start Mapping is clicked */}
@@ -411,7 +413,7 @@ export default function MapsPage() {
                             handleStartMapping();
                           }
                         }}
-                        placeholder="Enter map name..."
+                        placeholder={t('maps', 'mapNamePlaceholder')}
                         className="w-full px-3 py-2 text-sm bg-white dark:bg-botbot-darker border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         autoFocus
                       />
@@ -425,7 +427,7 @@ export default function MapsPage() {
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                            Mapping: {mapName}
+                            {t('maps', 'mappingLabel').replace('{mapName}', mapName)}
                           </span>
                         </div>
                         <span className="text-sm font-mono text-blue-700 dark:text-blue-300">
@@ -449,17 +451,17 @@ export default function MapsPage() {
                     {isMapping ? (
                       <>
                         <Square className="w-4 h-4" />
-                        <span>Stop Mapping</span>
+                        <span>{t('maps', 'stopMapping')}</span>
                       </>
                     ) : showMapNameInput && mapName.trim() ? (
                       <>
                         <Play className="w-4 h-4" />
-                        <span>Start Mapping</span>
+                        <span>{t('maps', 'startMapping')}</span>
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4" />
-                        <span>Start New Map</span>
+                        <span>{t('maps', 'startNewMap')}</span>
                       </>
                     )}
                   </button>
@@ -473,7 +475,7 @@ export default function MapsPage() {
                       }}
                       className="w-full px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200"
                     >
-                      Cancel
+                      {t('maps', 'cancel')}
                     </button>
                   )}
                 </div>
@@ -483,13 +485,13 @@ export default function MapsPage() {
               <div className="flex-1 min-h-0 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Available Maps
+                    {t('maps', 'availableMaps')}
                   </h3>
                   <button
                     onClick={fetchMaps}
                     disabled={!isConnected || isLoading}
                     className="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-botbot-darkest/80 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Refresh maps list"
+                    title={t('maps', 'refreshMaps')}
                   >
                     <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                   </button>
@@ -498,7 +500,7 @@ export default function MapsPage() {
                   {!isConnected ? (
                     <div className="h-full flex items-center justify-center">
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Connect to robot to view maps
+                        {t('maps', 'connectToRobotToViewMaps')}
                       </p>
                     </div>
                   ) : isLoading && locations.length === 0 ? (
@@ -508,7 +510,7 @@ export default function MapsPage() {
                   ) : locations.length === 0 ? (
                     <div className="h-full flex items-center justify-center">
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        No maps available
+                        {t('maps', 'noMapsAvailable')}
                       </p>
                     </div>
                   ) : (
@@ -543,21 +545,21 @@ export default function MapsPage() {
                                   <div className="flex items-center gap-2 px-3 py-1.5">
                                     <RefreshCw className="w-3 h-3 animate-spin text-red-600 dark:text-red-400" />
                                     <span className="text-xs font-medium text-red-700 dark:text-red-300">
-                                      Deleting...
+                                      {t('maps', 'deleting')}
                                     </span>
                                   </div>
                                 ) : loadingMapId === location.id ? (
                                   <div className="flex items-center gap-2 px-3 py-1.5">
                                     <RefreshCw className="w-3 h-3 animate-spin text-yellow-600 dark:text-yellow-400" />
                                     <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">
-                                      Loading...
+                                      {t('maps', 'loading')}
                                     </span>
                                   </div>
                                 ) : selectedLocation === location.id ? (
                                   <>
                                     <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-md">
                                       <CheckCircle className="w-3 h-3" />
-                                      <span className="text-xs font-medium">Active</span>
+                                      <span className="text-xs font-medium">{t('maps', 'active')}</span>
                                     </div>
                                     <button
                                       className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors duration-200"
@@ -565,7 +567,7 @@ export default function MapsPage() {
                                         e.stopPropagation();
                                         setShowDeleteConfirm(location.id);
                                       }}
-                                      title="Delete map"
+                                      title={t('maps', 'deleteMap')}
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -579,7 +581,7 @@ export default function MapsPage() {
                                         handleLoadMap(location.id, location.path, location.name);
                                       }}
                                     >
-                                      Load Map
+                                      {t('maps', 'loadMap')}
                                     </button>
                                     <button
                                       className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors duration-200"
@@ -587,7 +589,7 @@ export default function MapsPage() {
                                         e.stopPropagation();
                                         setShowDeleteConfirm(location.id);
                                       }}
-                                      title="Delete map"
+                                      title={t('maps', 'deleteMap')}
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -603,10 +605,10 @@ export default function MapsPage() {
                                   <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5" />
                                   <div className="flex-1">
                                     <p className="text-sm font-medium text-red-900 dark:text-red-100">
-                                      Delete "{location.name}"?
+                                      {t('maps', 'deleteMapTitle').replace('{mapName}', location.name)}
                                     </p>
                                     <p className="text-xs text-red-700 dark:text-red-300 mt-1">
-                                      This action cannot be undone.
+                                      {t('maps', 'deleteMapWarning')}
                                     </p>
                                   </div>
                                 </div>
@@ -618,7 +620,7 @@ export default function MapsPage() {
                                     }}
                                     className="flex-1 px-3 py-1.5 text-xs font-medium bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
                                   >
-                                    Delete
+                                    {t('maps', 'delete')}
                                   </button>
                                   <button
                                     onClick={(e) => {
@@ -627,7 +629,7 @@ export default function MapsPage() {
                                     }}
                                     className="flex-1 px-3 py-1.5 text-xs font-medium bg-gray-200 dark:bg-botbot-darkest hover:bg-gray-300 dark:hover:bg-botbot-darker text-gray-700 dark:text-gray-300 rounded-md transition-colors duration-200"
                                   >
-                                    Cancel
+                                    {t('maps', 'cancel')}
                                   </button>
                                 </div>
                               </div>

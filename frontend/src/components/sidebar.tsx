@@ -84,7 +84,7 @@ export function Sidebar() {
 
   // Get language emoji based on current language
   const getLanguageEmoji = () => {
-    return language === 'en' ? '🇬🇧' : '🇧🇷';
+    return languageNames[language].split(' ')[0];
   };
 
   // Handle escape key to close panels
@@ -303,8 +303,8 @@ export function Sidebar() {
                     setShowLanguageSelector(false);
                   }}
                 >
-                  <span className="text-xl">{code === 'en' ? '🇬🇧' : '🇧🇷'}</span>
-                  {code === 'en' ? 'English' : 'Português'}
+                  <span className="text-xl">{languageNames[code].split(' ')[0]}</span>
+                  {languageNames[code].replace(/^[^ ]+ /, '')}
                 </button>
               ))}
             </div>
@@ -316,4 +316,4 @@ export function Sidebar() {
       <JoysticksWrapper enabled={joystickEnabled} />
     </>
   );
-} 
+}

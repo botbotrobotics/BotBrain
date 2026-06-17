@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Network, Home, Layout, ArrowRight, Sparkles } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface QuickAccessItem {
   icon: React.ReactNode;
@@ -14,29 +15,30 @@ interface QuickAccessItem {
 
 export default function CompactQuickAccess() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const items: QuickAccessItem[] = [
     {
       icon: <Home className="h-5 w-5" />,
-      title: "Cockpit",
+      title: t('dashboard', 'cockpit'),
       href: "/cockpit",
       gradient: "from-violet-500 to-purple-600",
-      description: "Control & monitor your robot",
+      description: t('dashboard', 'cockpitDescription'),
       highlight: true
     },
     {
       icon: <Network className="h-5 w-5" />,
-      title: "Fleet Manager",
+      title: t('dashboard', 'fleetManager'),
       href: "/fleet",
       gradient: "from-blue-500 to-cyan-600",
-      description: "Manage all your robots"
+      description: t('dashboard', 'fleetManagerDescription')
     },
     {
       icon: <Layout className="h-5 w-5" />,
-      title: "My UI",
+      title: t('dashboard', 'myUI'),
       href: "/my-ui",
       gradient: "from-green-500 to-emerald-600",
-      description: "Customize your workspace"
+      description: t('dashboard', 'myUIDescription')
     }
   ];
 

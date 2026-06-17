@@ -24,6 +24,7 @@ import {
 import { parsePGM, parseYAML, canvasToPGM, generateYAML, quantizeColor, createMapZip, MapMetadata } from '@/utils/ros/mapFileUtils';
 import { setupWebGL } from '@/utils/webgl/mapShaders';
 import { cn } from '@/utils/cn';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export type DrawingTool = 'brush' | 'eraser' | 'line' | 'rectangle' | 'circle' | 'polygon';
 export type MapRegion = 'occupied' | 'free' | 'unknown';
@@ -33,6 +34,7 @@ interface MapEditorProps {
 }
 
 export function MapEditor({ className }: MapEditorProps) {
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const toolPreviewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -640,7 +642,7 @@ export function MapEditor({ className }: MapEditorProps) {
         setHistoryIndex(0);
       } catch (error) {
         console.error('Error parsing PGM file:', error);
-        alert('Failed to parse PGM file. Please ensure it\'s a valid P5 format.');
+        alert(t('maps', 'failedParsePgm'));
       }
     } else if (file.name.endsWith('.png')) {
       // Handle PNG files
@@ -702,15 +704,15 @@ export function MapEditor({ className }: MapEditorProps) {
       
       img.onerror = () => {
         console.error('Error loading PNG file');
-        alert('Failed to load PNG file. Please ensure it\'s a valid PNG image.');
+        alert(t('maps', 'failedLoadPng'));
         URL.revokeObjectURL(url);
       };
       
       img.src = url;
     } else {
-      alert('Please select a PGM or PNG file.');
+      alert(t('maps', 'selectPgmOrPng'));
     }
-  }, []);
+  }, [t]);
   
   const handleYamlUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -722,9 +724,9 @@ export function MapEditor({ className }: MapEditorProps) {
       setMapMetadata(metadata);
     } catch (error) {
       console.error('Error parsing YAML file:', error);
-      alert('Failed to parse YAML file.');
+      alert(t('maps', 'failedParseYaml'));
     }
-  }, []);
+  }, [t]);
   
   // Drawing functions
   const getMousePos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -978,14 +980,14 @@ export function MapEditor({ className }: MapEditorProps) {
             className="flex items-center gap-2 px-3 py-2 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
             <Upload className="w-4 h-4" />
-            Upload Map (PGM/PNG)
+            {t('maps', 'uploadMapPgmPng')}
           </button>
           <button
             onClick={() => yamlInputRef.current?.click()}
             className="flex items-center gap-2 px-3 py-2 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
             <Upload className="w-4 h-4" />
-            Upload YAML
+            {t('maps', 'uploadYaml')}
           </button>
           <div className="flex items-center gap-2">
             <button
@@ -993,7 +995,7 @@ export function MapEditor({ className }: MapEditorProps) {
               className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
             >
               <Save className="w-4 h-4" />
-              Save Map
+              {t('maps', 'saveMap')}
             </button>
             <button
               onClick={performUndo}
@@ -1288,4 +1290,4 @@ export function MapEditor({ className }: MapEditorProps) {
       </div>
     </div>
   );
-} 
+}

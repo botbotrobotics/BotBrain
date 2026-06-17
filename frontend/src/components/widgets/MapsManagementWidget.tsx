@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useRosMappingServices } from '@/hooks/ros/useRosMappingServices';
 import { useNotifications } from '@/contexts/NotificationsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MapLocation {
   id: string;
@@ -57,6 +58,7 @@ export function MapsManagementWidget({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const { dispatch } = useNotifications();
+  const { t } = useLanguage();
   
   const {
     isConnected,
@@ -110,8 +112,8 @@ export function MapsManagementWidget({
         id: index.toString(),
         name: map.name,
         path: map.path,
-        lastUpdated: map.lastModified || 'Unknown',
-        size: map.size || 'Unknown',
+        lastUpdated: map.lastModified || t('maps', 'unknown'),
+        size: map.size || t('maps', 'unknown'),
       }));
       setLocations(mapsWithIds);
     } catch (error) {
@@ -163,8 +165,8 @@ export function MapsManagementWidget({
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Map Loaded',
-          message: `Successfully loaded: ${mapName}`,
+          title: t('maps', 'mapLoadedTitle'),
+          message: t('maps', 'mapLoadedShortMessage').replace('{mapName}', mapName),
         },
       });
     } catch (error) {
@@ -173,8 +175,8 @@ export function MapsManagementWidget({
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to Load Map',
-          message: `Could not load: ${mapName}`,
+          title: t('maps', 'failedToLoadMapTitle'),
+          message: t('maps', 'failedToLoadMapShortMessage').replace('{mapName}', mapName),
         },
       });
     } finally {
@@ -188,7 +190,7 @@ export function MapsManagementWidget({
       title={
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4" />
-          <span>Maps Management</span>
+          <span>{t('maps', 'pageTitle')}</span>
         </div>
       }
       initialPosition={initialPosition}
@@ -209,7 +211,7 @@ export function MapsManagementWidget({
                 className="flex items-center justify-between w-full text-left"
               >
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Map View {selectedLocation && 
+                  {t('maps', 'mapView')} {selectedLocation &&
                     <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                       ({locations.find(l => l.id === selectedLocation)?.name})
                     </span>
@@ -227,7 +229,7 @@ export function MapsManagementWidget({
         {/* Mapping Control Section */}
         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Mapping Control
+            {t('maps', 'mappingControl')}
           </h3>
           
           <div className="space-y-2">
@@ -243,7 +245,7 @@ export function MapsManagementWidget({
                       handleStartMapping();
                     }
                   }}
-                  placeholder="Enter map name..."
+                  placeholder={t('maps', 'mapNamePlaceholder')}
                   className="w-full px-3 py-1.5 text-sm bg-white dark:bg-botbot-darker border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   autoFocus
                 />
@@ -281,17 +283,17 @@ export function MapsManagementWidget({
               {isMapping ? (
                 <>
                   <Square className="w-3 h-3" />
-                  <span>Stop Mapping</span>
+                  <span>{t('maps', 'stopMapping')}</span>
                 </>
               ) : showMapNameInput && mapName.trim() ? (
                 <>
                   <Play className="w-3 h-3" />
-                  <span>Start Mapping</span>
+                  <span>{t('maps', 'startMapping')}</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3 h-3" />
-                  <span>Start New Map</span>
+                  <span>{t('maps', 'startNewMap')}</span>
                 </>
               )}
             </button>
@@ -305,7 +307,7 @@ export function MapsManagementWidget({
                 }}
                 className="w-full px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200"
               >
-                Cancel
+                {t('maps', 'cancel')}
               </button>
             )}
           </div>
@@ -318,7 +320,7 @@ export function MapsManagementWidget({
               onClick={() => setShowMapsList(!showMapsList)}
               className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Available Maps
+              {t('maps', 'availableMaps')}
               {showMapsList ? (
                 <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               ) : (
@@ -329,7 +331,7 @@ export function MapsManagementWidget({
               onClick={fetchMaps}
               disabled={!isConnected || isLoading}
               className="p-1 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-botbot-darkest/80 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Refresh maps list"
+              title={t('maps', 'refreshMaps')}
             >
               <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
@@ -340,7 +342,7 @@ export function MapsManagementWidget({
               {!isConnected ? (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Connect to robot to view maps
+                    {t('maps', 'connectToRobotToViewMaps')}
                   </p>
                 </div>
               ) : isLoading && locations.length === 0 ? (
@@ -350,7 +352,7 @@ export function MapsManagementWidget({
               ) : locations.length === 0 ? (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    No maps available
+                    {t('maps', 'noMapsAvailable')}
                   </p>
                 </div>
               ) : (
@@ -393,7 +395,7 @@ export function MapsManagementWidget({
                                   handleLoadMap(location.id, location.path, location.name);
                                 }}
                               >
-                                Load
+                                {t('maps', 'load')}
                               </button>
                             )}
                           </div>

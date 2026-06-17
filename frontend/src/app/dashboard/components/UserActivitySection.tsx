@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useSupabase } from '@/contexts/SupabaseProvider';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { NestedTranslationKey } from '@/utils/translations';
 
 interface ActivityItem {
   id: string;
@@ -28,8 +30,8 @@ interface ActivityItem {
 
 interface AchievementBadge {
   id: string;
-  title: string;
-  description: string;
+  titleKey: NestedTranslationKey<'dashboard'>;
+  descriptionKey: NestedTranslationKey<'dashboard'>;
   icon: React.ReactNode;
   unlocked: boolean;
   progress: number;
@@ -39,6 +41,7 @@ interface AchievementBadge {
 export default function UserActivitySection() {
   const router = useRouter();
   const { user, supabase } = useSupabase();
+  const { t } = useLanguage();
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [achievements, setAchievements] = useState<AchievementBadge[]>([]);
   const [weeklyProgress, setWeeklyProgress] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
@@ -60,7 +63,7 @@ export default function UserActivitySection() {
         if (logs) {
           const activities = logs.map((log) => ({
             id: log.id,
-            action: log.action || 'Action performed',
+            action: log.action || '',
             timestamp: new Date(log.created_at).toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
@@ -79,8 +82,8 @@ export default function UserActivitySection() {
         setAchievements([
           {
             id: '1',
-            title: 'First Connection',
-            description: 'Connect your first robot',
+            titleKey: 'achievementFirstConnection',
+            descriptionKey: 'achievementFirstConnectionDescription',
             icon: <Zap className="h-4 w-4" />,
             unlocked: true,
             progress: 1,
@@ -88,8 +91,8 @@ export default function UserActivitySection() {
           },
           {
             id: '2',
-            title: 'Fleet Commander',
-            description: 'Manage 5+ robots',
+            titleKey: 'achievementFleetCommander',
+            descriptionKey: 'achievementFleetCommanderDescription',
             icon: <Users className="h-4 w-4" />,
             unlocked: false,
             progress: 3,
@@ -97,8 +100,8 @@ export default function UserActivitySection() {
           },
           {
             id: '3',
-            title: 'Power User',
-            description: '1000+ actions performed',
+            titleKey: 'achievementPowerUser',
+            descriptionKey: 'achievementPowerUserDescription',
             icon: <Award className="h-4 w-4" />,
             unlocked: false,
             progress: 750,
@@ -106,8 +109,8 @@ export default function UserActivitySection() {
           },
           {
             id: '4',
-            title: 'Global Operator',
-            description: 'Control robots remotely',
+            titleKey: 'achievementGlobalOperator',
+            descriptionKey: 'achievementGlobalOperatorDescription',
             icon: <Globe className="h-4 w-4" />,
             unlocked: true,
             progress: 1,
@@ -140,7 +143,15 @@ export default function UserActivitySection() {
     return 'from-gray-400 to-gray-500';
   };
 
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const days = [
+    t('dashboard', 'mondayAbbrev'),
+    t('dashboard', 'tuesdayAbbrev'),
+    t('dashboard', 'wednesdayAbbrev'),
+    t('dashboard', 'thursdayAbbrev'),
+    t('dashboard', 'fridayAbbrev'),
+    t('dashboard', 'saturdayAbbrev'),
+    t('dashboard', 'sundayAbbrev'),
+  ];
   const maxProgress = Math.max(...weeklyProgress);
 
   return (
@@ -149,14 +160,14 @@ export default function UserActivitySection() {
       <div className="lg:col-span-1 bg-white dark:bg-botbot-dark rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-botbot-darker">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">Recent Activity</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Your latest actions</p>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('dashboard', 'recentActivity')}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('dashboard', 'yourLatestActions')}</p>
           </div>
           <button
             onClick={() => router.push('/activity')}
             className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 flex items-center gap-1 group"
           >
-            View all
+            {t('dashboard', 'viewAll')}
             <ChevronRight className="h-3 w-3 transform group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
@@ -188,7 +199,7 @@ export default function UserActivitySection() {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {activity.action}
+                      {activity.action || t('dashboard', 'actionPerformed')}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
                       <Clock className="h-3 w-3" />
@@ -202,7 +213,7 @@ export default function UserActivitySection() {
         ) : (
           <div className="text-center py-8">
             <Activity className="h-12 w-12 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
-            <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard', 'noRecentActivity')}</p>
           </div>
         )}
       </div>
@@ -211,8 +222,8 @@ export default function UserActivitySection() {
       <div className="lg:col-span-1 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 shadow-lg border border-indigo-100 dark:border-indigo-900/50">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">Weekly Progress</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Activity over the week</p>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('dashboard', 'weeklyProgress')}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('dashboard', 'activityOverTheWeek')}</p>
           </div>
           <BarChart2 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
         </div>
@@ -243,10 +254,10 @@ export default function UserActivitySection() {
         <div className="mt-4 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
-            <span className="text-gray-600 dark:text-gray-400">Actions performed</span>
+            <span className="text-gray-600 dark:text-gray-400">{t('dashboard', 'actionsPerformed')}</span>
           </div>
           <span className="font-semibold text-gray-900 dark:text-white">
-            {weeklyProgress.reduce((a, b) => a + b, 0)} total
+            {t('dashboard', 'totalCount').replace('{count}', String(weeklyProgress.reduce((a, b) => a + b, 0)))}
           </span>
         </div>
       </div>
@@ -255,8 +266,8 @@ export default function UserActivitySection() {
       <div className="lg:col-span-1 bg-white dark:bg-botbot-dark rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-botbot-darker">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">Achievements</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Your milestones</p>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('dashboard', 'achievements')}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('dashboard', 'yourMilestones')}</p>
           </div>
           <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
         </div>
@@ -289,15 +300,15 @@ export default function UserActivitySection() {
                         : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
-                    {achievement.title}
+                    {t('dashboard', achievement.titleKey)}
                     {achievement.unlocked && (
                       <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                        UNLOCKED
+                        {t('dashboard', 'unlocked')}
                       </span>
                     )}
                   </h4>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                    {achievement.description}
+                    {t('dashboard', achievement.descriptionKey)}
                   </p>
 
                   {/* Progress bar */}
@@ -305,7 +316,7 @@ export default function UserActivitySection() {
                     <div className="mt-2">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                          Progress
+                          {t('dashboard', 'progress')}
                         </span>
                         <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
                           {achievement.progress}/{achievement.total}

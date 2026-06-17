@@ -280,8 +280,8 @@ export function ExtrasBar() {
                     setShowLanguageSelector(false);
                   }}
                 >
-                  <span className="text-xl">{code === 'en' ? '🇬🇧' : '🇧🇷'}</span>
-                  {code === 'en' ? 'English' : 'Português'}
+                  <span className="text-xl">{languageNames[code].split(' ')[0]}</span>
+                  {languageNames[code].replace(/^[^ ]+ /, '')}
                 </button>
               ))}
             </div>

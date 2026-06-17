@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Activity, TrendingUp } from 'lucide-react';
 
 interface HourlyActivity {
@@ -12,13 +13,22 @@ interface HourlyActivity {
 
 export default function ActivityHeatmap() {
   const { supabase, user } = useSupabase();
+  const { t } = useLanguage();
   const [hourlyData, setHourlyData] = useState<HourlyActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [maxActivity, setMaxActivity] = useState(0);
   const [totalActions, setTotalActions] = useState(0);
   const [weeklyActions, setWeeklyActions] = useState(0);
 
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const days = [
+    t('dashboard', 'sundayShort'),
+    t('dashboard', 'mondayShort'),
+    t('dashboard', 'tuesdayShort'),
+    t('dashboard', 'wednesdayShort'),
+    t('dashboard', 'thursdayShort'),
+    t('dashboard', 'fridayShort'),
+    t('dashboard', 'saturdayShort'),
+  ];
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   useEffect(() => {
@@ -121,10 +131,10 @@ export default function ActivityHeatmap() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              Activity Pattern
+              {t('dashboard', 'activityPattern')}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Last 30 days
+              {t('dashboard', 'last30Days')}
             </p>
           </div>
         </div>
@@ -134,11 +144,11 @@ export default function ActivityHeatmap() {
             <span className="text-xs font-bold text-violet-700 dark:text-violet-300">
               {totalActions.toLocaleString()}
             </span>
-            <span className="text-xs text-violet-600 dark:text-violet-400">total</span>
+            <span className="text-xs text-violet-600 dark:text-violet-400">{t('dashboard', 'total')}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
             <TrendingUp className="h-3 w-3" />
-            <span>{avgDailyActions}/day avg</span>
+            <span>{t('dashboard', 'dayAverage').replace('{count}', String(avgDailyActions))}</span>
           </div>
         </div>
       </div>
@@ -184,7 +194,10 @@ export default function ActivityHeatmap() {
                           hover:scale-125 hover:z-10 hover:shadow-lg cursor-pointer
                           ${getHeatmapColor(count)}
                         `}
-                        title={`${days[dayIndex]} ${hour}:00 - ${count} actions`}
+                        title={t('dashboard', 'activityCellTitle')
+                          .replace('{day}', days[dayIndex])
+                          .replace('{hour}', String(hour))
+                          .replace('{count}', String(count))}
                       />
                     );
                   })}
@@ -196,7 +209,7 @@ export default function ActivityHeatmap() {
 
         {/* Compact Legend */}
         <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-700/50">
-          <span className="text-[10px] text-gray-500 dark:text-gray-400">Less</span>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400">{t('dashboard', 'less')}</span>
           <div className="flex gap-[2px]">
             {[0, 20, 40, 60, 80, 100].map((_, i) => (
               <div
@@ -212,7 +225,7 @@ export default function ActivityHeatmap() {
               />
             ))}
           </div>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400">More</span>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400">{t('dashboard', 'more')}</span>
         </div>
       </div>
     </div>

@@ -139,13 +139,13 @@ export default function Login() {
       if (!response.ok) {
         // More user-friendly error messages
         if (data.error?.includes('Invalid login credentials')) {
-          setError('The email or password you entered is incorrect. Please try again.');
+          setError(t('login', 'invalidCredentials'));
         } else if (data.error?.includes('Email not confirmed')) {
-          setError('Please check your email to confirm your account before logging in.');
+          setError(t('login', 'emailNotConfirmed'));
         } else if (data.error?.includes('Too many requests')) {
-          setError('Too many login attempts. Please wait a few minutes and try again.');
+          setError(t('login', 'tooManyLoginAttempts'));
         } else {
-          setError(data.error || 'Unable to log in. Please check your credentials and try again.');
+          setError(data.error || t('login', 'loginError'));
         }
         setLoading(false);
       } else if (data.success) {
@@ -241,9 +241,9 @@ export default function Login() {
           <button
             onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
             className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-white/80 dark:bg-botbot-dark/80 backdrop-blur-lg border border-white/20 dark:border-botbot-purple/20 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-            aria-label="Select language"
+            aria-label={t('login', 'selectLanguage')}
           >
-            <span className="text-lg sm:text-xl">{language === 'en' ? '🇬🇧' : '🇧🇷'}</span>
+            <span className="text-lg sm:text-xl">{languageNames[language].split(' ')[0]}</span>
             <svg
               className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform duration-200 ${showLanguageDropdown ? 'rotate-180' : ''}`}
               fill="none"
@@ -270,8 +270,8 @@ export default function Login() {
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-botbot-darker/50'
                   }`}
                 >
-                  <span className="text-xl">{code === 'en' ? '🇬🇧' : '🇧🇷'}</span>
-                  <span className="text-sm">{code === 'en' ? 'English' : 'Português'}</span>
+                  <span className="text-xl">{languageNames[code].split(' ')[0]}</span>
+                  <span className="text-sm">{languageNames[code].replace(/^[^ ]+ /, '')}</span>
                   {language === code && (
                     <svg className="w-4 h-4 ml-auto text-botbot-purple dark:text-botbot-accent" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -360,7 +360,7 @@ export default function Login() {
                     <svg className="w-5 h-5 mr-2 flex-shrink-0 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    <span>Success! Redirecting to your dashboard...</span>
+                    <span>{t('login', 'loginSuccessRedirect')}</span>
                   </div>
                 </div>
               )}
@@ -391,7 +391,7 @@ export default function Login() {
                     <span>
                       {mode === 'signup'
                         ? (t('login', 'creatingAccount') || 'Creating account...')
-                        : 'Verifying your credentials...'}
+                        : t('login', 'verifyingCredentials')}
                     </span>
                   </div>
                 </div>
@@ -414,7 +414,7 @@ export default function Login() {
                 label={t('login', 'email') || 'Email'}
                 name="email"
                 value={formData.email}
-                placeholder="Enter your email"
+                placeholder={t('login', 'emailPlaceholder')}
                 type="email"
                 onChange={handleChange}
                 autoComplete="username"
@@ -424,7 +424,7 @@ export default function Login() {
                 label={t('login', 'password') || 'Password'}
                 name="password"
                 value={formData.password}
-                placeholder="Enter your password"
+                placeholder={t('login', 'passwordPlaceholder')}
                 type="password"
                 onChange={handleChange}
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}

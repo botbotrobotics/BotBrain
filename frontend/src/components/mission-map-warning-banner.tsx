@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertTriangle, Map, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MissionMapWarningBannerProps {
   missionMapName: string;
@@ -24,20 +25,25 @@ export function MissionMapWarningBanner({
   isLoading = false,
   className = '',
 }: MissionMapWarningBannerProps) {
+  const { t } = useLanguage();
+  const formattedMissionMapName = formatMapName(missionMapName);
+  const formattedCurrentMapName = currentMapName ? formatMapName(currentMapName) : null;
+  const mismatchMessage = formattedCurrentMapName
+    ? t('missions', 'mapMismatchCurrent')
+        .replace('{missionMapName}', formattedMissionMapName)
+        .replace('{currentMapName}', formattedCurrentMapName)
+    : t('missions', 'mapMismatchNoCurrentMap')
+        .replace('{missionMapName}', formattedMissionMapName);
+
   return (
     <div className={`flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg ${className}`}>
       <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-          Map Mismatch
+          {t('missions', 'mapMismatchTitle')}
         </p>
         <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5 truncate">
-          Mission created on <strong>{formatMapName(missionMapName)}</strong>
-          {currentMapName ? (
-            <>, currently <strong>{formatMapName(currentMapName)}</strong> is loaded</>
-          ) : (
-            <>, but no map is currently loaded</>
-          )}
+          {mismatchMessage}
         </p>
       </div>
       <button
@@ -50,7 +56,7 @@ export function MissionMapWarningBanner({
         ) : (
           <Map className="w-4 h-4" />
         )}
-        <span className="hidden sm:inline">Switch Map</span>
+        <span className="hidden sm:inline">{t('missions', 'switchMap')}</span>
       </button>
     </div>
   );

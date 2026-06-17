@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Network, Home, Layout, ArrowUpRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -121,27 +122,28 @@ function FeatureCard({
 }
 
 export default function FeatureGrid() {
+  const { t } = useLanguage();
   const features = [
     {
       icon: <Network className="h-5 w-5 text-white" />,
-      title: "Robot Fleet",
-      description: "Manage and connect to your entire robot fleet with real-time status monitoring",
+      title: t('dashboard', 'robotFleet'),
+      description: t('dashboard', 'robotFleetDescription'),
       href: "/fleet",
       gradient: "from-violet-500 to-purple-600",
       variant: 'gradient' as const,
     },
     {
       icon: <Home className="h-5 w-5 text-white" />,
-      title: "Cockpit",
-      description: "Control center for robot operations, telemetry, and real-time diagnostics",
+      title: t('dashboard', 'cockpit'),
+      description: t('dashboard', 'cockpitDescription'),
       href: "/cockpit",
       gradient: "from-blue-500 to-cyan-600",
       variant: 'glass' as const,
     },
     {
       icon: <Layout className="h-5 w-5 text-white" />,
-      title: "My UI",
-      description: "Customize your dashboard with widgets and personalized layouts",
+      title: t('dashboard', 'myUI'),
+      description: t('dashboard', 'myUIDescription'),
       href: "/my-ui",
       gradient: "from-green-500 to-emerald-600",
       variant: 'glass' as const,
@@ -152,8 +154,8 @@ export default function FeatureGrid() {
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Quick Access</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Your most used features and tools</p>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('dashboard', 'quickAccess')}</h2>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{t('dashboard', 'quickAccessDescription')}</p>
         </div>
       </div>
 

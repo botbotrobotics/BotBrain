@@ -170,10 +170,32 @@ export function RecorderWidget({
     return selectedStreams.filter(streamId => isRecording(streamId)).length;
   }, [selectedStreams, isRecording]);
 
+  const getStreamName = (streamId: string) => {
+    const streamNames: Record<string, string> = {
+      'main-camera': t('myUI', 'mainCamera'),
+      'thermal-camera': t('myUI', 'thermalCamera'),
+      'rgb-camera': t('myUI', 'rgbCamera'),
+    };
+
+    return streamNames[streamId] || streamId;
+  };
+
+  const formatActiveStreams = (count: number) => (
+    count === 1
+      ? t('myUI', 'streamActive').replace('{count}', String(count))
+      : t('myUI', 'streamsActive').replace('{count}', String(count))
+  );
+
+  const formatSelectedStreams = (count: number) => (
+    count === 1
+      ? t('myUI', 'streamSelected').replace('{count}', String(count))
+      : t('myUI', 'streamsSelected').replace('{count}', String(count))
+  );
+
   return (
     <Widget
       id={id}
-      title="Recorder"
+      title={t('myUI', 'recorder')}
       onRemove={onRemove}
       onStartDrag={onStartDrag}
       onEndDrag={onEndDrag}
@@ -189,7 +211,7 @@ export function RecorderWidget({
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select Streams to Record
+                {t('myUI', 'selectStreamsToRecord')}
               </h3>
               <div className="space-y-2">
                 {AVAILABLE_STREAMS.map(stream => (
@@ -206,7 +228,7 @@ export function RecorderWidget({
                                 focus:ring-2 focus:ring-primary dark:focus:ring-botbot-accent"
                     />
                     <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {stream.name}
+                      {getStreamName(stream.id)}
                     </span>
                     {isRecording(stream.id) && (
                       <Circle className="w-3 h-3 text-red-600 fill-current animate-pulse ml-auto" />
@@ -218,14 +240,14 @@ export function RecorderWidget({
 
             <div>
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                File Format
+                {t('myUI', 'fileFormat')}
               </h3>
               <div className="bg-gray-100 dark:bg-botbot-darker p-2 rounded">
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Format: <span className="font-medium">{videoFormat.toUpperCase()}</span>
+                  {t('myUI', 'format')}: <span className="font-medium">{videoFormat.toUpperCase()}</span>
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  Change in Settings to update
+                  {t('myUI', 'changeInSettingsToUpdate')}
                 </p>
               </div>
             </div>
@@ -238,7 +260,7 @@ export function RecorderWidget({
               {!connection.online ? (
                 <div className="text-center">
                   <Camera className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 dark:text-gray-400">Robot Offline</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('myUI', 'robotOffline')}</p>
                 </div>
               ) : isAnyRecording ? (
                 <div className="text-center">
@@ -250,17 +272,17 @@ export function RecorderWidget({
                       </span>
                     </div>
                   </div>
-                  <p className="text-red-600 font-medium mt-3">Recording</p>
+                  <p className="text-red-600 font-medium mt-3">{t('myUI', 'recording')}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {activeRecordingCount} stream{activeRecordingCount !== 1 ? 's' : ''} active
+                    {formatActiveStreams(activeRecordingCount)}
                   </p>
                 </div>
               ) : (
                 <div className="text-center">
                   <Camera className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 dark:text-gray-400">Ready to Record</p>
+                  <p className="text-gray-600 dark:text-gray-400">{t('myUI', 'readyToRecord')}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                    {selectedStreams.length} stream{selectedStreams.length !== 1 ? 's' : ''} selected
+                    {formatSelectedStreams(selectedStreams.length)}
                   </p>
                 </div>
               )}
@@ -275,12 +297,12 @@ export function RecorderWidget({
             {/* Stream List */}
             <div className="mb-4">
               <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                Selected Streams:
+                {t('myUI', 'selectedStreams')}
               </h4>
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {selectedStreams.length === 0 ? (
                   <p className="text-xs text-gray-500 dark:text-gray-500 italic">
-                    No streams selected
+                    {t('myUI', 'noStreamsSelected')}
                   </p>
                 ) : (
                   selectedStreams.map(streamId => {
@@ -292,7 +314,7 @@ export function RecorderWidget({
                                  bg-gray-50 dark:bg-botbot-darker px-2 py-1 rounded"
                       >
                         <span className="text-gray-700 dark:text-gray-300">
-                          {stream.name}
+                          {getStreamName(stream.id)}
                         </span>
                         {isRecording(streamId) && (
                           <Circle className="w-2 h-2 text-red-600 fill-current animate-pulse" />
@@ -325,17 +347,17 @@ export function RecorderWidget({
                 {isProcessing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing...</span>
+                    <span>{t('myUI', 'processing')}</span>
                   </>
                 ) : isAnyRecording ? (
                   <>
                     <Download className="w-4 h-4" />
-                    <span>Stop & Save</span>
+                    <span>{t('myUI', 'stopAndSave')}</span>
                   </>
                 ) : (
                   <>
                     <Circle className="w-4 h-4" />
-                    <span>Start Recording</span>
+                    <span>{t('myUI', 'startRecording')}</span>
                   </>
                 )}
               </button>

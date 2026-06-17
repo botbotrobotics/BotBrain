@@ -10,27 +10,43 @@ type LanguageContextType = {
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const supportedLanguages = ['en', 'pt', 'zh-CN'] as const;
 
 type LanguageProviderProps = {
   children: ReactNode;
 };
+
+function isSupportedLanguage(language: string): language is LanguageCode {
+  return supportedLanguages.includes(language as LanguageCode);
+}
+
+function detectBrowserLanguage(): LanguageCode {
+  const browserLanguages = [
+    ...(navigator.languages || []),
+    navigator.language,
+  ].filter(Boolean).map((lang) => lang.toLowerCase());
+
+  if (browserLanguages.some((lang) => lang === 'zh' || lang.startsWith('zh-'))) {
+    return 'zh-CN';
+  }
+
+  if (browserLanguages.some((lang) => lang.startsWith('pt'))) {
+    return 'pt';
+  }
+
+  return 'en';
+}
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<LanguageCode>('pt'); // Default to Portuguese
 
   useEffect(() => {
     // Load saved language preference from localStorage if available
-    const savedLanguage = localStorage.getItem('language') as LanguageCode | null;
-    if (savedLanguage && ['en', 'pt'].includes(savedLanguage)) {
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage && isSupportedLanguage(savedLanguage)) {
       setLanguageState(savedLanguage);
     } else {
-      // Auto-detect from browser language
-      const browserLang = navigator.language?.toLowerCase() || '';
-      if (browserLang.startsWith('pt')) {
-        setLanguageState('pt');
-      } else {
-        setLanguageState('en');
-      }
+      setLanguageState(detectBrowserLanguage());
     }
   }, []);
 
@@ -59,4 +75,4 @@ export function useLanguage() {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
-} 
+}

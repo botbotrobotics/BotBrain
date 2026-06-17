@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@/contexts/SupabaseProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { format, subDays, startOfDay, endOfDay, parseISO } from 'date-fns';
 import {
   Search,
@@ -98,6 +99,7 @@ const criticalActions = [
 
 export default function AuditPage() {
   const { user, supabase } = useSupabase();
+  const { t } = useLanguage();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,8 +122,38 @@ export default function AuditPage() {
   const [viewMode, setViewMode] = useState<'timeline' | 'analytics'>('analytics');
 
   useEffect(() => {
-    document.title = 'Advanced Audit - BotBot';
-  }, []);
+    document.title = `${t('auditLog', 'advancedPageTitle')} - BotBot`;
+  }, [t]);
+
+  const getDateRangeSummary = () => {
+    if (selectedDateRange === 'all') {
+      return t('auditLog', 'allTime');
+    }
+
+    return t('auditLog', 'lastRange').replace(
+      '{range}',
+      t('auditLog', 'daysRange').replace('{count}', selectedDateRange)
+    );
+  };
+
+  const getEventTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      all: t('auditLog', 'allEvents'),
+      auth: t('auditLog', 'authentication'),
+      robot: t('auditLog', 'robot'),
+      command: t('auditLog', 'commands'),
+      system: t('auditLog', 'system'),
+      data: t('auditLog', 'data'),
+      mission: t('auditLog', 'mission'),
+      navigation: t('auditLog', 'navigation'),
+      audio: t('auditLog', 'audio'),
+      camera: t('auditLog', 'camera'),
+      safety: t('auditLog', 'safety'),
+      export: t('auditLog', 'export'),
+    };
+
+    return labels[type] || type;
+  };
 
   // Fetch audit logs with date filtering
   const fetchLogs = async () => {
@@ -240,7 +272,17 @@ export default function AuditPage() {
   // Export logs with enhanced format
   const exportLogs = () => {
     const csv = [
-      ['Date', 'Time', 'Event Type', 'Action', 'Robot', 'Robot ID', 'IP Address', 'User Agent', 'Details'],
+      [
+        t('auditLog', 'dateCsv'),
+        t('auditLog', 'timeCsv'),
+        t('auditLog', 'eventTypeCsv'),
+        t('auditLog', 'actionCsv'),
+        t('auditLog', 'robotCsv'),
+        t('auditLog', 'robotIdCsv'),
+        t('auditLog', 'ipAddressCsv'),
+        t('auditLog', 'userAgentCsv'),
+        t('auditLog', 'detailsCsv')
+      ],
       ...filteredLogs.map(log => [
         format(new Date(log.created_at), 'yyyy-MM-dd'),
         format(new Date(log.created_at), 'HH:mm:ss'),
@@ -311,7 +353,7 @@ export default function AuditPage() {
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading audit data...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('auditLog', 'loadingData')}</p>
         </div>
       </div>
     );
@@ -324,10 +366,10 @@ export default function AuditPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-              Advanced Audit System
+              {t('auditLog', 'advancedPageTitle')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Comprehensive tracking and analytics for all operator activities
+              {t('auditLog', 'advancedPageDescription')}
             </p>
           </div>
 
@@ -336,12 +378,12 @@ export default function AuditPage() {
             <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Events</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('auditLog', 'totalEvents')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.totalEvents.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    Last {selectedDateRange === 'all' ? 'all time' : `${selectedDateRange} days`}
+                    {getDateRangeSummary()}
                   </p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-purple-500" />
@@ -351,12 +393,12 @@ export default function AuditPage() {
             <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Events Today</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('auditLog', 'eventsToday')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.eventsToday.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    Since midnight
+                    {t('auditLog', 'sinceMidnight')}
                   </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-500" />
@@ -366,12 +408,14 @@ export default function AuditPage() {
             <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Active Robots</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('auditLog', 'activeRobots')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.uniqueRobots}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    {stats.mostActiveRobot ? `Most active: ${stats.mostActiveRobot}` : 'No robots active'}
+                    {stats.mostActiveRobot
+                      ? t('auditLog', 'mostActiveRobot').replace('{robotName}', stats.mostActiveRobot)
+                      : t('auditLog', 'noRobotsActive')}
                   </p>
                 </div>
                 <Bot className="w-8 h-8 text-blue-500" />
@@ -381,12 +425,12 @@ export default function AuditPage() {
             <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Critical Events</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('auditLog', 'criticalEvents')}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.criticalEvents}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    Safety & failures
+                    {t('auditLog', 'safetyAndFailures')}
                   </p>
                 </div>
                 <Shield className="w-8 h-8 text-red-500" />
@@ -408,7 +452,7 @@ export default function AuditPage() {
                   }`}
                 >
                   <PieChart className="w-4 h-4" />
-                  Analytics
+                  {t('auditLog', 'analytics')}
                 </button>
                 <button
                   onClick={() => setViewMode('timeline')}
@@ -419,7 +463,7 @@ export default function AuditPage() {
                   }`}
                 >
                   <Clock className="w-4 h-4" />
-                  Timeline
+                  {t('auditLog', 'timeline')}
                 </button>
               </div>
 
@@ -429,7 +473,7 @@ export default function AuditPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search logs..."
+                    placeholder={t('auditLog', 'searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-botbot-dark border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -445,11 +489,11 @@ export default function AuditPage() {
                   onChange={(e) => setSelectedDateRange(e.target.value)}
                   className="px-4 py-2 bg-gray-50 dark:bg-botbot-dark border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
-                  <option value="1">Last 24 hours</option>
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 90 days</option>
-                  <option value="all">All time</option>
+                  <option value="1">{t('auditLog', 'last24Hours')}</option>
+                  <option value="7">{t('auditLog', 'last7Days')}</option>
+                  <option value="30">{t('auditLog', 'last30Days')}</option>
+                  <option value="90">{t('auditLog', 'last90Days')}</option>
+                  <option value="all">{t('auditLog', 'allTime')}</option>
                 </select>
 
                 {/* Event Type Filter */}
@@ -458,18 +502,18 @@ export default function AuditPage() {
                   onChange={(e) => setSelectedEventType(e.target.value)}
                   className="px-4 py-2 bg-gray-50 dark:bg-botbot-dark border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
-                  <option value="all">All Events</option>
-                  <option value="auth">Authentication</option>
-                  <option value="robot">Robot</option>
-                  <option value="command">Commands</option>
-                  <option value="system">System</option>
-                  <option value="data">Data</option>
-                  <option value="mission">Mission</option>
-                  <option value="navigation">Navigation</option>
-                  <option value="audio">Audio</option>
-                  <option value="camera">Camera</option>
-                  <option value="safety">Safety</option>
-                  <option value="export">Export</option>
+                  <option value="all">{t('auditLog', 'allEvents')}</option>
+                  <option value="auth">{t('auditLog', 'authentication')}</option>
+                  <option value="robot">{t('auditLog', 'robot')}</option>
+                  <option value="command">{t('auditLog', 'commands')}</option>
+                  <option value="system">{t('auditLog', 'system')}</option>
+                  <option value="data">{t('auditLog', 'data')}</option>
+                  <option value="mission">{t('auditLog', 'mission')}</option>
+                  <option value="navigation">{t('auditLog', 'navigation')}</option>
+                  <option value="audio">{t('auditLog', 'audio')}</option>
+                  <option value="camera">{t('auditLog', 'camera')}</option>
+                  <option value="safety">{t('auditLog', 'safety')}</option>
+                  <option value="export">{t('auditLog', 'export')}</option>
                 </select>
               </div>
 
@@ -483,14 +527,14 @@ export default function AuditPage() {
                   disabled={isRefreshing}
                 >
                   <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
+                  {t('auditLog', 'refresh')}
                 </button>
                 <button
                   onClick={exportLogs}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Export
+                  {t('auditLog', 'exportButton')}
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
@@ -502,7 +546,7 @@ export default function AuditPage() {
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  Clear
+                  {t('auditLog', 'clear')}
                 </button>
               </div>
             </div>
@@ -516,7 +560,7 @@ export default function AuditPage() {
                 {/* Event Types */}
                 <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Event Distribution by Type
+                    {t('auditLog', 'eventDistributionByType')}
                   </h3>
                   <div className="space-y-3">
                     {Object.entries(stats.eventsByType).map(([type, count]) => {
@@ -530,7 +574,7 @@ export default function AuditPage() {
                           <div className="flex-1">
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                                {type}
+                                {getEventTypeLabel(type)}
                               </span>
                               <span className="text-sm text-gray-500">
                                 {count} ({percentage}%)
@@ -552,7 +596,7 @@ export default function AuditPage() {
                 {/* Hourly Activity */}
                 <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    24-Hour Activity Pattern
+                    {t('auditLog', 'activityPattern24h')}
                   </h3>
                   <div className="flex items-end justify-between h-32 gap-1">
                     {stats.hourlyDistribution.map((count, hour) => {
@@ -563,7 +607,9 @@ export default function AuditPage() {
                           key={hour}
                           className="flex-1 bg-purple-600 dark:bg-purple-500 rounded-t hover:bg-purple-700 dark:hover:bg-purple-400 transition-colors relative group"
                           style={{ height: `${height}%` }}
-                          title={`${hour}:00 - ${count} events`}
+                          title={t('auditLog', 'hourlyActivityTitle')
+                            .replace('{hour}', String(hour))
+                            .replace('{count}', String(count))}
                         >
                           <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             {count}
@@ -585,7 +631,7 @@ export default function AuditPage() {
               {/* Top Actions */}
               <div className="bg-white dark:bg-botbot-darker rounded-lg shadow-md p-4 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Most Frequent Actions
+                  {t('auditLog', 'mostFrequentActions')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Object.entries(stats.eventsByAction)
@@ -623,19 +669,19 @@ export default function AuditPage() {
                   <thead className="bg-gray-50 dark:bg-botbot-dark">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Time
+                        {t('auditLog', 'time')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Type
+                        {t('auditLog', 'type')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Action
+                        {t('auditLog', 'action')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Robot
+                        {t('auditLog', 'robot')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Details
+                        {t('auditLog', 'details')}
                       </th>
                     </tr>
                   </thead>
@@ -646,7 +692,7 @@ export default function AuditPage() {
                           <td colSpan={5} className="px-6 py-12 text-center">
                             <div className="text-gray-500 dark:text-gray-400">
                               <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                              <p>No audit logs found</p>
+                              <p>{t('auditLog', 'noAuditLogsFound')}</p>
                             </div>
                           </td>
                         </tr>
@@ -668,7 +714,7 @@ export default function AuditPage() {
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 <div>
                                   <div className="font-medium">
-                                    {format(new Date(log.created_at), 'MMM dd, yyyy')}
+                                    {format(new Date(log.created_at), 'yyyy-MM-dd')}
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-400">
                                     {format(new Date(log.created_at), 'HH:mm:ss')}
@@ -696,7 +742,7 @@ export default function AuditPage() {
                                 {log.event_details && Object.keys(log.event_details).length > 0 ? (
                                   <details className="cursor-pointer">
                                     <summary className="hover:text-purple-600 dark:hover:text-purple-400">
-                                      View details
+                                      {t('auditLog', 'viewDetails')}
                                     </summary>
                                     <pre className="mt-2 text-xs bg-gray-50 dark:bg-botbot-dark p-2 rounded overflow-x-auto max-w-md">
                                       {JSON.stringify(log.event_details, null, 2)}
@@ -730,12 +776,12 @@ export default function AuditPage() {
             <div className="flex items-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-500 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Clear All Audit Logs
+                {t('auditLog', 'clearAllTitle')}
               </h3>
             </div>
 
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure you want to clear all {logs.length} audit logs? This action cannot be undone.
+              {t('auditLog', 'clearAllConfirm').replace('{count}', String(logs.length))}
             </p>
 
             <div className="flex justify-end gap-3">
@@ -743,7 +789,7 @@ export default function AuditPage() {
                 onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 bg-gray-200 dark:bg-botbot-dark text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-botbot-dark/80 transition-colors"
               >
-                Cancel
+                {t('common', 'cancel')}
               </button>
               <button
                 onClick={deleteAllLogs}
@@ -755,12 +801,12 @@ export default function AuditPage() {
                 {isDeleting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Deleting...
+                    {t('auditLog', 'deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    Clear All
+                    {t('auditLog', 'clearAll')}
                   </>
                 )}
               </button>

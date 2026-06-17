@@ -27,6 +27,7 @@ import useNetworkModeStatus from '@/hooks/ros/useNetworkModeStatus';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import { WifiNetwork, WifiAuthType, signalToBars } from '@/types/WifiControl';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ConnectionDialogProps {
   network: WifiNetwork;
@@ -36,6 +37,7 @@ interface ConnectionDialogProps {
 }
 
 function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: ConnectionDialogProps) {
+  const { t } = useLanguage();
   const [psk, setPsk] = useState('');
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
@@ -56,13 +58,13 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-botbot-dark rounded-lg shadow-xl p-6 max-w-md w-full">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          Connect to {network.ssid}
+          {t('health', 'connectToSsid').replace('{ssid}', network.ssid)}
         </h3>
 
         {network.security === WifiAuthType.PSK && (
           <div className="mb-4">
             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Password
+              {t('health', 'password')}
             </label>
             <input
               type="password"
@@ -71,7 +73,7 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-botbot-darker text-gray-800 dark:text-white
                        focus:outline-none focus:ring-2 focus:ring-violet-500"
-              placeholder="Enter WiFi password"
+              placeholder={t('health', 'wifiPasswordPlaceholder')}
               autoFocus
             />
           </div>
@@ -81,7 +83,7 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
           <>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Username
+                {t('health', 'username')}
               </label>
               <input
                 type="text"
@@ -90,13 +92,13 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                          bg-white dark:bg-botbot-darker text-gray-800 dark:text-white
                          focus:outline-none focus:ring-2 focus:ring-violet-500"
-                placeholder="Enter username"
+                placeholder={t('health', 'usernamePlaceholder')}
                 autoFocus
               />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Password
+                {t('health', 'password')}
               </label>
               <input
                 type="password"
@@ -105,7 +107,7 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                          bg-white dark:bg-botbot-darker text-gray-800 dark:text-white
                          focus:outline-none focus:ring-2 focus:ring-violet-500"
-                placeholder="Enter password"
+                placeholder={t('health', 'passwordPlaceholder')}
               />
             </div>
           </>
@@ -121,7 +123,7 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
                        focus:ring-violet-500"
             />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Save network for automatic connection
+              {t('health', 'saveNetworkForAutomaticConnection')}
             </span>
           </label>
         </div>
@@ -133,7 +135,7 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
             className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800
                      dark:hover:text-white transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t('common', 'cancel')}
           </button>
           <button
             onClick={handleConnect}
@@ -146,12 +148,12 @@ function ConnectionDialog({ network, onConnect, onCancel, isConnecting }: Connec
             {isConnecting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Connecting...
+                {t('health', 'connecting')}
               </>
             ) : (
               <>
                 <Wifi className="w-4 h-4" />
-                Connect
+                {t('health', 'connect')}
               </>
             )}
           </button>
@@ -181,6 +183,7 @@ function SignalBars({ bars }: { bars: number }) {
 
 export function WifiControlPanel() {
   const { dispatch } = useNotifications();
+  const { t } = useLanguage();
   const networkStatus = useNetworkModeStatus();
   const { connection } = useRobotConnection();
   const { networks, isScanning, error: scanError, scanNetworks } = useWifiNetworks();
@@ -308,9 +311,9 @@ export function WifiControlPanel() {
         dispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'WiFi Radio',
+            title: t('health', 'wifiRadioTitle'),
             type: 'success',
-            message: `WiFi ${newState ? 'enabled' : 'disabled'} successfully`
+            message: newState ? t('health', 'wifiEnabledSuccess') : t('health', 'wifiDisabledSuccess')
           }
         });
 
@@ -330,9 +333,9 @@ export function WifiControlPanel() {
         dispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'WiFi Radio',
+            title: t('health', 'wifiRadioTitle'),
             type: 'error',
-            message: 'WiFi toggle failed - check robot WiFi hardware'
+            message: t('health', 'wifiToggleFailedHardware')
           }
         });
       }
@@ -341,9 +344,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'WiFi Radio',
+          title: t('health', 'wifiRadioTitle'),
           type: 'error',
-          message: `Failed to ${newState ? 'enable' : 'disable'} WiFi`
+          message: newState ? t('health', 'failedToEnableWifi') : t('health', 'failedToDisableWifi')
         }
       });
     }
@@ -359,18 +362,19 @@ export function WifiControlPanel() {
         dispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'Network Scan',
+            title: t('health', 'networkScanTitle'),
             type: 'success',
-            message: `Found ${foundNetworks.length} network${foundNetworks.length > 1 ? 's' : ''}`
+            message: (foundNetworks.length === 1 ? t('health', 'foundNetwork') : t('health', 'foundNetworks'))
+              .replace('{count}', String(foundNetworks.length))
           }
         });
       } else {
         dispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'Network Scan',
+            title: t('health', 'networkScanTitle'),
             type: 'info',
-            message: 'No networks found. Make sure WiFi is enabled on the robot.'
+            message: t('health', 'noNetworksFoundScanMessage')
           }
         });
       }
@@ -379,9 +383,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Network Scan',
+          title: t('health', 'networkScanTitle'),
           type: 'error',
-          message: scanError || 'Failed to scan networks. Check robot connection.'
+          message: scanError || t('health', 'failedToScanNetworks')
         }
       });
     }
@@ -398,9 +402,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'WiFi Connection',
+          title: t('health', 'wifiConnectionTitle'),
           type: 'success',
-          message: `Connected to ${network.ssid}`
+          message: t('health', 'connectedToNetwork').replace('{networkName}', network.ssid)
         }
       });
 
@@ -415,9 +419,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'WiFi Connection',
+          title: t('health', 'wifiConnectionTitle'),
           type: 'error',
-          message: connectionError || `Failed to connect to ${network.ssid}`
+          message: connectionError || t('health', 'failedToConnectNetwork').replace('{networkName}', network.ssid)
         }
       });
     }
@@ -431,7 +435,7 @@ export function WifiControlPanel() {
       // This matches the ROS2 service call: ros2 service call /connect_wifi bot_jetson_stats_interfaces/srv/ConnectWifi "{ssid: 'networkName'}"
 
       if (!connection.ros || !connection.online) {
-        throw new Error('Not connected to robot');
+        throw new Error(t('health', 'notConnectedToRobot'));
       }
 
       const service = new ROSLIB.Service({
@@ -445,7 +449,7 @@ export function WifiControlPanel() {
 
       await new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          reject(new Error('Connection timeout'));
+          reject(new Error(t('health', 'connectionTimeout')));
         }, 30000);
 
         service.callService(
@@ -455,7 +459,7 @@ export function WifiControlPanel() {
             if (response && (response.success || response === true)) {
               resolve(response);
             } else {
-              reject(new Error(response?.message || 'Failed to connect to saved network'));
+              reject(new Error(response?.message || t('health', 'failedToConnectSavedNetwork')));
             }
           },
           (error: string) => {
@@ -468,9 +472,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'WiFi Connection',
+          title: t('health', 'wifiConnectionTitle'),
           type: 'success',
-          message: `Connected to ${networkName}`
+          message: t('health', 'connectedToNetwork').replace('{networkName}', networkName)
         }
       });
 
@@ -484,9 +488,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'WiFi Connection',
+          title: t('health', 'wifiConnectionTitle'),
           type: 'error',
-          message: `Failed to connect to ${networkName}. The saved profile may be outdated.`
+          message: t('health', 'failedToConnectSavedNetworkMessage').replace('{networkName}', networkName)
         }
       });
       setConnectingSavedNetwork(null);
@@ -495,7 +499,7 @@ export function WifiControlPanel() {
 
   const handleForgetNetwork = async (networkName: string) => {
     // Confirm before forgetting
-    if (!confirm(`Are you sure you want to forget the network "${networkName}"? You'll need to re-enter the password to connect again.`)) {
+    if (!confirm(t('health', 'forgetNetworkConfirm').replace('{networkName}', networkName))) {
       return;
     }
 
@@ -503,7 +507,7 @@ export function WifiControlPanel() {
     try {
       // Call the forget network service
       if (!connection.ros || !connection.online) {
-        throw new Error('Not connected to robot');
+        throw new Error(t('health', 'notConnectedToRobot'));
       }
 
       const service = new ROSLIB.Service({
@@ -521,7 +525,7 @@ export function WifiControlPanel() {
             if (response && (response.success || response === true)) {
               resolve(response);
             } else {
-              reject(new Error(response?.message || 'Failed to forget network'));
+              reject(new Error(response?.message || t('health', 'failedToForgetNetwork')));
             }
           },
           (error: string) => {
@@ -533,9 +537,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Network Forgotten',
+          title: t('health', 'networkForgottenTitle'),
           type: 'success',
-          message: `Successfully removed ${networkName} from saved networks`
+          message: t('health', 'networkForgottenMessage').replace('{networkName}', networkName)
         }
       });
 
@@ -545,9 +549,9 @@ export function WifiControlPanel() {
       dispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Forget Network',
+          title: t('health', 'forgetNetworkTitle'),
           type: 'error',
-          message: `Failed to forget ${networkName}`
+          message: t('health', 'failedToForgetNetworkMessage').replace('{networkName}', networkName)
         }
       });
     } finally {
@@ -605,7 +609,7 @@ export function WifiControlPanel() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <WifiIcon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">WiFi Settings</h2>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{t('health', 'wifiSettings')}</h2>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -613,7 +617,7 @@ export function WifiControlPanel() {
             disabled={isScanning || !wifiEnabled}
             className="p-2 text-gray-600 dark:text-gray-400 hover:text-violet-600
                      dark:hover:text-violet-400 transition-colors disabled:opacity-50"
-            title="Scan for networks"
+            title={t('health', 'scanForNetworks')}
           >
             <RefreshCw className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
           </button>
@@ -631,11 +635,11 @@ export function WifiControlPanel() {
             )}
             <div>
               <p className="text-sm font-medium text-gray-800 dark:text-white">
-                {isConnected ? currentNetwork : 'Not Connected'}
+                {isConnected ? currentNetwork : t('health', 'notConnectedTitle')}
               </p>
               {networkStatus?.mode && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Mode: {networkStatus.mode}
+                  {t('health', 'modeLabel').replace('{mode}', networkStatus.mode)}
                 </p>
               )}
             </div>
@@ -646,7 +650,7 @@ export function WifiControlPanel() {
               <div className="flex items-center gap-2">
                 <Network className="w-4 h-4 text-green-500" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  IP: {networkInfo.wifiIp}
+                  {t('health', 'ipAddress').replace('{ip}', networkInfo.wifiIp)}
                 </span>
               </div>
             )}
@@ -655,13 +659,13 @@ export function WifiControlPanel() {
               <div className="flex items-center gap-2">
                 <Smartphone className="w-4 h-4 text-blue-500" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  4G: {networkInfo.fourGIp || 'Active'}
+                  4G: {networkInfo.fourGIp || t('health', 'activeStatus')}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                WiFi {wifiEnabled ? 'Enabled' : 'Disabled'}
+                {t('health', 'wifiStateLabel').replace('{state}', wifiEnabled ? t('health', 'enabled') : t('health', 'disabled'))}
               </span>
               <button
                 onClick={handleWifiToggle}
@@ -669,8 +673,8 @@ export function WifiControlPanel() {
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
                           ${wifiEnabled ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'}
                           ${isToggling || !connection.online ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title={!connection.online ? 'Connect to robot to toggle WiFi' :
-                       wifiEnabled ? 'Click to disable WiFi' : 'Click to enable WiFi'}
+                title={!connection.online ? t('health', 'connectToRobotToToggleWifi') :
+                       wifiEnabled ? t('health', 'clickToDisableWifi') : t('health', 'clickToEnableWifi')}
               >
                 {isToggling ? (
                   <Loader2 className="absolute left-1/2 -translate-x-1/2 w-3 h-3 animate-spin text-white" />
@@ -692,7 +696,7 @@ export function WifiControlPanel() {
           <div className="flex items-center gap-2">
             <WifiOff className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              WiFi is disabled. Enable WiFi to scan for networks and manage connections.
+              {t('health', 'wifiDisabledHelp')}
             </p>
           </div>
         </div>
@@ -703,12 +707,12 @@ export function WifiControlPanel() {
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Available Networks
+              {t('health', 'availableNetworks')}
             </h3>
             {scanError && (
               <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                Scan error
+                {t('health', 'scanError')}
               </span>
             )}
           </div>
@@ -749,14 +753,14 @@ export function WifiControlPanel() {
                                dark:hover:bg-violet-900/30 transition-colors
                                disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Connect
+                      {t('health', 'connect')}
                     </button>
                   )}
                 </div>
               ))
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                No networks found
+                {t('health', 'noNetworksFound')}
               </p>
             )}
           </div>
@@ -780,7 +784,7 @@ export function WifiControlPanel() {
             }}
             className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Saved Networks ({savedNetworks.length})
+            {t('health', 'savedNetworks').replace('{count}', String(savedNetworks.length))}
             {showSavedNetworks ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {showSavedNetworks && (
@@ -795,7 +799,7 @@ export function WifiControlPanel() {
               }}
               className="p-1 text-gray-600 dark:text-gray-400 hover:text-violet-600
                        dark:hover:text-violet-400 transition-colors"
-              title="Refresh saved networks"
+              title={t('health', 'refreshSavedNetworks')}
             >
               <RefreshCw className="w-3 h-3" />
             </button>
@@ -812,7 +816,7 @@ export function WifiControlPanel() {
                       <Wifi className="w-3 h-3" />
                       <span>{network}</span>
                       {networkStatus?.ssid === network && (
-                        <span className="text-xs text-green-600 dark:text-green-400 ml-2">(Connected)</span>
+                        <span className="text-xs text-green-600 dark:text-green-400 ml-2">{t('health', 'connectedTag')}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -823,17 +827,17 @@ export function WifiControlPanel() {
                           className="px-3 py-1 text-xs bg-violet-600 text-white rounded-lg
                                    hover:bg-violet-700 transition-colors disabled:opacity-50
                                    disabled:cursor-not-allowed flex items-center gap-1"
-                          title={`Connect to ${network}`}
+                          title={t('health', 'connectToNetwork').replace('{networkName}', network)}
                         >
                           {connectingSavedNetwork === network ? (
                             <>
                               <Loader2 className="w-3 h-3 animate-spin" />
-                              Connecting...
+                              {t('health', 'connecting')}
                             </>
                           ) : (
                             <>
                               <WifiIcon className="w-3 h-3" />
-                              Connect
+                              {t('health', 'connect')}
                             </>
                           )}
                         </button>
@@ -844,7 +848,7 @@ export function WifiControlPanel() {
                         className="p-1 text-gray-600 dark:text-gray-400 hover:text-red-600
                                  dark:hover:text-red-400 transition-colors disabled:opacity-50
                                  disabled:cursor-not-allowed"
-                        title={`Forget ${network}`}
+                        title={t('health', 'forgetNetwork').replace('{networkName}', network)}
                       >
                         {forgettingNetwork === network ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -858,7 +862,7 @@ export function WifiControlPanel() {
               </div>
             ) : (
               <p className="text-xs text-gray-500 dark:text-gray-400 pl-4">
-                No saved networks found
+                {t('health', 'noSavedNetworksFound')}
               </p>
             )}
           </div>

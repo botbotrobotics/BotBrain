@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Search, Filter, Download, Activity, Bot, Command, Settings, Database as DatabaseIcon, RefreshCw, TestTube, Trash2, AlertTriangle, Navigation, Volume2, Camera, Shield, FileDown, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auditLogger } from '@/utils/audit-logger';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,7 @@ const eventTypeIcons: Record<string, React.ComponentType<any>> = {
 
 export default function LogPage() {
   const { user, supabase } = useSupabase();
+  const { t } = useLanguage();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,8 +65,8 @@ export default function LogPage() {
 
   useEffect(() => {
     // Set page title
-    document.title = 'Audit - BotBot';
-  }, []);
+    document.title = `${t('auditLog', 'pageTitle')} - BotBot`;
+  }, [t]);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch audit logs
@@ -120,7 +122,14 @@ export default function LogPage() {
   // Export logs as CSV
   const exportLogs = () => {
     const csv = [
-      ['Date', 'Time', 'Event Type', 'Action', 'Robot', 'Details'],
+      [
+        t('auditLog', 'dateCsv'),
+        t('auditLog', 'timeCsv'),
+        t('auditLog', 'eventTypeCsv'),
+        t('auditLog', 'actionCsv'),
+        t('auditLog', 'robotCsv'),
+        t('auditLog', 'detailsCsv'),
+      ],
       ...filteredLogs.map(log => [
         format(new Date(log.created_at), 'yyyy-MM-dd'),
         format(new Date(log.created_at), 'HH:mm:ss'),
@@ -154,7 +163,7 @@ export default function LogPage() {
       event_details: {
         test: true,
         timestamp: new Date().toISOString(),
-        message: 'Test audit log entry'
+        message: t('auditLog', 'testAuditMessage')
       }
     });
     console.log('[Test] Test audit log created, refreshing...');
@@ -206,7 +215,7 @@ export default function LogPage() {
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading audit logs...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('auditLog', 'loading')}</p>
         </div>
       </div>
     );
@@ -219,10 +228,10 @@ export default function LogPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-              Audit Log
+              {t('auditLog', 'pageTitle')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Track all activities and events in your application
+              {t('auditLog', 'pageDescription')}
             </p>
           </div>
 
@@ -235,7 +244,7 @@ export default function LogPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search logs..."
+                    placeholder={t('auditLog', 'searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-botbot-dark border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
@@ -251,18 +260,18 @@ export default function LogPage() {
                   onChange={(e) => setSelectedEventType(e.target.value)}
                   className="px-4 py-2 bg-gray-50 dark:bg-botbot-dark border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
                 >
-                  <option value="all">All Events</option>
-                  <option value="auth">Authentication</option>
-                  <option value="robot">Robot</option>
-                  <option value="command">Commands</option>
-                  <option value="system">System</option>
-                  <option value="data">Data</option>
-                  <option value="mission">Mission</option>
-                  <option value="navigation">Navigation</option>
-                  <option value="audio">Audio</option>
-                  <option value="camera">Camera</option>
-                  <option value="safety">Safety</option>
-                  <option value="export">Export</option>
+                  <option value="all">{t('auditLog', 'allEvents')}</option>
+                  <option value="auth">{t('auditLog', 'authentication')}</option>
+                  <option value="robot">{t('auditLog', 'robot')}</option>
+                  <option value="command">{t('auditLog', 'commands')}</option>
+                  <option value="system">{t('auditLog', 'system')}</option>
+                  <option value="data">{t('auditLog', 'data')}</option>
+                  <option value="mission">{t('auditLog', 'mission')}</option>
+                  <option value="navigation">{t('auditLog', 'navigation')}</option>
+                  <option value="audio">{t('auditLog', 'audio')}</option>
+                  <option value="camera">{t('auditLog', 'camera')}</option>
+                  <option value="safety">{t('auditLog', 'safety')}</option>
+                  <option value="export">{t('auditLog', 'export')}</option>
                 </select>
               </div>
 
@@ -276,14 +285,14 @@ export default function LogPage() {
                   disabled={isRefreshing}
                 >
                   <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
+                  {t('auditLog', 'refresh')}
                 </button>
                 <button
                   onClick={exportLogs}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Export
+                  {t('auditLog', 'exportButton')}
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
@@ -295,16 +304,16 @@ export default function LogPage() {
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete All
+                  {t('auditLog', 'deleteAll')}
                 </button>
                 {process.env.NODE_ENV === 'development' && (
                   <button
                     onClick={testAuditLog}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                    title="Create a test audit log entry"
+                    title={t('auditLog', 'createTestLogTitle')}
                   >
                     <TestTube className="w-4 h-4" />
-                    Test Log
+                    {t('auditLog', 'testLog')}
                   </button>
                 )}
               </div>
@@ -318,19 +327,19 @@ export default function LogPage() {
                 <thead className="bg-gray-50 dark:bg-botbot-dark">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Date & Time
+                      {t('auditLog', 'dateAndTime')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Type
+                      {t('auditLog', 'type')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Action
+                      {t('auditLog', 'action')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Robot
+                      {t('auditLog', 'robot')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Details
+                      {t('auditLog', 'details')}
                     </th>
                   </tr>
                 </thead>
@@ -341,7 +350,7 @@ export default function LogPage() {
                         <td colSpan={5} className="px-6 py-12 text-center">
                           <div className="text-gray-500 dark:text-gray-400">
                             <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>No audit logs found</p>
+                            <p>{t('auditLog', 'noAuditLogsFound')}</p>
                           </div>
                         </td>
                       </tr>
@@ -384,7 +393,7 @@ export default function LogPage() {
                               {log.event_details && Object.keys(log.event_details).length > 0 ? (
                                 <details className="cursor-pointer">
                                   <summary className="hover:text-purple-600 dark:hover:text-purple-400">
-                                    View details
+                                    {t('auditLog', 'viewDetails')}
                                   </summary>
                                   <pre className="mt-2 text-xs bg-gray-50 dark:bg-botbot-dark p-2 rounded overflow-x-auto max-w-md">
                                     {JSON.stringify(log.event_details, null, 2)}
@@ -422,7 +431,7 @@ export default function LogPage() {
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
-                          {type} Events
+                          {t('auditLog', 'eventsLabel').replace('{type}', type)}
                         </p>
                         <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                           {count}
@@ -448,12 +457,12 @@ export default function LogPage() {
             <div className="flex items-center mb-4">
               <AlertTriangle className="w-6 h-6 text-red-500 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Delete All Audit Logs
+                {t('auditLog', 'deleteAllTitle')}
               </h3>
             </div>
             
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure you want to delete all {filteredLogs.length} audit logs? This action cannot be undone.
+              {t('auditLog', 'deleteAllConfirm').replace('{count}', String(filteredLogs.length))}
             </p>
             
             <div className="flex justify-end gap-3">
@@ -461,7 +470,7 @@ export default function LogPage() {
                 onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 bg-gray-200 dark:bg-botbot-dark text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-botbot-dark/80 transition-colors"
               >
-                Cancel
+                {t('common', 'cancel')}
               </button>
               <button
                 onClick={deleteAllLogs}
@@ -473,12 +482,12 @@ export default function LogPage() {
                 {isDeleting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Deleting...
+                    {t('auditLog', 'deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    Delete All
+                    {t('auditLog', 'deleteAll')}
                   </>
                 )}
               </button>
@@ -488,4 +497,4 @@ export default function LogPage() {
       )}
     </div>
   );
-} 
+}

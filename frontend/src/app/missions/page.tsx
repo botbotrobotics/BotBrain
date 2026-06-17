@@ -16,6 +16,7 @@ import { useNotifications } from '@/contexts/NotificationsContext';
 import { useRosMappingServices } from '@/hooks/ros/useRosMappingServices';
 import { useMapMissionCompatibility } from '@/hooks/useMapMissionCompatibility';
 import { MissionMapWarningBanner } from '@/components/mission-map-warning-banner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = 'force-dynamic';
@@ -46,11 +47,12 @@ export default function Missions() {
   const [showNavPlan, setShowNavPlan] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Set page title
-    document.title = 'Missions - BotBot';
-  }, []);
+    document.title = `${t('missions', 'title')} - BotBot`;
+  }, [t]);
   const { light, statusBeforeEmergency, antiCollision } = useRobotCustomModeContext();
   const { robotStatus } = useRobotStatus();
   const robotActions = useRobotActionsTransitions(robotStatus);
@@ -81,8 +83,11 @@ export default function Missions() {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'success',
-            title: 'Map Switched',
-            message: `Loaded map: ${selectedMission?.map_name?.replace(/\.db$/i, '')}`
+            title: t('missions', 'mapSwitchedTitle'),
+            message: t('missions', 'mapSwitchedMessage').replace(
+              '{mapName}',
+              selectedMission?.map_name?.replace(/\.db$/i, '') || t('missions', 'unknown')
+            )
           }
         });
       }
@@ -91,8 +96,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to switch map',
-          message: 'Could not load the mission map'
+          title: t('missions', 'failedToSwitchMapTitle'),
+          message: t('missions', 'failedToSwitchMapMessage')
         }
       });
     } finally {
@@ -154,11 +159,11 @@ export default function Missions() {
         notificationDispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            type: 'error',
-            title: 'Failed to load missions',
-            message: 'Please try refreshing the page'
-          }
-        });
+          type: 'error',
+          title: t('missions', 'failedToLoadMissionsTitle'),
+          message: t('missions', 'refreshPageMessage')
+        }
+      });
       } finally {
         setIsLoading(false);
       }
@@ -212,8 +217,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Mission created',
-          message: `Mission "${newMission.name}" has been created`
+          title: t('missions', 'missionCreatedTitle'),
+          message: t('missions', 'missionCreatedMessage').replace('{missionName}', newMission.name)
         }
       });
     } catch (error) {
@@ -222,8 +227,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to create mission',
-          message: 'Please try again'
+          title: t('missions', 'failedToCreateMissionTitle'),
+          message: t('missions', 'tryAgainMessage')
         }
       });
     } finally {
@@ -257,8 +262,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Mission updated',
-          message: `Mission has been renamed to "${updated.name}"`
+          title: t('missions', 'missionUpdatedTitle'),
+          message: t('missions', 'missionUpdatedMessage').replace('{missionName}', updated.name)
         }
       });
     } catch (error) {
@@ -267,8 +272,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to update mission',
-          message: 'Please try again'
+          title: t('missions', 'failedToUpdateMissionTitle'),
+          message: t('missions', 'tryAgainMessage')
         }
       });
     } finally {
@@ -296,8 +301,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Mission deleted',
-          message: 'Mission has been successfully deleted'
+          title: t('missions', 'missionDeletedTitle'),
+          message: t('missions', 'missionDeletedMessage')
         }
       });
     } catch (error) {
@@ -306,8 +311,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to delete mission',
-          message: 'Please try again'
+          title: t('missions', 'failedToDeleteMissionTitle'),
+          message: t('missions', 'tryAgainMessage')
         }
       });
     } finally {
@@ -327,8 +332,8 @@ export default function Missions() {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'info',
-            title: 'Saving waypoints',
-            message: 'Please wait while waypoints are saved...'
+            title: t('missions', 'savingWaypointsTitle'),
+            message: t('missions', 'savingWaypointsMessage')
           }
         });
         
@@ -347,8 +352,8 @@ export default function Missions() {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'error',
-            title: 'No waypoints found',
-            message: 'Please add waypoints and wait for them to save'
+            title: t('missions', 'noWaypointsFoundTitle'),
+            message: t('missions', 'noWaypointsFoundMessage')
           }
         });
         return;
@@ -368,8 +373,10 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Mission started',
-          message: `Mission "${freshMission.name}" is now active with ${freshMission.waypoints.length} waypoints`
+          title: t('missions', 'missionStartedTitle'),
+          message: t('missions', 'missionStartedMessage')
+            .replace('{missionName}', freshMission.name)
+            .replace('{count}', String(freshMission.waypoints.length))
         }
       });
     } catch (error) {
@@ -378,8 +385,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to start mission',
-          message: 'Please try again'
+          title: t('missions', 'failedToStartMissionTitle'),
+          message: t('missions', 'tryAgainMessage')
         }
       });
     } finally {
@@ -401,8 +408,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'success',
-          title: 'Mission stopped',
-          message: 'Mission has been stopped'
+          title: t('missions', 'missionStoppedTitle'),
+          message: t('missions', 'missionStoppedMessage')
         }
       });
     } catch (error) {
@@ -413,7 +420,7 @@ export default function Missions() {
       console.error('Error stringified:', JSON.stringify(error, null, 2));
       
       // Try different ways to extract error message
-      let errorMessage = 'Unknown error occurred';
+      let errorMessage = t('missions', 'unknownError');
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
@@ -426,7 +433,7 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to stop mission',
+          title: t('missions', 'failedToStopMissionTitle'),
           message: errorMessage
         }
       });
@@ -513,8 +520,8 @@ export default function Missions() {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Failed to save waypoints',
-          message: error instanceof Error ? error.message : 'Your changes may not have been saved'
+          title: t('missions', 'failedToSaveWaypointsTitle'),
+          message: error instanceof Error ? error.message : t('missions', 'changesMayNotHaveBeenSaved')
         }
       });
     } finally {
@@ -558,8 +565,8 @@ export default function Missions() {
       type: 'ADD_NOTIFICATION',
       payload: {
         type: 'info',
-        title: 'Navigation Complete',
-        message: 'Mission has finished'
+        title: t('missions', 'navigationCompleteTitle'),
+        message: t('missions', 'navigationCompleteMessage')
       }
     });
   };
@@ -617,12 +624,12 @@ export default function Missions() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <Navigation2 className="w-5 h-5" />
-                Missions
+                {t('missions', 'title')}
               </h3>
               <button
                 onClick={() => setIsCreatingMission(true)}
                 className="p-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
-                title="Create new mission"
+                title={t('missions', 'createNewMission')}
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -644,7 +651,7 @@ export default function Missions() {
                   type="text"
                   value={newMissionName}
                   onChange={(e) => setNewMissionName(e.target.value)}
-                  placeholder="Mission name..."
+                  placeholder={t('missions', 'missionNamePlaceholder')}
                   className="w-full px-3 py-2 bg-gray-50 dark:bg-botbot-darker text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-botbot-purple mb-2"
                   autoFocus
                   onKeyPress={(e) => e.key === 'Enter' && createMission()}
@@ -660,7 +667,7 @@ export default function Missions() {
                     ) : (
                       <Check className="w-4 h-4 inline mr-1" />
                     )}
-                    Create
+                    {t('missions', 'create')}
                   </button>
                   <button
                     onClick={() => {
@@ -670,7 +677,7 @@ export default function Missions() {
                     className="flex-1 px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-sm font-medium"
                   >
                     <X className="w-4 h-4 inline mr-1" />
-                    Cancel
+                    {t('missions', 'cancel')}
                   </button>
                 </div>
               </div>
@@ -682,14 +689,14 @@ export default function Missions() {
                 <div className="text-center py-8">
                   <Navigation2 className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    No missions yet
+                    {t('missions', 'noMissionsYet')}
                   </p>
                   <button
                     onClick={() => setIsCreatingMission(true)}
                     className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors text-sm font-medium"
                   >
                     <Plus className="w-4 h-4 inline mr-1" />
-                    Create First Mission
+                    {t('missions', 'createFirstMission')}
                   </button>
                 </div>
               ) : (
@@ -755,21 +762,21 @@ export default function Missions() {
                           </h4>
                           {activeMissionId === mission.id ? (
                             <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded-full animate-pulse">
-                              Active
+                              {t('missions', 'active')}
                             </span>
                           ) : mission.is_active ? (
                             <span className="px-2 py-0.5 bg-yellow-500 text-white text-xs rounded-full">
-                              Paused
+                              {t('missions', 'paused')}
                             </span>
                           ) : null}
                         </div>
                         <div className="space-y-1 mb-2">
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Created {mission.created_at ? new Date(mission.created_at).toLocaleDateString() : 'Unknown'}
+                            {t('missions', 'created')} {mission.created_at ? new Date(mission.created_at).toLocaleDateString() : t('missions', 'unknown')}
                           </p>
                           <p className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1">
                             <Route className="w-3 h-3" />
-                            {mission.waypoints?.length || 0} waypoints
+                            {mission.waypoints?.length || 0} {(mission.waypoints?.length || 0) === 1 ? t('missions', 'waypoint') : t('missions', 'waypoints')}
                           </p>
                           {mission.map_name && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -788,19 +795,19 @@ export default function Missions() {
                             className="flex-1 px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-sm font-medium flex items-center justify-center gap-1"
                           >
                             <Edit2 className="w-3 h-3" />
-                            Edit
+                            {t('missions', 'edit')}
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm(`Delete mission "${mission.name}"?`)) {
+                              if (confirm(t('missions', 'deleteMissionConfirm').replace('{missionName}', mission.name))) {
                                 deleteMission(mission.id);
                               }
                             }}
                             className="flex-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors text-sm font-medium flex items-center justify-center gap-1"
                           >
                             <Trash2 className="w-3 h-3" />
-                            Delete
+                            {t('missions', 'delete')}
                           </button>
                         </div>
                       </>
@@ -822,18 +829,18 @@ export default function Missions() {
               <div className="flex items-center justify-between px-4 pt-4 pb-2">
                 <h3 className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                   <MapIcon className="w-5 h-5" />
-                  {selectedMission ? `Mission: ${selectedMission.name}` : 'Mission Editor'}
+                  {selectedMission ? t('missions', 'missionTitle').replace('{missionName}', selectedMission.name) : t('missions', 'missionEditor')}
                 </h3>
                 {activeMissionId && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-600 dark:text-green-400 rounded-full text-sm">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    Mission Running
+                    {t('missions', 'missionRunning')}
                   </div>
                 )}
                 {!activeMissionId && selectedMission?.is_active && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-full text-sm">
                     <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                    Mission Paused
+                    {t('missions', 'missionPaused')}
                   </div>
                 )}
               </div>
@@ -846,17 +853,17 @@ export default function Missions() {
                       <div className="flex items-center gap-2">
                         <Route className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Waypoints: {currentWaypointCount}
+                          {t('missions', 'waypoints')}: {currentWaypointCount}
                         </span>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Pending</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('missions', 'pending')}</span>
                         <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Active</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('missions', 'active')}</span>
                         <div className="w-3 h-3 bg-green-500 rounded-full" />
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Reached</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('missions', 'reached')}</span>
                       </div>
                     </div>
                     
@@ -868,15 +875,15 @@ export default function Missions() {
                             ? 'bg-green-500 hover:bg-green-600 text-white' 
                             : 'bg-gray-500 hover:bg-gray-600 text-white'
                         }`}
-                        title="Toggle navigation plan overlay"
+                        title={t('missions', 'toggleNavPlanOverlay')}
                       >
                         <Route className="w-3 h-3" />
-                        Nav Plan
+                        {t('missions', 'navPlan')}
                       </button>
                       {isSaving && (
                         <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">
                           <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
-                          Saving waypoints...
+                          {t('missions', 'savingWaypoints')}
                         </span>
                       )}
                       {activeMissionId === selectedMission.id ? (
@@ -886,7 +893,7 @@ export default function Missions() {
                           className="px-3 py-1.5 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-md transition-colors text-sm font-medium flex items-center gap-1"
                         >
                           <Square className="w-3 h-3" />
-                          Stop
+                          {t('missions', 'stop')}
                         </button>
                       ) : (
                         <button
@@ -903,14 +910,14 @@ export default function Missions() {
                           }`}
                           title={
                             selectedMission.map_name && !isMapCompatible && isRobotConnected
-                              ? 'Switch to the correct map first'
+                              ? t('missions', 'switchToCorrectMapFirst')
                               : currentWaypointCount > 0
-                                ? (selectedMission.is_active ? 'Resume mission' : 'Start mission')
-                                : 'Add waypoints first'
+                                ? (selectedMission.is_active ? t('missions', 'resumeMission') : t('missions', 'startMissionTooltip'))
+                                : t('missions', 'addWaypointsFirst')
                           }
                         >
                           <Play className="w-3 h-3" />
-                          {selectedMission.is_active ? 'Resume' : 'Start'}
+                          {selectedMission.is_active ? t('missions', 'resume') : t('missions', 'start')}
                         </button>
                       )}
                     </div>
@@ -955,16 +962,16 @@ export default function Missions() {
                     <div className="text-center">
                       <Navigation2 className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
                       <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        No Mission Selected
+                        {t('missions', 'noMissionSelected')}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Select a mission from the left panel or create a new one to start planning waypoints
+                        {t('missions', 'noMissionSelectedDescription')}
                       </p>
                       <button
                         onClick={() => setShowLeftPanel(true)}
                         className="sm:hidden px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors text-sm font-medium"
                       >
-                        Open Mission List
+                        {t('missions', 'openMissionList')}
                       </button>
                     </div>
                   </div>
@@ -992,7 +999,7 @@ export default function Missions() {
 
           {/* Camera Feed at Top */}
           <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Camera View</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('missions', 'cameraView')}</h3>
             <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700">
               <RosCameraImg cameraType="camera" overlay="none" />
             </div>
@@ -1000,7 +1007,7 @@ export default function Missions() {
 
           {/* Robot Controls Below Camera */}
           <div className="flex-1 overflow-y-auto p-2">
-            <Container className="w-full" title="Robot Controls">
+            <Container className="w-full" title={t('missions', 'robotControls')}>
               <div className="space-y-2">
                 {/* Emergency button first */}
                 <div className="w-full">

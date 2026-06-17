@@ -137,8 +137,8 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Navigation Error',
-          message: 'No waypoints defined. Please add waypoints first.',
+          title: t('missions', 'navigationErrorTitle'),
+          message: t('missions', 'noWaypointsDefinedMessage'),
           type: 'error'
         }
       });
@@ -149,8 +149,8 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Navigation Error',
-          message: 'Nav2 FollowWaypoints action server not available. Ensure Nav2 is running on the robot.',
+          title: t('missions', 'navigationErrorTitle'),
+          message: t('missions', 'nav2ActionUnavailableMessage'),
           type: 'error'
         }
       });
@@ -179,8 +179,8 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Navigation Failed',
-          message: navigationError?.message || 'Failed to start navigation. Check robot connection and Nav2 status.',
+          title: t('missions', 'navigationFailedTitle'),
+          message: navigationError?.message || t('maps', 'navigationFailedMessage'),
           type: 'error'
         }
       });
@@ -188,13 +188,13 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Navigation Started',
-          message: `Navigating through ${waypoints.length} waypoints`,
+          title: t('missions', 'navigationStartedTitle'),
+          message: t('missions', 'navigatingThroughWaypoints').replace('{count}', String(waypoints.length)),
           type: 'success'
         }
       });
     }
-  }, [waypoints, isActionServerAvailable, startFollowWaypoints, navigationError, notificationDispatch]);
+  }, [waypoints, isActionServerAvailable, startFollowWaypoints, navigationError, notificationDispatch, t]);
 
   const stopNavigation = useCallback(() => {
     try {
@@ -204,8 +204,8 @@ export default function MissionMapView({
         notificationDispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'Navigation Cancelled',
-            message: 'Mission navigation has been stopped',
+            title: t('missions', 'navigationCancelledTitle'),
+            message: t('missions', 'missionNavigationStopped'),
             type: 'info'
           }
         });
@@ -214,8 +214,8 @@ export default function MissionMapView({
         notificationDispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'Cancel Failed',
-            message: 'Failed to cancel navigation. Please check robot connection.',
+            title: t('missions', 'cancelFailedTitle'),
+            message: t('missions', 'cancelFailedMessage'),
             type: 'error'
           }
         });
@@ -225,13 +225,13 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Cancel Error',
-          message: 'An error occurred while cancelling navigation',
+          title: t('missions', 'cancelErrorTitle'),
+          message: t('missions', 'cancelErrorMessage'),
           type: 'error'
         }
       });
     }
-  }, [cancelFollowWaypoints, notificationDispatch]);
+  }, [cancelFollowWaypoints, notificationDispatch, t]);
 
   // Notify parent of waypoint changes when they are modified by user actions
   // Use a ref to store previous waypoints to detect real changes
@@ -346,8 +346,8 @@ export default function MissionMapView({
         notificationDispatch({
           type: 'ADD_NOTIFICATION',
           payload: {
-            title: 'Navigation Complete',
-            message: 'Successfully reached all waypoints!',
+            title: t('missions', 'navigationCompleteTitle'),
+            message: t('missions', 'successfullyReachedAllWaypoints'),
             type: 'success'
           }
         });
@@ -363,7 +363,7 @@ export default function MissionMapView({
       notificationDispatch({
         type: 'ADD_NOTIFICATION',
         payload: {
-          title: 'Navigation Failed',
+          title: t('missions', 'navigationFailedTitle'),
           message: navigationError.message,
           type: 'error'
         }
@@ -374,7 +374,7 @@ export default function MissionMapView({
       hasStartedNavigationRef.current = false;
       prevWaypointIndexRef.current = 0;
     }
-  }, [navigationStatus, navigationError, waypoints, navigationProgress.missedWaypoints, onNavigationComplete, notificationDispatch]);
+  }, [navigationStatus, navigationError, waypoints, navigationProgress.missedWaypoints, onNavigationComplete, notificationDispatch, t]);
 
   const renderMap = useCallback(() => {
     if (!canvasRef.current || !occupancyGrid || !containerRef.current) return;
@@ -1084,17 +1084,17 @@ export default function MissionMapView({
                 ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
-            title="Toggle edit mode (E)"
+            title={t('missions', 'toggleEditMode')}
           >
             {isEditMode ? (
               <>
                 <X className="w-4 h-4" />
-                Exit Edit
+                {t('missions', 'exitEdit')}
               </>
             ) : (
               <>
                 <Navigation className="w-4 h-4" />
-                Edit
+                {t('missions', 'edit')}
               </>
             )}
           </button>
@@ -1103,9 +1103,9 @@ export default function MissionMapView({
             <button
               onClick={handleClearAllWaypoints}
               className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-              title="Clear all waypoints"
+              title={t('missions', 'clearAllWaypoints')}
             >
-              Clear
+              {t('missions', 'clear')}
             </button>
           )}
         </div>
@@ -1116,21 +1116,21 @@ export default function MissionMapView({
         <button
           onClick={handleZoomIn}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom in"
+          title={t('maps', 'zoomIn')}
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={handleZoomOut}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom out"
+          title={t('maps', 'zoomOut')}
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
           onClick={handleReset}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Reset view"
+          title={t('maps', 'resetView')}
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -1138,7 +1138,7 @@ export default function MissionMapView({
         <button
           onClick={retry}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Refresh map data"
+          title={t('maps', 'refreshMapData')}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -1150,7 +1150,7 @@ export default function MissionMapView({
               ? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700 hover:bg-orange-600 dark:hover:bg-orange-700'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
-          title={showLocalCostmap ? "Hide local costmap" : "Show local costmap"}
+          title={showLocalCostmap ? t('maps', 'hideLocalCostmap') : t('maps', 'showLocalCostmap')}
         >
           <Layers className="w-4 h-4" />
         </button>
@@ -1182,12 +1182,12 @@ export default function MissionMapView({
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 text-center shadow-lg">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-3 mx-auto"></div>
-            <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">Loading map...</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">{t('maps', 'loadingMap')}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Waiting for map data from {mapTopic}
+              {t('missions', 'waitingForMapDataFrom').replace('{topic}', mapTopic)}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              This may take up to 15 seconds
+              {t('missions', 'mayTake15Seconds')}
             </p>
           </div>
         </div>
@@ -1204,10 +1204,10 @@ export default function MissionMapView({
                 onClick={retry}
                 className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium"
               >
-                Retry Loading Map
+                {t('missions', 'retryLoadingMap')}
               </button>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Make sure the map server is running on the robot
+                {t('missions', 'mapServerRunningHelp')}
               </p>
             </div>
           </div>
@@ -1219,38 +1219,40 @@ export default function MissionMapView({
         <div className="absolute bottom-3 left-3 bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 rounded-lg p-2 text-xs">
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-violet-500" />
-            <span className="text-gray-700 dark:text-gray-300">Robot Position</span>
+            <span className="text-gray-700 dark:text-gray-300">{t('missions', 'robotPosition')}</span>
           </div>
           {waypoints.length > 0 && (
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-700 dark:text-gray-300">Waypoints</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('missions', 'waypoints')}</span>
             </div>
           )}
           {isNav2Navigating && (
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
               <span className="text-gray-700 dark:text-gray-300">
-                Navigating ({nav2CurrentIndex + 1}/{waypoints.length})
+                {t('missions', 'navigatingProgress')
+                  .replace('{current}', String(nav2CurrentIndex + 1))
+                  .replace('{total}', String(waypoints.length))}
               </span>
             </div>
           )}
           {!nav2Connected && (
             <div className="flex items-center gap-2 text-red-500">
               <X className="w-3 h-3" />
-              <span className="text-xs">Nav2 disconnected</span>
+              <span className="text-xs">{t('missions', 'nav2Disconnected')}</span>
             </div>
           )}
           {showNavPlan && navPlan && navPlan.poses.length > 0 && (
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span className="text-gray-700 dark:text-gray-300">Navigation Plan</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('missions', 'navigationPlan')}</span>
             </div>
           )}
           {showLocalCostmap && (
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(to right, #22c55e, #facc15, #f97316, #dc2626)' }}></div>
-              <span className="text-gray-700 dark:text-gray-300">Costmap</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('missions', 'costmap')}</span>
             </div>
           )}
         </div>

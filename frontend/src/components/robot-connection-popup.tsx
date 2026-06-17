@@ -49,13 +49,13 @@ export default function RobotConnectionPopup({
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {connection.online && connection.connectedRobot
-                  ? `Connected to ${connection.connectedRobot.name}`
-                  : 'Not Connected'}
+                  ? `${t('connectionPopup', 'connectedTo')} ${connection.connectedRobot.name}`
+                  : t('connectionPopup', 'notConnected')}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {connection.online && connection.connectedRobot
                   ? connection.connectedRobot.address
-                  : 'No robot connected'}
+                  : t('connectionPopup', 'noRobotConnected')}
               </p>
             </div>
           </div>
@@ -70,10 +70,10 @@ export default function RobotConnectionPopup({
             <Bot className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             <div className="text-left">
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                Manage Robot Fleet
+                {t('connectionPopup', 'manageRobotFleet')}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Add, edit, or connect to your robots
+                {t('connectionPopup', 'manageRobotFleetDescription')}
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function RobotConnectionPopup({
         {/* Info message */}
         <div className="text-center py-2">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Click above to manage your robot connections
+            {t('connectionPopup', 'manageRobotConnections')}
           </p>
         </div>
       </div>

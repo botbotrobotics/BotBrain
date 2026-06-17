@@ -809,8 +809,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'error',
-            title: 'Failed to Set Home',
-            message: 'Could not set home position. Please check ROS connection.'
+            title: t('maps', 'failedToSetHomeTitle'),
+            message: t('maps', 'failedToSetHomeMessage')
           }
         });
       }
@@ -955,8 +955,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'info',
-            title: 'Navigation Stopped',
-            message: 'Robot navigation has been cancelled'
+            title: t('maps', 'navigationStoppedTitle'),
+            message: t('maps', 'navigationStoppedMessage')
           }
         });
       } else {
@@ -965,8 +965,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'error',
-            title: 'Stop Failed',
-            message: 'Failed to stop navigation. Please try again.'
+            title: t('maps', 'stopFailedTitle'),
+            message: t('maps', 'stopFailedMessage')
           }
         });
       }
@@ -976,8 +976,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
         type: 'ADD_NOTIFICATION',
         payload: {
           type: 'error',
-          title: 'Stop Failed',
-          message: 'An error occurred while stopping navigation.'
+          title: t('maps', 'stopFailedTitle'),
+          message: t('maps', 'stopErrorMessage')
         }
       });
     }
@@ -1002,8 +1002,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'success',
-            title: 'Navigation Started',
-            message: 'Navigating to destination'
+            title: t('maps', 'navigationStartedTitle'),
+            message: t('maps', 'navigationStartedMessage')
           }
         });
       } else {
@@ -1012,8 +1012,8 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'error',
-            title: 'Navigation Failed',
-            message: navigationError || 'Failed to start navigation. Please check Nav2 is running.'
+            title: t('maps', 'navigationFailedTitle'),
+            message: navigationError || t('maps', 'navigationFailedMessage')
           }
         });
       }
@@ -1050,7 +1050,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
                   ? 'bg-orange-500 dark:bg-orange-600 border-orange-600 dark:border-orange-700' 
                   : 'bg-red-500 dark:bg-red-600 border-red-600 dark:border-red-700 hover:bg-red-600 dark:hover:bg-red-700 active:bg-red-700 dark:active:bg-red-800 animate-pulse'
               } text-white w-12 h-12 rounded-lg border-2 shadow-lg transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center relative z-10`}
-              title={isStopping ? "Stopping navigation..." : "Stop navigation - Click to stop the robot"}
+              title={isStopping ? t('maps', 'stoppingNavigation') : t('maps', 'stopNavigationClick')}
             >
               {isStopping ? (
                 <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
@@ -1062,7 +1062,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
             {!isStopping && (
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                 <div className="bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                  Stop Navigation
+                  {t('maps', 'stopNavigation')}
                   <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-800"></div>
                 </div>
               </div>
@@ -1080,7 +1080,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
                   ? 'bg-green-500 dark:bg-green-600 text-white border-green-600 dark:border-green-700' 
                   : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
-              title={isSetHomeMode ? "Cancel set home" : "Set home position"}
+              title={isSetHomeMode ? t('maps', 'cancelSetHome') : t('maps', 'setHomePositionTooltip')}
               disabled={!nav2Connected}
             >
               <Home className="w-4 h-4" />
@@ -1095,7 +1095,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
                   ? 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 dark:border-blue-700'
                   : 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
-              title={isWaypointMode ? "Cancel navigation mode" : "Navigate to location"}
+              title={isWaypointMode ? t('maps', 'cancelNavigationMode') : t('maps', 'navigateToLocation')}
               disabled={!nav2Connected || isNavigating}
             >
               {isWaypointMode ? <X className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
@@ -1105,7 +1105,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
                 <button
                   onClick={handleSendWaypoint}
                   className="bg-emerald-500 dark:bg-emerald-600 text-white w-8 h-8 rounded-lg border border-emerald-600 dark:border-emerald-700 shadow-sm hover:bg-emerald-600 dark:hover:bg-emerald-700 transition-colors flex items-center justify-center"
-                  title="Navigate to location"
+                  title={t('maps', 'navigateToLocation')}
                   disabled={!nav2Connected}
                 >
                   <Send className="w-4 h-4" />
@@ -1113,7 +1113,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
                 <button
                   onClick={handleClearWaypoint}
                   className="bg-gray-500 dark:bg-gray-600 text-white w-8 h-8 rounded-lg border border-gray-600 dark:border-gray-700 shadow-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-                  title="Clear navigation goal"
+                  title={t('maps', 'clearNavigationGoal')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1125,21 +1125,21 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
         <button
           onClick={handleZoomIn}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom in"
+          title={t('maps', 'zoomIn')}
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={handleZoomOut}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Zoom out"
+          title={t('maps', 'zoomOut')}
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
           onClick={handleReset}
           className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          title="Reset view"
+          title={t('maps', 'resetView')}
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -1150,7 +1150,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
               ? 'bg-green-500 dark:bg-green-600 text-white border-green-600 dark:border-green-700 hover:bg-green-600 dark:hover:bg-green-700'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
-          title={showNavPlan ? "Hide navigation plan" : "Show navigation plan"}
+          title={showNavPlan ? t('maps', 'hideNavigationPlan') : t('maps', 'showNavigationPlan')}
         >
           <Route className="w-4 h-4" />
         </button>
@@ -1161,7 +1161,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
               ? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700 hover:bg-orange-600 dark:hover:bg-orange-700'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
-          title={showLocalCostmap ? "Hide local costmap" : "Show local costmap"}
+          title={showLocalCostmap ? t('maps', 'hideLocalCostmap') : t('maps', 'showLocalCostmap')}
         >
           <Layers className="w-4 h-4" />
         </button>
@@ -1171,7 +1171,9 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
       {isMissionActive && missionWaypoints.length > 0 && (
         <div className="absolute top-3 left-3 z-10 bg-white dark:bg-gray-800 rounded-lg px-3 py-1 shadow-sm border border-purple-300 dark:border-purple-700">
           <span className="text-sm text-purple-600 dark:text-purple-400">
-            Mission: {missionWaypointIndex + 1}/{missionWaypoints.length}
+            {t('maps', 'missionProgress')
+              .replace('{current}', String(missionWaypointIndex + 1))
+              .replace('{total}', String(missionWaypoints.length))}
           </span>
         </div>
       )}
@@ -1179,7 +1181,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
       {/* Navigation goal indicator - bottom left */}
       {waypoint && !isNavigating && !isStopping && (
         <div className="absolute bottom-3 left-3 z-10 bg-white dark:bg-gray-800 rounded-lg px-3 py-1 shadow-sm border border-gray-300 dark:border-gray-700">
-          <span className="text-sm text-gray-700 dark:text-gray-300">Goal set</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('maps', 'goalSet')}</span>
         </div>
       )}
 
@@ -1190,11 +1192,11 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
             {isStopping ? (
               <div className="flex items-center gap-2 text-orange-500">
                 <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                <span>Stopping navigation...</span>
+                <span>{t('maps', 'stoppingNavigation')}</span>
               </div>
             ) : (
               <>
-                <div>Navigating to destination...</div>
+                <div>{t('maps', 'navigatingToDestination')}</div>
                 {navigationError && (
                   <div className="text-red-500">{navigationError}</div>
                 )}
@@ -1233,7 +1235,7 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-white rounded-full animate-spin mb-2"></div>
-            <p className="text-sm text-white">Loading map...</p>
+            <p className="text-sm text-white">{t('maps', 'loadingMap')}</p>
           </div>
         </div>
       )}
@@ -1253,30 +1255,30 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
         <div className="absolute bottom-3 right-3 bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 rounded-lg p-2 text-xs">
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-purple-500" />
-            <span className="text-gray-700 dark:text-gray-300">Robot</span>
+            <span className="text-gray-700 dark:text-gray-300">{t('maps', 'robot')}</span>
           </div>
           {(isWaypointMode || waypoint) && (
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-700 dark:text-gray-300">Goal</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('maps', 'goal')}</span>
             </div>
           )}
           {isMissionActive && missionWaypoints.length > 0 && (
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span className="text-gray-700 dark:text-gray-300">Mission</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('maps', 'mission')}</span>
             </div>
           )}
           {showNavPlan && (
             <div className="flex items-center gap-2 mb-1">
               <div className="w-3 h-0.5 bg-green-500"></div>
-              <span className="text-gray-700 dark:text-gray-300">Plan</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('maps', 'plan')}</span>
             </div>
           )}
           {showLocalCostmap && (
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(to right, #22c55e, #facc15, #f97316, #dc2626)' }}></div>
-              <span className="text-gray-700 dark:text-gray-300">Costmap</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('maps', 'costmap')}</span>
             </div>
           )}
         </div>
@@ -1286,14 +1288,14 @@ export default function MapViewNav2({ className = '' }: MapViewNav2Props) {
       {isWaypointMode && (
         <div className="absolute top-14 left-3 z-10 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 shadow-sm border border-gray-300 dark:border-gray-700">
           <p className="text-xs text-gray-700 dark:text-gray-300">
-            Click to set navigation goal • Drag to set orientation • ESC to cancel
+            {t('maps', 'setNavigationGoalInstructions')}
           </p>
         </div>
       )}
       {isSetHomeMode && (
         <div className="absolute top-14 left-3 z-10 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 shadow-sm border border-gray-300 dark:border-gray-700">
           <p className="text-xs text-gray-700 dark:text-gray-300">
-            Click to set home position • Drag to set orientation • ESC to cancel
+            {t('maps', 'setHomePositionInstructions')}
           </p>
         </div>
       )}

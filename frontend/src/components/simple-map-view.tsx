@@ -7,6 +7,7 @@ import useOccupancyGrid from '@/hooks/ros/useOccupancyGrid';
 import useMapPose from '@/hooks/ros/useMapPose';
 import useInitialPose from '@/hooks/ros/useInitialPose';
 import { useNotifications } from '@/contexts/NotificationsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SimpleMapViewProps {
   className?: string;
@@ -27,6 +28,7 @@ interface ViewState {
 export default function SimpleMapView({ className = '', isMapping = false, isSettingHome = false, onHomeSet }: SimpleMapViewProps) {
   const { connection } = useRobotConnection();
   const { dispatch: notificationDispatch } = useNotifications();
+  const { t } = useLanguage();
   const { publishInitialPose } = useInitialPose();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -565,8 +567,8 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
           type: 'ADD_NOTIFICATION',
           payload: {
             type: 'error',
-            title: 'Failed to Set Home',
-            message: 'Could not set home position. Please check ROS connection.'
+            title: t('maps', 'failedToSetHomeTitle'),
+            message: t('maps', 'failedToSetHomeMessage')
           }
         });
       }
@@ -704,7 +706,7 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
         {/* Loading overlay */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="text-white">Loading map...</div>
+            <div className="text-white">{t('maps', 'loadingMap')}</div>
           </div>
         )}
         
@@ -712,7 +714,7 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="text-red-400 text-center">
-              <p>Failed to load map</p>
+              <p>{t('maps', 'failedToLoadMapGeneric')}</p>
               <p className="text-sm mt-2">{error}</p>
             </div>
           </div>
@@ -721,8 +723,8 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
         {/* Instructions for Set Home mode */}
         {isSettingHome && (
           <div className="absolute top-4 left-4 bg-green-500/90 text-white px-3 py-2 rounded-lg backdrop-blur-sm">
-            <p className="text-sm font-medium">Setting Home Position</p>
-            <p className="text-xs mt-1">Click on map to place • Drag to set orientation • ESC to cancel</p>
+            <p className="text-sm font-medium">{t('maps', 'settingHomePosition')}</p>
+            <p className="text-xs mt-1">{t('maps', 'setHomePositionInstructions')}</p>
           </div>
         )}
 
@@ -730,7 +732,7 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
         {robotPose && (
           <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded-lg backdrop-blur-sm">
             <p className="text-xs font-mono">
-              Position: ({robotPose.x.toFixed(2)}, {robotPose.y.toFixed(2)})
+              {t('maps', 'position')}: ({robotPose.x.toFixed(2)}, {robotPose.y.toFixed(2)})
             </p>
           </div>
         )}
@@ -748,7 +750,7 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
                 ? 'bg-green-500/80 hover:bg-green-600/80 text-white'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
-            title={isSettingHome ? "Cancel set home" : "Set home position"}
+            title={isSettingHome ? t('maps', 'cancelSetHome') : t('maps', 'setHomePositionTooltip')}
           >
             <Home className="w-5 h-5" />
           </button>
@@ -756,28 +758,28 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
           <button
             onClick={handleZoomIn}
             className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg transition-colors"
-            title="Zoom In"
+            title={t('maps', 'zoomIn')}
           >
             <ZoomIn className="w-5 h-5 text-white" />
           </button>
           <button
             onClick={handleZoomOut}
             className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg transition-colors"
-            title="Zoom Out"
+            title={t('maps', 'zoomOut')}
           >
             <ZoomOut className="w-5 h-5 text-white" />
           </button>
           <button
             onClick={handleReset}
             className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg transition-colors"
-            title="Reset View"
+            title={t('maps', 'resetView')}
           >
             <RotateCcw className="w-5 h-5 text-white" />
           </button>
           <button
             onClick={handleCenterRobot}
             className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg transition-colors"
-            title="Center on Robot"
+            title={t('maps', 'centerOnRobot')}
           >
             <Navigation className="w-5 h-5 text-white" />
           </button>
@@ -788,14 +790,14 @@ export default function SimpleMapView({ className = '', isMapping = false, isSet
           {/* Connection status */}
           {connection && (
             <div className="px-3 py-1 bg-green-500/20 backdrop-blur-sm rounded-lg">
-              <span className="text-xs text-green-400">Map Connected</span>
+              <span className="text-xs text-green-400">{t('maps', 'mapConnected')}</span>
             </div>
           )}
           {/* Instructions when setting home */}
           {isSettingHome && (
             <div className="px-3 py-2 bg-blue-500/20 backdrop-blur-sm rounded-lg">
               <p className="text-xs text-blue-300">
-                Click to set home position • Drag to set orientation • ESC to cancel
+                {t('maps', 'setHomePositionInstructions')}
               </p>
             </div>
           )}

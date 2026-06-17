@@ -264,7 +264,7 @@ function DiagnosticItem({ diagnostic, t }: { diagnostic: DiagnosticStatus; t: an
               ))}
               {diagnostic.values.length > 3 && (
                 <p className="text-xs text-gray-500 dark:text-gray-500">
-                  +{diagnostic.values.length - 3} more values
+                  {t('health', 'moreValues').replace('{count}', String(diagnostic.values.length - 3))}
                 </p>
               )}
             </div>
@@ -305,7 +305,7 @@ function StateMachineRow({
             <button
               onClick={() => setShowIdDialog(true)}
               className="w-4 h-4 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
-              title="View module ID"
+              title={t('health', 'viewModuleId')}
             >
               <Info className="w-2.5 h-2.5" />
             </button>
@@ -318,19 +318,19 @@ function StateMachineRow({
               onClick={() => onStart(node.name)}
               className="px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
             >
-              Start
+              {t('health', 'start')}
             </button>
             <button
               onClick={() => onStop(node.name)}
               className="px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
             >
-              Stop
+              {t('health', 'stop')}
             </button>
             <button
               onClick={() => onReset(node.name)}
               className="px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
             >
-              Reset
+              {t('health', 'reset')}
             </button>
           </div>
         </td>
@@ -353,7 +353,7 @@ function StateMachineRow({
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                       {node.displayName}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Module Details</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('health', 'moduleDetails')}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-botbot-darker rounded-lg p-3 mb-4">
@@ -364,7 +364,7 @@ function StateMachineRow({
                   onClick={() => setShowIdDialog(false)}
                   className="w-full px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors"
                 >
-                  Close
+                  {t('health', 'close')}
                 </button>
               </div>
             </div>
@@ -589,7 +589,7 @@ export default function HealthPage() {
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{t('health', 'systemInformation')}</h2>
                 {!hasJetsonData && connection.online && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-400">
-                    Waiting for data...
+                    {t('health', 'waitingForData')}
                   </span>
                 )}
               </div>
@@ -600,7 +600,7 @@ export default function HealthPage() {
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Power className="w-4 h-4" />
-                  <span>{isRebooting ? 'Rebooting...' : 'Reboot System'}</span>
+                  <span>{isRebooting ? t('health', 'rebooting') : t('health', 'rebootSystem')}</span>
                 </button>
               )}
             </div>
@@ -660,7 +660,7 @@ export default function HealthPage() {
                   <>
                     <Wifi className="h-5 w-5 text-green-600 dark:text-green-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">WiFi</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{t('health', 'wifi')}</p>
                       {networkModeStatus.ssid && (
                         <p className="text-xs text-gray-500 dark:text-gray-400">{networkModeStatus.ssid}</p>
                       )}
@@ -671,7 +671,7 @@ export default function HealthPage() {
                   <>
                     <Smartphone className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">4G/Cellular</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{t('health', 'cellular')}</p>
                       {networkModeStatus.interface && (
                         <p className="text-xs text-gray-500 dark:text-gray-400">{networkModeStatus.interface}</p>
                       )}
@@ -682,7 +682,7 @@ export default function HealthPage() {
                   <>
                     <Radio className="h-5 w-5 text-orange-600 dark:text-orange-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">Hotspot</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{t('health', 'hotspot')}</p>
                       {networkModeStatus.ssid && (
                         <p className="text-xs text-gray-500 dark:text-gray-400">{networkModeStatus.ssid}</p>
                       )}
@@ -693,8 +693,8 @@ export default function HealthPage() {
                   <>
                     <Globe className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                     <div>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">Offline</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">No network</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{t('health', 'offline')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('health', 'noNetwork')}</p>
                     </div>
                   </>
                 )}
@@ -716,9 +716,9 @@ export default function HealthPage() {
                     {formatLatency(networkMetrics.latency)}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {networkMetrics.latency < 0 ? 'Measuring...' :
-                     networkMetrics.latency < 50 ? 'Excellent' :
-                     networkMetrics.latency < 150 ? 'Good' : 'Poor'}
+                    {networkMetrics.latency < 0 ? t('health', 'measuring') :
+                     networkMetrics.latency < 50 ? t('health', 'excellent') :
+                     networkMetrics.latency < 150 ? t('health', 'good') : t('health', 'poor')}
                   </p>
                 </div>
               </div>
@@ -733,7 +733,7 @@ export default function HealthPage() {
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
                     {formatDataRate(networkMetrics.dataIn)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Incoming data</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('health', 'incomingData')}</p>
                 </div>
               </div>
             </div>
@@ -747,7 +747,7 @@ export default function HealthPage() {
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
                     {formatDataRate(networkMetrics.dataOut)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Outgoing data</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('health', 'outgoingData')}</p>
                 </div>
               </div>
             </div>
@@ -758,10 +758,10 @@ export default function HealthPage() {
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">{t('health', 'connectionQuality')}</span>
               <span className="text-sm font-medium text-gray-800 dark:text-white">
-                {networkMetrics.latency < 0 ? 'Measuring...' :
-                 networkMetrics.latency < 50 && networkMetrics.dataIn > 0 ? 'Excellent' :
-                 networkMetrics.latency < 150 && networkMetrics.dataIn > 0 ? 'Good' :
-                 networkMetrics.dataIn > 0 ? 'Fair' : 'Poor'}
+                {networkMetrics.latency < 0 ? t('health', 'measuring') :
+                 networkMetrics.latency < 50 && networkMetrics.dataIn > 0 ? t('health', 'excellent') :
+                 networkMetrics.latency < 150 && networkMetrics.dataIn > 0 ? t('health', 'good') :
+                 networkMetrics.dataIn > 0 ? t('health', 'fair') : t('health', 'poor')}
               </span>
             </div>
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -811,7 +811,7 @@ export default function HealthPage() {
                 />
                 {/* Individual CPU cores */}
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">Individual Cores</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">{t('health', 'individualCores')}</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {data.cpus.map((cpu) => (
                       <CpuCore key={cpu.id} {...cpu} t={t} />
@@ -822,7 +822,7 @@ export default function HealthPage() {
             ) : (
               <div className="text-center text-gray-500 dark:text-gray-400 py-4">
                 {!connection.online ? t('health', 'notConnectedDescription') :
-                 !hasJetsonData ? 'Waiting for CPU data...' :
+                 !hasJetsonData ? t('health', 'waitingForCpuData') :
                  t('health', 'noCpuData')}
               </div>
             )}
@@ -933,7 +933,7 @@ export default function HealthPage() {
             {/* Power rails details */}
             {data.power.rails.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">Power Rails</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">{t('health', 'powerRails')}</p>
                 <div className="space-y-1">
                   {data.power.rails.map((rail, index) => (
                     <PowerRail key={index} {...rail} t={t} />
@@ -1051,19 +1051,19 @@ export default function HealthPage() {
               {errors.length > 0 && (
                 <span className="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-full">
                   <XCircle className="w-3 h-3" />
-                  {errors.length} {errors.length === 1 ? 'Error' : 'Errors'}
+                  {errors.length} {errors.length === 1 ? t('health', 'error') : t('health', 'errors')}
                 </span>
               )}
               {warnings.length > 0 && (
                 <span className="flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-full">
                   <AlertTriangle className="w-3 h-3" />
-                  {warnings.length} {warnings.length === 1 ? 'Warning' : 'Warnings'}
+                  {warnings.length} {warnings.length === 1 ? t('health', 'warning') : t('health', 'warnings')}
                 </span>
               )}
               {issues.length === 0 && diagnostics.length > 0 && (
                 <span className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full">
                   <CheckCircle className="w-3 h-3" />
-                  All Systems OK
+                  {t('health', 'allSystemsOk')}
                 </span>
               )}
             </div>
@@ -1073,7 +1073,7 @@ export default function HealthPage() {
           {issues.length > 0 ? (
             <div className="space-y-3">
               <div className="mb-3">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Active Issues</h3>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{t('health', 'activeIssues')}</h3>
                 <div className="grid gap-2">
                   {issues.map((diagnostic, idx) => (
                     <DiagnosticItem key={`${diagnostic.name}-${idx}`} diagnostic={diagnostic} t={t} />
@@ -1087,7 +1087,7 @@ export default function HealthPage() {
                   <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                     <span className="inline-flex items-center gap-2">
                       <CheckCircle className="w-3 h-3 text-green-500" />
-                      {diagnostics.filter(d => d.level === DiagnosticLevel.OK).length} systems operating normally
+                      {t('health', 'systemsOperatingNormally').replace('{count}', String(diagnostics.filter(d => d.level === DiagnosticLevel.OK).length))}
                     </span>
                   </summary>
                   <div className="mt-2 grid gap-2">
@@ -1109,8 +1109,8 @@ export default function HealthPage() {
             /* No diagnostics data */
             <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
               {connection.online ?
-                'Waiting for diagnostics data...' :
-                'Connect to robot to view diagnostics'
+                t('health', 'loadingDescription') :
+                t('health', 'connectToRobotToViewDiagnostics')
               }
             </div>
           )}
@@ -1130,10 +1130,10 @@ export default function HealthPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Confirm System Reboot
+                  {t('health', 'confirmSystemReboot')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Are you sure you want to reboot the system? This will temporarily disconnect all services and the robot will be unavailable for a few minutes.
+                  {t('health', 'confirmSystemRebootDescription')}
                 </p>
                 <div className="flex gap-3 justify-end">
                   <button
@@ -1141,7 +1141,7 @@ export default function HealthPage() {
                     disabled={isRebooting}
                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                   >
-                    Cancel
+                    {t('common', 'cancel')}
                   </button>
                   <button
                     onClick={handleSystemReboot}
@@ -1151,12 +1151,12 @@ export default function HealthPage() {
                     {isRebooting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Rebooting...</span>
+                        <span>{t('health', 'rebooting')}</span>
                       </>
                     ) : (
                       <>
                         <Power className="w-4 h-4" />
-                        <span>Reboot Now</span>
+                        <span>{t('health', 'rebootNow')}</span>
                       </>
                     )}
                   </button>

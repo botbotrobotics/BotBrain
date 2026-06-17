@@ -4,6 +4,7 @@ import { Clock, Image, Sparkles, ChevronDown, X, Trash2, RefreshCw, Settings } f
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/utils/cn';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export type TimeFilter = 'all' | '1h' | '6h' | '24h' | '7d';
 export type ImageFilter = 'all' | 'with-images' | 'without-images';
@@ -24,27 +25,6 @@ interface YoloFilterBarProps {
   onRealtimeToggle?: (enabled: boolean) => void;
   onOpenSettings?: () => void;
 }
-
-const timeOptions: { value: TimeFilter; label: string }[] = [
-  { value: 'all', label: 'All time' },
-  { value: '1h', label: 'Last hour' },
-  { value: '6h', label: 'Last 6 hours' },
-  { value: '24h', label: 'Last 24 hours' },
-  { value: '7d', label: 'Last 7 days' },
-];
-
-const imageOptions: { value: ImageFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'with-images', label: 'With images' },
-  { value: 'without-images', label: 'Without images' },
-];
-
-const confidenceOptions: { value: ConfidenceFilter; label: string; description: string }[] = [
-  { value: 'all', label: 'All', description: 'Any confidence' },
-  { value: 'high', label: 'High', description: '≥ 90%' },
-  { value: 'medium', label: 'Medium', description: '70-89%' },
-  { value: 'low', label: 'Low', description: '< 70%' },
-];
 
 interface DropdownButtonProps {
   icon: React.ReactNode;
@@ -210,14 +190,34 @@ export default function YoloFilterBar({
   onRealtimeToggle,
   onOpenSettings,
 }: YoloFilterBarProps) {
+  const { t } = useLanguage();
   const hasActiveFilters = timeFilter !== 'all' || imageFilter !== 'all' || confidenceFilter !== 'all';
+  const timeOptions: { value: TimeFilter; label: string }[] = [
+    { value: 'all', label: t('aiDetections', 'allTime') },
+    { value: '1h', label: t('aiDetections', 'lastHour') },
+    { value: '6h', label: t('aiDetections', 'last6Hours') },
+    { value: '24h', label: t('aiDetections', 'last24Hours') },
+    { value: '7d', label: t('aiDetections', 'last7Days') },
+  ];
+  const imageOptions: { value: ImageFilter; label: string }[] = [
+    { value: 'all', label: t('aiDetections', 'all') },
+    { value: 'with-images', label: t('aiDetections', 'withImages') },
+    { value: 'without-images', label: t('aiDetections', 'withoutImages') },
+  ];
+  const confidenceOptions: { value: ConfidenceFilter; label: string; description: string }[] = [
+    { value: 'all', label: t('aiDetections', 'all'), description: t('aiDetections', 'anyConfidence') },
+    { value: 'high', label: t('aiDetections', 'high'), description: '≥ 90%' },
+    { value: 'medium', label: t('aiDetections', 'medium'), description: '70-89%' },
+    { value: 'low', label: t('aiDetections', 'low'), description: '< 70%' },
+  ];
+  const detectionLabel = filteredCount === 1 ? t('aiDetections', 'detection') : t('aiDetections', 'detections');
   
   return (
     <div className="flex items-center justify-between gap-4 p-3 bg-white/50 dark:bg-botbot-darker/30 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2 flex-wrap">
         <DropdownButton
           icon={<Clock className="w-3.5 h-3.5" />}
-          label="Time"
+          label={t('aiDetections', 'time')}
           value={timeFilter}
           options={timeOptions}
           onChange={setTimeFilter}
@@ -226,7 +226,7 @@ export default function YoloFilterBar({
         
         <DropdownButton
           icon={<Image className="w-3.5 h-3.5" />}
-          label="Images"
+          label={t('aiDetections', 'images')}
           value={imageFilter}
           options={imageOptions}
           onChange={setImageFilter}
@@ -235,7 +235,7 @@ export default function YoloFilterBar({
         
         <DropdownButton
           icon={<Sparkles className="w-3.5 h-3.5" />}
-          label="Confidence"
+          label={t('aiDetections', 'confidence')}
           value={confidenceFilter}
           options={confidenceOptions}
           onChange={setConfidenceFilter}
@@ -248,7 +248,7 @@ export default function YoloFilterBar({
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <X className="w-3.5 h-3.5" />
-            Clear filters
+            {t('aiDetections', 'clearFilters')}
           </button>
         )}
 
@@ -263,13 +263,13 @@ export default function YoloFilterBar({
                   ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700"
                   : "bg-white dark:bg-botbot-darker hover:bg-gray-50 dark:hover:bg-botbot-dark text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700"
               )}
-              title={realtimeEnabled ? "Disable auto-refresh" : "Enable auto-refresh every 2 seconds"}
+              title={realtimeEnabled ? t('aiDetections', 'disableAutoRefresh') : t('aiDetections', 'enableAutoRefresh')}
             >
               <RefreshCw className={cn(
                 "w-3.5 h-3.5",
                 realtimeEnabled && "animate-spin"
               )} />
-              <span className="font-medium">Realtime</span>
+              <span className="font-medium">{t('aiDetections', 'realtime')}</span>
               {realtimeEnabled && <span className="text-xs opacity-70">2s</span>}
             </button>
           </div>
@@ -284,10 +284,10 @@ export default function YoloFilterBar({
                 "border border-gray-200 dark:border-gray-700",
                 "bg-white dark:bg-botbot-darker hover:bg-gray-50 dark:hover:bg-botbot-dark text-gray-700 dark:text-gray-300"
               )}
-              title="Upload settings"
+              title={t('aiDetections', 'uploadSettings')}
             >
               <Settings className="w-3.5 h-3.5" />
-              <span className="font-medium">Settings</span>
+              <span className="font-medium">{t('aiDetections', 'settings')}</span>
             </button>
           </div>
         )}
@@ -300,21 +300,23 @@ export default function YoloFilterBar({
               <span className="font-medium text-purple-600 dark:text-purple-400">
                 {filteredCount}
               </span>
-              <span>of</span>
+              <span>{t('aiDetections', 'of')}</span>
             </>
           )}
           <span className="font-medium">{totalCount}</span>
-          <span>detection{totalCount !== 1 ? 's' : ''}</span>
+          <span>{totalCount === 1 ? t('aiDetections', 'detection') : t('aiDetections', 'detections')}</span>
         </div>
         
         {onDeleteAll && filteredCount > 0 && (
           <button
             onClick={onDeleteAll}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-md transition-colors font-medium"
-            title={`Delete ${filteredCount} detection${filteredCount !== 1 ? 's' : ''}`}
+            title={t('aiDetections', 'deleteDetectionsTitle')
+              .replace('{count}', String(filteredCount))
+              .replace('{detectionLabel}', detectionLabel)}
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Delete {filteredCount !== totalCount && `${filteredCount}`}</span>
+            <span>{t('aiDetections', 'delete')} {filteredCount !== totalCount && `${filteredCount}`}</span>
           </button>
         )}
       </div>

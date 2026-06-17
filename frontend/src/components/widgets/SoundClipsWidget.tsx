@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useSupabase } from '@/contexts/SupabaseProvider';
 import { useRosPlayAudio } from '@/hooks/ros/useRosPlayAudio';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   Music, 
   Plus, 
@@ -74,12 +75,13 @@ export function SoundClipsWidget({
   onEndDrag,
   initialPosition,
   initialSize = { width: 400, height: 450 },
-  title = 'Sound Clips',
+  title,
 }: SoundClipsWidgetProps) {
   const { user } = useSupabase();
   const supabase = createClient();
   const { playAudioOnRobot } = useRosPlayAudio();
   const { connectionStatus } = useRobotConnection();
+  const { t } = useLanguage();
   const [clips, setClips] = useState<SoundClip[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -180,7 +182,7 @@ export function SoundClipsWidget({
       
       // Generate default name with timestamp
       const now = new Date();
-      const defaultName = `Recording ${now.toLocaleTimeString()}`;
+      const defaultName = `${t('soundClips', 'recordingDefaultName')} ${now.toLocaleTimeString()}`;
       setRecordingName(defaultName);
       
       // Start timer
@@ -190,7 +192,7 @@ export function SoundClipsWidget({
       
     } catch (error) {
       console.error('Error starting recording:', error);
-      alert('Failed to access microphone. Please check your permissions.');
+      alert(t('soundClips', 'failedMicrophoneAccess'));
     }
   };
 
@@ -274,7 +276,7 @@ export function SoundClipsWidget({
       
     } catch (error) {
       console.error('Error uploading recording:', error);
-      alert('Failed to upload recording');
+      alert(t('soundClips', 'failedUploadRecording'));
     } finally {
       setUploading(false);
     }
@@ -303,13 +305,13 @@ export function SoundClipsWidget({
 
     // Check file size (1GB limit)
     if (file.size > 1024 * 1024 * 1024) {
-      alert('File size must be less than 1GB');
+      alert(t('soundClips', 'fileSizeLimit'));
       return;
     }
 
     // Check if it's an audio file
     if (!file.type.startsWith('audio/')) {
-      alert('Please upload an audio file');
+      alert(t('soundClips', 'audioFileRequired'));
       return;
     }
 
@@ -386,7 +388,7 @@ export function SoundClipsWidget({
       }
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Failed to upload sound clip');
+      alert(t('soundClips', 'failedUploadSoundClip'));
     } finally {
       setUploading(false);
     }
@@ -403,7 +405,7 @@ export function SoundClipsWidget({
   };
 
   const handleDelete = async (clip: SoundClip) => {
-    if (!confirm(`Delete "${clip.name}"?`)) return;
+    if (!confirm(t('soundClips', 'deleteConfirm').replace('{clipName}', clip.name))) return;
 
     try {
       // Delete from storage
@@ -425,7 +427,7 @@ export function SoundClipsWidget({
       setClips(clips.filter(c => c.id !== clip.id));
     } catch (error) {
       console.error('Error deleting sound clip:', error);
-      alert('Failed to delete sound clip');
+      alert(t('soundClips', 'failedDeleteSoundClip'));
     }
   };
 
@@ -460,7 +462,7 @@ export function SoundClipsWidget({
       setEditingClip(null);
     } catch (error) {
       console.error('Error updating sound clip:', error);
-      alert('Failed to update sound clip');
+      alert(t('soundClips', 'failedUpdateSoundClip'));
     }
   };
 
@@ -500,7 +502,7 @@ export function SoundClipsWidget({
         }
       } catch (error) {
         console.error('Error playing sound clip:', error);
-        alert('Failed to play sound clip');
+        alert(t('soundClips', 'failedToPlay'));
       }
     }
   };
@@ -539,7 +541,7 @@ export function SoundClipsWidget({
       title={
         <div className="flex items-center gap-2">
           <Music className="w-4 h-4" />
-          <span>{title}</span>
+          <span>{title || t('soundClips', 'title')}</span>
         </div>
       }
       onRemove={onRemove}
@@ -554,7 +556,7 @@ export function SoundClipsWidget({
         {/* Header */}
         <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700">
           <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-            {clips.length} clips
+            {t('soundClips', 'clipsCount').replace('{count}', String(clips.length))}
           </div>
           {!showUploadForm && !showRecordingForm && (
             <div className="flex items-center space-x-1">
@@ -563,14 +565,14 @@ export function SoundClipsWidget({
                 className="flex items-center px-2 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-all hover:scale-105"
               >
                 <Mic className="w-3 h-3 mr-1" />
-                Record
+                {t('soundClips', 'record')}
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center px-2 py-1 bg-botbot-accent text-white text-xs rounded-full hover:bg-opacity-90 transition-all hover:scale-105"
               >
                 <Plus className="w-3 h-3 mr-1" />
-                Add
+                {t('soundClips', 'add')}
               </button>
             </div>
           )}
@@ -587,14 +589,14 @@ export function SoundClipsWidget({
                     <>
                       <Radio className="w-4 h-4 text-red-500 animate-pulse" />
                       <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                        Recording... {formatRecordingTime(recordingTime)}
+                        {t('soundClips', 'recording')} {formatRecordingTime(recordingTime)}
                       </span>
                     </>
                   ) : (
                     <>
                       <FileAudio className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                       <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                        Ready ({formatRecordingTime(recordingTime)})
+                        {t('soundClips', 'ready')} ({formatRecordingTime(recordingTime)})
                       </span>
                     </>
                   )}
@@ -646,7 +648,7 @@ export function SoundClipsWidget({
                     value={recordingName}
                     onChange={(e) => setRecordingName(e.target.value)}
                     className="flex-1 bg-white dark:bg-botbot-darker text-gray-800 dark:text-white px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 focus:border-botbot-accent focus:outline-none text-xs"
-                    placeholder="Recording name..."
+                    placeholder={t('soundClips', 'recordingNamePlaceholder')}
                     autoFocus
                   />
 
@@ -723,7 +725,7 @@ export function SoundClipsWidget({
                   value={uploadName}
                   onChange={(e) => setUploadName(e.target.value)}
                   className="flex-1 bg-white dark:bg-botbot-darker text-gray-800 dark:text-white px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 focus:border-botbot-accent focus:outline-none text-xs"
-                  placeholder="Sound clip name..."
+                  placeholder={t('soundClips', 'soundClipNamePlaceholder')}
                   autoFocus
                 />
 
@@ -756,7 +758,7 @@ export function SoundClipsWidget({
         <div className="flex-1 overflow-y-auto p-2">
           {!user ? (
             <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-              <p>Please log in to manage sound clips</p>
+              <p>{t('soundClips', 'loginRequired')}</p>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center h-full">
@@ -765,8 +767,8 @@ export function SoundClipsWidget({
           ) : clips.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
               <Music className="w-10 h-10 mb-2 opacity-50" />
-              <p className="text-xs font-medium">No sound clips yet</p>
-              <p className="text-xs mt-1">Click "Record" or "Add" to get started</p>
+              <p className="text-xs font-medium">{t('soundClips', 'emptyTitle')}</p>
+              <p className="text-xs mt-1">{t('soundClips', 'emptyDescriptionShort')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
@@ -788,7 +790,7 @@ export function SoundClipsWidget({
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
                             className="flex-1 px-2 py-1 bg-white dark:bg-botbot-dark rounded-lg text-xs font-medium outline-none focus:ring-1 focus:ring-purple-500 dark:focus:ring-purple-400"
-                            placeholder="Clip name"
+                            placeholder={t('soundClips', 'clipNamePlaceholder')}
                             autoFocus
                           />
                         </div>
@@ -822,13 +824,13 @@ export function SoundClipsWidget({
                             onClick={handleSaveEdit}
                             className="flex-1 py-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md"
                           >
-                            Save
+                            {t('soundClips', 'save')}
                           </button>
                           <button
                             onClick={handleCancelEdit}
                             className="px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-botbot-dark dark:hover:bg-botbot-darker rounded-lg text-xs transition-colors"
                           >
-                            Cancel
+                            {t('soundClips', 'cancel')}
                           </button>
                         </div>
                       </div>
@@ -845,7 +847,9 @@ export function SoundClipsWidget({
                         className={`relative w-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 dark:from-botbot-darker/90 dark:via-botbot-darker/70 dark:to-botbot-darker/90 hover:from-purple-100 hover:via-pink-100 hover:to-purple-100 dark:hover:from-botbot-dark/90 dark:hover:via-botbot-dark/70 dark:hover:to-botbot-dark/90 rounded-xl transition-all duration-200 group border border-purple-100 dark:border-botbot-dark/50 hover:border-purple-200 dark:hover:border-botbot-accent/30 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 focus-visible:ring-offset-1 ${
                           connectionStatus !== 'connected' ? 'opacity-60 cursor-not-allowed' : ''
                         }`}
-                        title={connectionStatus !== 'connected' ? 'Connect to robot to play on robot' : `Play "${clip.name}" on robot`}
+                        title={connectionStatus !== 'connected'
+                          ? t('soundClips', 'connectToRobotToPlay')
+                          : t('soundClips', 'playOnRobot').replace('{clipName}', clip.name)}
                       >
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 bg-white dark:bg-botbot-dark/80 rounded-lg shadow-sm group-hover:shadow-md transition-all">
@@ -870,7 +874,7 @@ export function SoundClipsWidget({
                                 handlePlayInBrowser(clip);
                               }}
                               className="p-1 bg-white/80 dark:bg-botbot-dark/80 rounded-lg hover:bg-white dark:hover:bg-botbot-dark transition-all focus:outline-none"
-                              title="Play in browser"
+                              title={t('soundClips', 'playInBrowser')}
                             >
                               {playingClip === clip.id ? (
                                 <Pause className="w-3 h-3 text-purple-500 dark:text-purple-400" />

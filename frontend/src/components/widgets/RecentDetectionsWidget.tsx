@@ -7,6 +7,7 @@ import { useSupabase } from '@/contexts/SupabaseProvider';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { getSignedImageUrl } from '@/utils/supabase-storage';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Detection {
   id: number;
@@ -41,6 +42,7 @@ export function RecentDetectionsWidget({
   initialSize = { width: 400, height: 500 },
 }: RecentDetectionsWidgetProps) {
   const { supabase, user } = useSupabase();
+  const { t } = useLanguage();
   const router = useRouter();
   const [detections, setDetections] = useState<Detection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export function RecentDetectionsWidget({
     } catch (err) {
       console.error('Error fetching detections:', err);
       if (isMountedRef.current) {
-        setError('Failed to load detections');
+        setError(t('aiDetections', 'failedToLoad'));
       }
     } finally {
       if (isMountedRef.current) {
@@ -204,7 +206,7 @@ export function RecentDetectionsWidget({
   return (
     <Widget
       id={id}
-      title="Recent AI Detections"
+      title={t('aiDetections', 'recentTitle')}
       onRemove={onRemove}
       onStartDrag={onStartDrag}
       onEndDrag={onEndDrag}
@@ -218,7 +220,7 @@ export function RecentDetectionsWidget({
         {/* Auto-refresh toggle */}
         <div className="flex items-center justify-between mb-2 px-1">
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            Showing {Math.min(detections.length, maxItems)} recent
+            {t('aiDetections', 'showingRecent').replace('{count}', String(Math.min(detections.length, maxItems)))}
           </span>
           <button
             onClick={() => setRealtimeEnabled(!realtimeEnabled)}
@@ -227,10 +229,10 @@ export function RecentDetectionsWidget({
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
             }`}
-            title={realtimeEnabled ? 'Auto-refresh enabled' : 'Auto-refresh disabled'}
+            title={realtimeEnabled ? t('aiDetections', 'autoRefreshEnabled') : t('aiDetections', 'autoRefreshDisabled')}
           >
             <RefreshCw className={`w-3 h-3 ${realtimeEnabled ? 'animate-spin' : ''}`} />
-            {realtimeEnabled ? 'Live' : 'Paused'}
+            {realtimeEnabled ? t('aiDetections', 'live') : t('aiDetections', 'paused')}
           </button>
         </div>
         {loading ? (
@@ -248,7 +250,7 @@ export function RecentDetectionsWidget({
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <Brain className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">No detections yet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('aiDetections', 'noDetectionsYet')}</p>
             </div>
           </div>
         ) : (
@@ -316,7 +318,7 @@ export function RecentDetectionsWidget({
                        text-botbot-primary dark:text-botbot-primary rounded-lg transition-colors
                        text-sm font-medium flex items-center justify-center gap-2 flex-shrink-0"
             >
-              View All Detections
+              {t('aiDetections', 'viewAllDetections')}
               <ChevronRight className="w-4 h-4" />
             </button>
           </>

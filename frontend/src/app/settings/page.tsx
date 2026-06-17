@@ -203,17 +203,17 @@ export default function SettingsPage() {
                 {saveStatus === 'saving' ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Saving...
+                    {t('common', 'saving')}
                   </>
                 ) : saveStatus === 'saved' ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
-                    Saved
+                    {t('common', 'saved')}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Save
+                    {t('common', 'save')}
                   </>
                 )}
               </button>
@@ -317,9 +317,9 @@ export default function SettingsPage() {
               {/* Joystick Visualization Only Mode */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Joystick Visualization Only</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings', 'joystickVisualizationOnly')}</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Display joystick input in visualizer without sending commands to robot
+                    {t('settings', 'joystickVisualizationOnlyDescription')}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -355,4 +355,4 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-} 
+}
