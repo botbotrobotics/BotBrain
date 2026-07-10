@@ -244,7 +244,7 @@ void LifecycleManager::create_comms()
     
         // Watch lifecycle transition events for this node.
         auto sub = this->create_subscription<lifecycle_msgs::msg::TransitionEvent>(
-          "/" + n.name + "/transition_event",
+          n.name + "/transition_event",
           rclcpp::SystemDefaultsQoS(),
           [this, node_name = n.name](const lifecycle_msgs::msg::TransitionEvent::SharedPtr msg) {
             this->transition_callback(node_name, msg);
@@ -255,13 +255,13 @@ void LifecycleManager::create_comms()
 
         // Service clients used to push lifecycle commands and query status.
         auto change_cli = this->create_client<lifecycle_msgs::srv::ChangeState>
-            ("/" + n.name + "/change_state",
+            (n.name + "/change_state",
             rmw_qos_profile_services_default, 
             cbg_);
         change_state_srvs_.emplace(n.name, change_cli);
 
         auto get_cli = this->create_client<lifecycle_msgs::srv::GetState>
-            ("/" + n.name + "/get_state",
+            (n.name + "/get_state",
             rmw_qos_profile_services_default, 
             cbg_);
         get_state_srvs_.emplace(n.name, get_cli);
