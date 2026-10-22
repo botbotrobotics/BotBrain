@@ -5,10 +5,10 @@ import { Robot3DViewer } from './robot-3d-viewer';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import RosCameraImg from './ros-camera-img';
+import CameraFeed from './camera-feed';
 import { Crosshair, Video, Circle, Grid, CornerUpLeft, Volume2, VolumeX, Map, Box, Mic, MicOff, Radio, MapPin, Route } from 'lucide-react';
 import { CameraType, OverlayType } from '@/types/CameraType';
-import useVideoRecorder from '@/hooks/useVideoRecorder';
+import useVideoRecorder, { findCameraStream } from '@/hooks/useVideoRecorder';
 import useRosAudioStream from '@/hooks/useRosAudioStream';
 import useRosMicrophoneStream from '@/hooks/useRosMicrophoneStream';
 import useRosPushToTalk from '@/hooks/useRosPushToTalk';
@@ -136,12 +136,6 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
     };
   }, []);
 
-  // Get canvas elements by ID - more reliable than querySelector
-  const getCanvasElement = (cameraType: string): HTMLCanvasElement | null => {
-    const element = document.getElementById(`camera-canvas-${cameraType}`);
-    return element instanceof HTMLCanvasElement ? element : null;
-  };
-
   // Handle downloading recordings with appropriate filenames
   const downloadAllRecordings = async () => {
     try {
@@ -198,20 +192,19 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
     setIsProcessingRecord(true);
     
     try {
-      // Get the canvas elements to record
-      const mainCanvas = getCanvasElement('camera');
-      const sideCanvas = getCanvasElement(sideCam);
+      const mainStream = findCameraStream('camera');
+      const sideStream = findCameraStream(sideCam);
       
       // Log what we found
       console.log('Found canvases:', { 
-        mainCanvas: !!mainCanvas, 
-        sideCanvas: !!sideCanvas
+        mainStream: !!mainStream, 
+        sideStream: !!sideStream
       });
       
       // Start recording main camera if available
-      if (mainCanvas) {
+      if (mainStream) {
         console.log('Starting recording of main camera');
-        await startRecording(MAIN_CAMERA_ID, mainCanvas);
+        await startRecording(MAIN_CAMERA_ID, mainStream);
         
         // Log recording start
         auditLogger.logRecordingStarted(
@@ -224,9 +217,9 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
       }
       
       // Start recording side camera if available
-      if (sideCanvas) {
+      if (sideStream) {
         console.log(`Starting recording of ${sideCam} camera`);
-        await startRecording(SIDE_CAMERA_ID, sideCanvas);
+        await startRecording(SIDE_CAMERA_ID, sideStream);
         
         // Log recording start
         auditLogger.logRecordingStarted(
@@ -579,7 +572,7 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
             ref={camDivRef}
           >
             <div className="w-1/2 h-full ros-camera-main relative">
-              <RosCameraImg
+              <CameraFeed
                 cameraType="camera"
                 overlay={videoOverlay}
                 waypointArEnabled={waypointArEnabled}
@@ -597,7 +590,7 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
               )}
             </div>
             <div className="w-1/2 h-full relative">
-              <RosCameraImg
+              <CameraFeed
                 key={sideCam}
                 cameraType={sideCam}
                 offlineMsg={t('robotOffline', 'noPayload')}
@@ -872,7 +865,7 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
               ref={camDivRef}
             >
               <div className="w-full sm:w-1/2 min-h-[200px] h-full ros-camera-main relative">
-                <RosCameraImg
+                <CameraFeed
                   cameraType="camera"
                   overlay={videoOverlay}
                   waypointArEnabled={waypointArEnabled}
@@ -890,7 +883,7 @@ export default function RobotCams({ isMobile = false }: RobotCamsProps) {
                 )}
               </div>
               <div className="w-full sm:w-1/2 min-h-[200px] h-full relative">
-                <RosCameraImg
+                <CameraFeed
                   key={sideCam}
                   cameraType={sideCam}
                   offlineMsg={t('robotOffline', 'noPayload')}

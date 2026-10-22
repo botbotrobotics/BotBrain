@@ -48,6 +48,7 @@ export default function RosCameraImg({
   cameraConfig,
   pathArEnabled = false,
   navPlan = null,
+  stream = null,
 }: {
   width?: number;
   height?: number;
@@ -61,6 +62,8 @@ export default function RosCameraImg({
   cameraConfig?: CameraConfig;
   pathArEnabled?: boolean;
   navPlan?: NavPlan | null;
+  /** Plays this live video (WebRTC) instead of the ROS topic. */
+  stream?: MediaStream | null;
 }) {
   const [content, setContent] = useState<React.ReactNode | undefined>(
     undefined
@@ -68,10 +71,11 @@ export default function RosCameraImg({
   const [isFullScreen, setIsFullScreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const image = useRobotCamera(false, cameraType, topicName);
+  const image = useRobotCamera(false, cameraType, topicName, !stream);
 
   const latestImageRef = useRef(image);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const { connection } = useRobotConnection();
   const canvasSetSize = useRef(false);
   const { t } = useLanguage();
@@ -670,14 +674,15 @@ export default function RosCameraImg({
   useEffect(() => {
     throttledUpdateCanvasRef.current = throttle(async () => {
       const currentImage = latestImageRef.current;
-      if (!currentImage.data || isImageDataEmpty(currentImage.data)) {
+      const video = videoRef.current;
+      if (video ? video.readyState < video.HAVE_CURRENT_DATA : !currentImage.data || isImageDataEmpty(currentImage.data)) {
         return;
       }
       if (!canvasRef.current) return;
 
       try {
         const canvas = canvasRef.current;
-        const bitmap = await createBitmapFromJPEG(currentImage.data);
+        const bitmap = video ? await createImageBitmap(video) : await createBitmapFromJPEG(currentImage.data);
         
         // Set canvas dimensions to match its display size
         if (!canvasSetSize.current) {
@@ -740,11 +745,36 @@ export default function RosCameraImg({
           // Draw waypoint AR overlay if enabled
           drawWaypointOverlay(ctx, canvas.width, canvas.height);
         }
+        bitmap.close();
       } catch (error) {
         console.error('Error processing JPEG image:', error);
       }
     }, 25);
   }, [overlayColor]);
+
+  // A live stream redraws on each decoded frame instead of on each ROS image.
+  useEffect(() => {
+    if (!stream) return;
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    video.srcObject = stream;
+    video.play().catch((error) => console.warn('Camera video did not start:', error));
+    videoRef.current = video;
+    const frameCallbacks = 'requestVideoFrameCallback' in video;
+    const next = () => (frameCallbacks ? video.requestVideoFrameCallback(draw) : requestAnimationFrame(draw));
+    const draw = () => {
+      throttledUpdateCanvasRef.current();
+      frame = next();
+    };
+    let frame = next();
+    return () => {
+      if (frameCallbacks) video.cancelVideoFrameCallback(frame);
+      else cancelAnimationFrame(frame);
+      video.srcObject = null;
+      videoRef.current = null;
+    };
+  }, [stream]);
 
   // Update canvas when entering or exiting full-screen
   useEffect(() => {
@@ -837,7 +867,7 @@ export default function RosCameraImg({
   }, [pathArEnabled, navPlan]);
 
   useEffect(() => {
-    if (image === undefined || image.format !== 'jpeg') {
+    if (!stream && (image === undefined || image.format !== 'jpeg')) {
       setContent(
         <span className="w-full h-full border-2 border-gray-200 dark:border-black rounded-lg flex flex-col items-center justify-center text-center">
           <Loader className="w-5 h-5 animate-spin" />
@@ -872,7 +902,7 @@ export default function RosCameraImg({
         </div>
       );
     }
-  }, [image, cameraType, t, isFullScreen]);
+  }, [image, cameraType, t, isFullScreen, stream]);
 
   return (
     <div 

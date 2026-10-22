@@ -1,5 +1,56 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getConfig } from '@/utils/config';
+import { containRect } from '@/utils/realsense';
+import type { CameraType } from '@/types/CameraType';
+
+const RECORD_FPS = 30;
+
+// Cockpit mounts its camera panel once per breakpoint and hides all but one with CSS, so ids and
+// tile markers repeat; only an element with a layout box is on screen.
+function visible<E extends Element>(selector: string): E | null {
+  for (const element of document.querySelectorAll<E>(selector)) {
+    if (element.getClientRects().length > 0) return element;
+  }
+  return null;
+}
+
+/**
+ * A stream of what the on-screen view of a camera shows, for startRecording to own (it stops the
+ * track when done). Every view draws into a `camera-canvas-<type>` canvas; a ROS view's is
+ * recorded directly. A RealSense view replaces its canvas on every reconnect and colour/depth
+ * toggle, so the recording copies whichever one the tile shows into a canvas of its own at
+ * RECORD_FPS. Browsers throttle that copy to about 1 Hz while the tab is hidden.
+ */
+export function findCameraStream(cameraType: CameraType): MediaStream | null {
+  const tileSelector = `[data-realsense-view="${cameraType}"]`;
+  const canvasSelector = `canvas[id="camera-canvas-${cameraType}"]`;
+  const tile = visible<HTMLElement>(tileSelector);
+  if (!tile) {
+    const canvas = visible<HTMLCanvasElement>(canvasSelector);
+    return canvas ? canvas.captureStream(RECORD_FPS) : null;
+  }
+
+  const out = document.createElement('canvas');
+  // Even dimensions: H.264 encoders reject odd ones.
+  out.width = tile.clientWidth & ~1;
+  out.height = tile.clientHeight & ~1;
+  const ctx = out.getContext('2d');
+  const stream = out.captureStream(RECORD_FPS);
+  const [track] = stream.getVideoTracks();
+  const timer = window.setInterval(() => {
+    if (track.readyState === 'ended') {
+      window.clearInterval(timer);
+      return;
+    }
+    const picture = visible<HTMLElement>(tileSelector)?.querySelector<HTMLCanvasElement>(canvasSelector);
+    if (!ctx || !picture?.width || !picture.height) return;
+    const bounds = containRect(picture.width, picture.height, out.width, out.height);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(picture, bounds.offsetX, bounds.offsetY, bounds.width, bounds.height);
+  }, 1000 / RECORD_FPS);
+  return stream;
+}
 
 export interface RecordingOptions {
   mimeType?: string;
@@ -109,11 +160,13 @@ export default function useVideoRecorder() {
     return { mimeType: 'video/webm', isPreferredFormat: preferredFormat === 'webm' };
   }, [preferredFormat, isMimeTypeSupported]);
 
-  const startRecording = useCallback(async (id: string, canvas: HTMLCanvasElement, options: RecordingOptions = {}) => {
+  // Takes ownership of stream: its tracks are stopped when the recording ends or fails to start.
+  const startRecording = useCallback(async (id: string, stream: MediaStream, options: RecordingOptions = {}) => {
     try {
       // Don't start if already recording
       if (isRecording[id]) {
         console.log(`Already recording ${id}, ignoring request`);
+        stream.getTracks().forEach(track => track.stop());
         return;
       }
       
@@ -123,13 +176,6 @@ export default function useVideoRecorder() {
       const { mimeType: bestMimeType, isPreferredFormat } = getBestMimeType();
       
       console.log(`Starting recording with MIME type: ${bestMimeType} (preferred format: ${isPreferredFormat ? 'Yes' : 'No'})`);
-      
-      // Create a stream from the canvas with high framerate
-      const stream = canvas.captureStream(30); // 30 FPS
-
-      if (!stream) {
-        throw new Error(`Failed to create stream for ${id}`);
-      }
       
       // Configure the media recorder
       const mediaRecorder = new MediaRecorder(stream, {
@@ -184,6 +230,7 @@ export default function useVideoRecorder() {
       console.log(`Started recording for ${id} with mime type ${bestMimeType}`);
     } catch (err) {
       console.error(`Error starting recording for ${id}:`, err);
+      stream.getTracks().forEach(track => track.stop());
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }, [getBestMimeType, isRecording]);
@@ -229,6 +276,7 @@ export default function useVideoRecorder() {
       
       // If recorder already stopped, just return the chunks
       if (recorder.mediaRecorder.state === 'inactive') {
+        recorder.stream.getTracks().forEach(track => track.stop());
         if (recorder.chunks.length > 0) {
           const blob = new Blob(recorder.chunks, { type: recorder.mimeType });
           return resolve(blob);

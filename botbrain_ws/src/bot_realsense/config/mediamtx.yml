@@ -1,0 +1,36 @@
+# MediaMTX for bot_realsense: pulls each camera stream from its node's RTSP server
+# (front_camera :8560, back_camera :8561) only while a browser watches it, and serves
+# it to every viewer over WebRTC (WHEP).
+# Viewer URL: http://<robot-ip>:8889/<front_camera|back_camera>/<color|depth>/whep
+
+logLevel: warn
+
+api: no
+metrics: no
+pprof: no
+playback: no
+rtsp: no
+rtmp: no
+hls: no
+srt: no
+moq: no
+
+webrtc: yes
+webrtcAddress: :8889
+webrtcAllowOrigins: ['*']
+webrtcLocalUDPAddress: :8189
+webrtcIPsFromInterfaces: yes
+
+paths:
+  "~^front_camera/(color|depth)$":
+    source: rtsp://127.0.0.1:8560/front_camera/$G1
+    rtspTransport: tcp
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 10s
+    sourceOnDemandCloseAfter: 10s
+  "~^back_camera/(color|depth)$":
+    source: rtsp://127.0.0.1:8561/back_camera/$G1
+    rtspTransport: tcp
+    sourceOnDemand: yes
+    sourceOnDemandStartTimeout: 10s
+    sourceOnDemandCloseAfter: 10s

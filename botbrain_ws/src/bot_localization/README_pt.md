@@ -62,13 +62,10 @@ Drivers de câmera Intel RealSense e lançador de conversão depth-to-laser.
 O launch file lê `{robot_model}_pkg/config/camera_config.yaml` e inicia:
 
 **Para cada câmera configurada (frente/traseira)**:
-- **Nó de câmera RealSense** (LifecycleNode): `realsense2_camera_node`
+- **Nó de câmera RealSense** (LifecycleNode): `bot_realsense_node` do pacote `bot_realsense`. Ele publica os tópicos da câmera e serve o vídeo para o navegador; veja `bot_realsense/README_pt.md`.
 - **Publicador TF estático**: Publica transformação câmera-para-base
   - Baseado nos parâmetros `tf` em camera_config.yaml (x, y, z, roll, pitch, yaw)
 - **Nó depth_to_laserscan**: Converte imagem de profundidade em laser scan 2D
-
-**Nós adicionais**:
-- **realsense_compressed_node** (LifecycleNode): Comprime tópicos RealSense para otimização de banda
 
 **Fonte de configuração**:
 
@@ -329,8 +326,7 @@ bot_localization/
 │   │   └── rtab_manager.launch.py            # Gerenciador de ciclo de vida do RTAB-Map
 │   ├── scripts/
 │   │   ├── map_odom.py                       # Publicador de pose map-to-base_link
-│   │   ├── rtab_manager.py                   # Nó gerenciador do RTAB-Map
-│   │   └── compressed_realsense.py           # Nó de compressão RealSense
+│   │   └── rtab_manager.py                   # Nó gerenciador do RTAB-Map
 │   ├── CMakeLists.txt                        # Configuração de build
 │   ├── package.xml                           # Manifesto do pacote
 │   └── README.md                             # Este arquivo

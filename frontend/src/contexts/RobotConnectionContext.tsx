@@ -54,7 +54,7 @@ interface RobotContextType {
 const DEFAULT_IP = process.env.NEXT_PUBLIC_ROS_IP ?? '192.168.1.95';
 const DEFAULT_PORT = process.env.NEXT_PUBLIC_ROS_PORT ?? '9090';
 
-const createRos = (ipAddress: string) => {
+const rosbridgeUrl = (ipAddress: string): string => {
   // Clean up the address - remove @ prefix if present
   let cleanAddress = ipAddress.startsWith('@') ? ipAddress.substring(1) : ipAddress;
   let url = cleanAddress;
@@ -83,6 +83,10 @@ const createRos = (ipAddress: string) => {
     url = `${url}:${DEFAULT_PORT}`;
   }
 
+  return url;
+};
+
+const createRos = (url: string) => {
   console.log('Attempting connection to:', url);
 
   // Use type assertion to handle the encoding property
@@ -172,7 +176,8 @@ export const RobotConnectionProvider: React.FC<{ children: ReactNode }> = ({
         connection.ros.close();
       }
 
-      const ros = createRos(ipAddress);
+      const url = rosbridgeUrl(ipAddress);
+      const ros = createRos(url);
 
       // Create a promise that resolves when connected or rejects on error
       await new Promise<void>((resolve, reject) => {
@@ -205,7 +210,7 @@ export const RobotConnectionProvider: React.FC<{ children: ReactNode }> = ({
       // Successfully connected - now reset the manual disconnect flag
       console.log('Connected to ROS via websocket with CBOR encoding!');
       isManualDisconnectRef.current = false;
-      updateRobot({ ros, online: true });
+      updateRobot({ ros, url, online: true });
       setConnectionStatus('connected');
 
       // Setup disconnect listener with auto-reconnect
@@ -400,7 +405,7 @@ export const RobotConnectionProvider: React.FC<{ children: ReactNode }> = ({
     if (connection.ros && connection.ros.isConnected) {
       connection.ros.close();
     }
-    updateRobot({ ros: undefined, online: false, connectedRobot: null });
+    updateRobot({ ros: undefined, url: undefined, online: false, connectedRobot: null });
     setConnectionStatus('idle');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('connectedRobotId');

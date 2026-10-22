@@ -22,6 +22,15 @@ services:
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
       CYCLONEDDS_URI: "file:///botbrain_ws/cyclonedds_config.xml"
 
+  # base plus the bot_realsense dependencies, built locally on first use.
+  camera_base:
+    extends: base
+    image: botbrain-camera:local
+    pull_policy: build
+    build:
+      context: ./docker
+      dockerfile: bot_realsense.Dockerfile
+
   dev:
     extends: base
     container_name: dev
@@ -29,7 +38,7 @@ services:
     command: ["bash", "-lc", "bash"]
 
   builder_base:
-    extends: base
+    extends: camera_base
     container_name: builder_base
     command: ["bash", "-lc", "colcon build --packages-select \
           go2_pkg \
@@ -45,6 +54,7 @@ services:
           bot_jetson_stats \
           bot_jetson_stats_interfaces \
           bot_rosa \
+          bot_realsense \
           g1_pkg \
           go2w_pkg"]
 
@@ -61,9 +71,17 @@ services:
     restart: always
 
   localization:
-    extends: base
+    extends: camera_base
     container_name: localization
     command: ["bash", "-lc", "source install/setup.bash && ros2 launch bot_localization localization.launch.py"]
+    restart: always
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.2
+    container_name: mediamtx
+    network_mode: host
+    volumes:
+      - ./botbrain_ws/src/bot_realsense/config/mediamtx.yml:/mediamtx.yml:ro
     restart: always
 
   navigation:

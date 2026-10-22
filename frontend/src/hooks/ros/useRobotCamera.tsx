@@ -10,7 +10,8 @@ import { CameraType } from '@/types/CameraType';
 export default function useRobotCamera(
   useDummy: boolean = false,
   cameraType: CameraType,
-  customTopic?: string
+  customTopic?: string,
+  enabled: boolean = true
 ): Image {
   const { connection } = useRobotConnection();
   const [image, setImage] = useState<Image>({
@@ -31,7 +32,7 @@ export default function useRobotCamera(
   });
 
   useEffect(() => {
-    if (!connection.ros || !connection.online) return;
+    if (!enabled || !connection.ros || !connection.online) return;
 
     const topicFactory: ROSTopicFactory = new ROSTopicFactory(
       connection.ros,
@@ -70,7 +71,7 @@ export default function useRobotCamera(
     return () => {
       imageTopic.unsubscribe();
     };
-  }, [connection.ros, connection.online, customTopic, useDummy]);
+  }, [connection.ros, connection.online, customTopic, useDummy, enabled]);
 
   return image;
 }

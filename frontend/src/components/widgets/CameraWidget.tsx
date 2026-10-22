@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Widget } from './Widget';
 import { Play, Pause, Video, Camera, Save, MapPin, Route } from 'lucide-react';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import RosCameraImg from '../ros-camera-img';
+import CameraFeed from '../camera-feed';
+import { CameraLoading } from '../realsense-camera';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboard } from '@/contexts/DashboardContext';
 import {
@@ -18,6 +20,8 @@ import useSmoothedPose from '@/hooks/ros/useSmoothedPose';
 import useRosNavPlan from '@/hooks/ros/useRosNavPlan';
 import { DEFAULT_CAMERA_CONFIGS } from '@/utils/waypointProjection';
 
+const TOPIC_RECHECK_MS = 10000;
+
 interface CameraWidgetProps {
   id: string;
   onRemove: (id: string) => void;
@@ -25,7 +29,6 @@ interface CameraWidgetProps {
   onEndDrag?: (id: string) => void;
   initialPosition?: { x: number; y: number };
   initialSize?: { width: number; height: number };
-  initialTopic?: string;
   props?: {
     dataSource?: CameraDataSource;
     botbrainCamera?: BotBrainCamera;
@@ -41,12 +44,11 @@ export function CameraWidget({
   onEndDrag,
   initialPosition,
   initialSize = { width: 400, height: 350 },
-  initialTopic = 'compressed_camera',
   props,
 }: CameraWidgetProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [topic, setTopic] = useState(props?.topic ?? initialTopic);
+  const [topic, setTopic] = useState(props?.topic ?? '');
   const [isEditingTopic, setIsEditingTopic] = useState(false);
   const [dataSource, setDataSource] = useState<CameraDataSource>(
     props?.dataSource ?? 'botbrain'
@@ -71,6 +73,38 @@ export function CameraWidget({
   const { targets: navigationTargets } = useNavigationTargets();
   const { navPlan } = useRosNavPlan('/plan');
   const smoothedPose = useSmoothedPose({ enabled: waypointArEnabled || pathArEnabled });
+
+  // "By topic" without a saved topic shows the first CompressedImage topic the robot has, asking
+  // again every TOPIC_RECHECK_MS until one appears (a robot that is still starting has none yet).
+  const [noImageTopic, setNoImageTopic] = useState(false);
+  useEffect(() => {
+    const { ros, online } = connection;
+    if (dataSource !== 'topic' || topic || !ros || !online) return;
+    let cancelled = false;
+    let timer: number | undefined;
+    const retry = () => {
+      if (cancelled) return;
+      setNoImageTopic(true);
+      timer = window.setTimeout(ask, TOPIC_RECHECK_MS);
+    };
+    const ask = () =>
+      ros.getTopicsForType(
+        'sensor_msgs/msg/CompressedImage',
+        (topics: unknown) => {
+          if (cancelled) return;
+          const [first] = Array.isArray(topics) ? topics.filter((name): name is string => typeof name === 'string').sort() : [];
+          if (!first) return retry();
+          setTopic(first);
+          setTempTopic(first);
+        },
+        retry
+      );
+    ask();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [dataSource, topic, connection]);
 
   // Function to handle topic changes
   const handleTopicChange = () => {
@@ -243,20 +277,28 @@ export function CameraWidget({
               {connection.online && isPlaying ? (
                 <div className="w-full h-full">
                   {dataSource === 'topic' ? (
-                    // For topic mode, pass the custom topic with default camera config
-                    <RosCameraImg
-                      topicName={topic}
-                      cameraType="camera"
-                      waypointArEnabled={waypointArEnabled}
-                      navigationTargets={navigationTargets}
-                      robotPose={smoothedPose}
-                      cameraConfig={DEFAULT_CAMERA_CONFIGS['camera']}
-                      pathArEnabled={pathArEnabled}
-                      navPlan={navPlan}
-                    />
+                    topic ? (
+                      // For topic mode, pass the custom topic with default camera config
+                      <RosCameraImg
+                        topicName={topic}
+                        cameraType="camera"
+                        waypointArEnabled={waypointArEnabled}
+                        navigationTargets={navigationTargets}
+                        robotPose={smoothedPose}
+                        cameraConfig={DEFAULT_CAMERA_CONFIGS['camera']}
+                        pathArEnabled={pathArEnabled}
+                        navPlan={navPlan}
+                      />
+                    ) : noImageTopic ? (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                        {t('robotCams', 'noImageTopic')}
+                      </div>
+                    ) : (
+                      <CameraLoading />
+                    )
                   ) : (
                     // For BotBrain or CamCam, use the appropriate camera type
-                    <RosCameraImg
+                    <CameraFeed
                       cameraType={getCameraType()}
                       waypointArEnabled={waypointArEnabled}
                       navigationTargets={navigationTargets}

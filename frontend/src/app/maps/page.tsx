@@ -5,7 +5,7 @@ import SimpleMapView from '@/components/simple-map-view';
 import { MapPin, Play, Square, Clock, Edit, RefreshCw, Trash2, Download, CheckCircle, ChevronRight, ChevronLeft, Gamepad2, ArrowUp, ArrowDown, Lock, Unlock, AlertTriangle } from 'lucide-react';
 import { useRosMappingServices } from '@/hooks/ros/useRosMappingServices';
 import { useNotifications } from '@/contexts/NotificationsContext';
-import RosCameraImg from '@/components/ros-camera-img';
+import CameraFeed from '@/components/camera-feed';
 import { JoysticksWrapper } from '@/components/ui/JoysticksWrapper';
 import useRobotActions from '@/hooks/ros/useRobotActions';
 import { useHeader } from '@/contexts/HeaderContext';
@@ -263,7 +263,7 @@ export default function MapsPage() {
                 <div className="flex-shrink-0">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Live Camera</h3>
                   <div className="bg-gray-50 dark:bg-botbot-darkest/50 rounded-lg overflow-hidden aspect-video">
-                    <RosCameraImg 
+                    <CameraFeed 
                       cameraType="camera"
                       width={320}
                       height={180}

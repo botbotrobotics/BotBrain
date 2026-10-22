@@ -136,7 +136,9 @@ The BotBrain workspace uses ROS 2 Humble and the following packages.
 
 | Package | Description |
 |---------|-------------|
-| realsense2_camera | Intel RealSense driver |
+| librealsense2 | Intel RealSense SDK, used by `bot_realsense` |
+| GStreamer (with gst-rtsp-server, x264enc, and nvv4l2h264enc on Jetsons that have NVENC) | Video encoding for the browser stream |
+| MediaMTX (docker image `bluenviron/mediamtx`) | WebRTC relay that serves the camera streams to browsers |
 | image_transport | Image transport |
 | cv_bridge | OpenCV bridge |
 | depthimage_to_laserscan | Depth to laser conversion |

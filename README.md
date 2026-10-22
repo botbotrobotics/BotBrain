@@ -180,6 +180,7 @@ BotBrain is a modular collection of open source software and hardware components
   - [Hardware Setup](#1-hardware-setup)
   - [Supabase Setup](#2-supabase-setup)
   - [Software Setup](#3-software-setup)
+  - [Upgrading an Existing Installation](#4-upgrading-an-existing-installation)
 - [Frontend Development](#frontend-development)
 - [Features](#features)
 - [Configuration](#configuration)
@@ -371,8 +372,23 @@ hostname -I
 
 > **Note:** Ensure both devices are on the same network and port 80 is not blocked by a firewall. 
 
+> **Note:** The cameras reach the browser over WebRTC through the `mediamtx` container. Allow 8889/tcp (signalling) and 8189/udp (video) as well: `sudo ufw allow 8889/tcp && sudo ufw allow 8189/udp`
 
 > **Note:** Also if you selected g1-internal, your web port will be 3000. So your web ip will be: http://<JETSON_IP>:3000
+
+### 4. Upgrading an Existing Installation
+
+With the `bot_realsense` camera driver, `botbrain.service` also starts the `mediamtx` container that relays the camera video. After pulling a new version, either re-run `sudo ./install.sh` (it rewrites `.env`, so add any `NEXT_PUBLIC_WEBRTC_*` lines again afterwards), or install the new service file and rebuild by hand:
+
+```bash
+git pull
+sed "s|BOTBRAIN_WORKSPACE_PATH|$PWD|g" botbrain.service | sudo tee /etc/systemd/system/botbrain.service > /dev/null
+sudo systemctl daemon-reload
+docker compose up builder_base web_server_builder   # rebuilds the ROS workspace and the web interface
+docker compose up -d mediamtx
+sudo systemctl restart botbrain.service
+docker compose up -d --force-recreate web_server_prod
+```
 
 ---
 
@@ -400,6 +416,10 @@ nano .env.local
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Your Supabase anon/public key |
 | `NEXT_PUBLIC_ROS_IP` | No | Default robot IP (default: 192.168.1.95) |
 | `NEXT_PUBLIC_ROS_PORT` | No | ROS bridge port (default: 9090) |
+| `NEXT_PUBLIC_WEBRTC_PORT` | No | Port of the robot's camera video server (MediaMTX WebRTC), on the same host as rosbridge (default: 8889) |
+| `NEXT_PUBLIC_WEBRTC_URL` | No | Full base URL of the camera video server, e.g. `https://robot.example/whep-proxy`. Overrides host, port and scheme; use it when the interface is served over HTTPS behind a TLS proxy |
+
+These are build-time settings. On the robot the web interface is built from the `.env` file in the repository root: add them there, then run `docker compose up web_server_builder` and `docker compose up -d --force-recreate web_server_prod`.
 
 ### Running
 
@@ -468,6 +488,11 @@ To add support for a new robot platform to BotBrain:
 - Check USB connections and ensure cameras have power
 - Verify serial numbers in `camera_config.yaml` match your cameras
 - Check USB permissions: `sudo usermod -a -G video $USER`
+
+### Camera Video Not Showing
+- "Video server unreachable": check the relay runs (`docker compose ps mediamtx`, `docker compose logs mediamtx`) and that 8889/tcp is open
+- "Refused the stream (HTTP 4xx)": the camera node is not streaming; check `ros2 lifecycle get /front_camera` and the `localization` container logs
+- "The WebRTC connection failed": 8189/udp is blocked between the browser and the robot
 
 ### Docker Issues
 - Ensure Docker runs without sudo (see installation instructions)

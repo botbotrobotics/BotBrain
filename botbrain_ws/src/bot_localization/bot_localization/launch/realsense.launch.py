@@ -15,36 +15,24 @@ from launch_ros.events.lifecycle import ChangeState
 from launch.events import matches_action
 from lifecycle_msgs.msg import Transition
 
-def make_camera_params(serial: str | None, camera_name: str, tf_prefix: str, camera_side: str):
-    name_prefix = f"{camera_name}_" if camera_name else ""
-    params = {
-        "serial_no": serial,
-        "pointcloud.enable": False,
-        "enable_infra": False,
-        "enable_infra1": False,
-        "enable_infra2": False,
-        "enable_gyro": False,
-        "enable_accel": False,
-        "enable_motion": False,
+def make_camera_params(serial: str | None, camera_side: str, tf_prefix: str, rtsp_port: int):
+    # Sensors run at 15 fps for the browser stream; ROS topics stay at the 6 Hz RTAB-Map is tuned for.
+    return {
+        "serial_no": serial or "",
+        "camera_name": f"{camera_side}_camera",
+        "tf_prefix": tf_prefix,
         "initial_reset": True,
-        "accelerate_gpu_with_glsl": True,
-        "depth_module.depth_profile": "640x480x6",
-        "rgb_camera.color_profile": "640x480x6",
-        "rgb_camera.color_format": "MJPEG",
-        "unite_imu_method": 2,
-        "camera_name": f"{camera_name}{camera_side}_camera",
-        'tf_prefix': tf_prefix,
-        "align_depth.enable": True,
-        "spatial_filter.enable": False,
-        "spatial_filter.parameters.filter_magnitude": 5.0,
-        "spatial_filter.parameters.filter_smooth_alpha": 0.5,
-        "spatial_filter.parameters.filter_smooth_delta": 20.0,
-        "temporal_filter.enable": False,
-        "temporal_filter.parameters.filter_smooth_alpha": 0.1,
-        "temporal_filter.parameters.filter_smooth_delta": 20.0,
-        "enable_sync": True,
+        "depth_width": 640,
+        "depth_height": 480,
+        "depth_fps": 15,
+        "color_width": 640,
+        "color_height": 480,
+        "color_fps": 15,
+        "color_rate": 6.0,
+        "depth_rate": 6.0,
+        "align_depth": True,
+        "stream_rtsp_port": rtsp_port,
     }
-    return params
 
 def generate_launch_description():
 
@@ -80,16 +68,9 @@ def generate_launch_description():
         front_camera_node = LifecycleNode(
             name='front_camera',
             namespace=robot_name,
-            package='realsense2_camera',
-            executable='realsense2_camera_node',
-            parameters=[
-                make_camera_params(
-                    serial=front_serial,      
-                    camera_name=robot_name,
-                    tf_prefix=robot_name,
-                    camera_side="front"
-                )
-            ],
+            package='bot_realsense',
+            executable='bot_realsense_node',
+            parameters=[make_camera_params(serial=front_serial, camera_side="front", tf_prefix=prefix, rtsp_port=8560)],
             output='screen'
         )
         nodes.append(front_camera_node)
@@ -140,16 +121,9 @@ def generate_launch_description():
         back_camera_node = LifecycleNode(
             name='back_camera',
             namespace=robot_name,
-            package='realsense2_camera',
-            executable='realsense2_camera_node',
-            parameters=[
-                make_camera_params(
-                    serial=back_serial,
-                    camera_name=robot_name,
-                    tf_prefix=robot_name,
-                    camera_side="back"
-                )
-            ],
+            package='bot_realsense',
+            executable='bot_realsense_node',
+            parameters=[make_camera_params(serial=back_serial, camera_side="back", tf_prefix=prefix, rtsp_port=8561)],
             output='screen'
         )
         nodes.append(back_camera_node)
@@ -176,15 +150,6 @@ def generate_launch_description():
             output='screen',
         )
         nodes.append(back_static_tf_node)
-
-    compressed_realsense_node = LifecycleNode(
-        package='bot_localization',
-        executable='compressed_realsense.py',
-        name='realsense_compressed_node',
-        namespace=robot_name,
-        output='screen'
-    )
-    nodes.append(compressed_realsense_node)
 
     scan_node_back = Node(
         package='depthimage_to_laserscan',

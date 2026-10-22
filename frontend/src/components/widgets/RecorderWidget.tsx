@@ -5,7 +5,7 @@ import { Widget } from './Widget';
 import { Circle, Camera, Check, X, Download, Settings2 } from 'lucide-react';
 import { useRobotConnection } from '@/contexts/RobotConnectionContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import useVideoRecorder from '@/hooks/useVideoRecorder';
+import useVideoRecorder, { findCameraStream } from '@/hooks/useVideoRecorder';
 import { getConfig } from '@/utils/config';
 import { auditLogger } from '@/utils/audit-logger';
 
@@ -66,25 +66,6 @@ export function RecorderWidget({
     }
   }, [error]);
 
-  // Get canvas element for a stream
-  const getCanvasForStream = (streamId: string): HTMLCanvasElement | null => {
-    const stream = AVAILABLE_STREAMS.find(s => s.id === streamId);
-    if (!stream) return null;
-
-    // Map stream ID to canvas ID used by camera components
-    let canvasId = '';
-    if (streamId === 'main-camera') {
-      canvasId = 'camera-canvas-camera';
-    } else if (streamId === 'thermal-camera') {
-      canvasId = 'camera-canvas-thermal';
-    } else if (streamId === 'rgb-camera') {
-      canvasId = 'camera-canvas-rgb';
-    }
-
-    const element = document.getElementById(canvasId);
-    return element instanceof HTMLCanvasElement ? element : null;
-  };
-
   // Check if any selected stream is recording
   const isAnyRecording = useMemo(() => {
     return selectedStreams.some(streamId => isRecording(streamId));
@@ -98,12 +79,12 @@ export function RecorderWidget({
 
     try {
       for (const streamId of selectedStreams) {
-        const canvas = getCanvasForStream(streamId);
         const stream = AVAILABLE_STREAMS.find(s => s.id === streamId);
+        const mediaStream = stream && findCameraStream(stream.type);
 
-        if (canvas && stream) {
+        if (stream && mediaStream) {
           console.log(`Starting recording for ${stream.name}`);
-          await startRecording(streamId, canvas);
+          await startRecording(streamId, mediaStream);
 
           // Log recording start
           auditLogger.logRecordingStarted(

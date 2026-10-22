@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import Container from '@/components/ui/container';
-import RosCameraImg from '@/components/ros-camera-img';
+import CameraFeed from '@/components/camera-feed';
 import RobotActionButton from '@/components/ui/robot-action-button';
 import { Menu, X, Map as MapIcon, Plus, Play, Square, Edit2, Trash2, Save, Check, Navigation2, Route, Loader2 } from 'lucide-react';
 import useRobotStatus from '@/hooks/ros/useRobotStatus';
@@ -994,7 +994,7 @@ export default function Missions() {
           <div className="p-2 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Camera View</h3>
             <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700">
-              <RosCameraImg cameraType="camera" overlay="none" />
+              <CameraFeed cameraType="camera" overlay="none" />
             </div>
           </div>
 

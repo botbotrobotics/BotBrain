@@ -34,7 +34,6 @@ install(
 install(PROGRAMS
   scripts/map_odom.py
   scripts/rtab_manager.py
-  scripts/compressed_realsense.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_python_install_package(${PROJECT_NAME}) # Only needed in case rosidl_generate_interfaces is not called

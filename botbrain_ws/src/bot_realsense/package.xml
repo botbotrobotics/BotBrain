@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bot_realsense</name>
+  <version>0.0.0</version>
+  <description>Intel RealSense D400 lifecycle driver: ROS image topics on demand plus H.264 colour and depth video served over RTSP for MediaMTX/WebRTC.</description>
+  <maintainer email="atofetti@botbot.bot">botbot</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>pkg-config</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>rclcpp_components</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>librealsense2</depend>
+
+  <build_depend>libgstreamer1.0-dev</build_depend>
+  <build_depend>libgstreamer-plugins-base1.0-dev</build_depend>
+  <build_depend>libgstrtspserver-1.0-dev</build_depend>
+  <exec_depend>libgstrtspserver-1.0-0</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-base</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-good</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-ugly</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
